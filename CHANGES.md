@@ -6,6 +6,7 @@ Version 1.0 (under development)
 
  - Improved test coverage.
  - Minor bugfixes and improvements.
+ - Moved to SLF4J API 1.7.10.
 
 Version 0.2 (12/11/2014)
 ------------------------
