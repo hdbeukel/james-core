@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
     <name>james-core</name>
     <description>
-        The James core module is part of the James framework for discrete optimization
+        The JAMES core module is part of the JAMES framework for discrete optimization
         using local search metaheuristics in Java. The core contains many general components
         for both problem specification and search application. It includes a wide range of
         generic optimization algorithms to solve the specified problems. Moreover, the core
