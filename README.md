@@ -1,4 +1,4 @@
-James Core Module
+JAMES Core Module
 =================
 
 The James core module is part of the [James framework][james-github].
