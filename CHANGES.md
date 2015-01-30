@@ -1,4 +1,4 @@
-James Core Module Changes
+JAMES Core Module Changes
 =========================
 
 Version 1.0 (under development)
@@ -29,4 +29,4 @@ Version 0.2 (12/11/2014)
 Version 0.1 (25/06/2014)
 ------------------------
 
- - First stable release of the James Core Module.
+ - First stable release of the JAMES Core Module.
