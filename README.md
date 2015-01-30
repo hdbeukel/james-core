@@ -1,7 +1,7 @@
 JAMES Core Module
 =================
 
-The JAMES core module is part of the [James framework][james-github].
+The JAMES core module is part of the [JAMES framework][james-github].
 
 The core module includes many general components for both problem specification and search application.
 
