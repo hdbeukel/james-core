@@ -1,7 +1,7 @@
 JAMES Core Module
 =================
 
-The James core module is part of the [James framework][james-github].
+The JAMES core module is part of the [James framework][james-github].
 
 The core module includes many general components for both problem specification and search application.
 
@@ -29,13 +29,13 @@ Additional developer documentation is posted on the [wiki][james-wiki].
 License and copyright
 =====================
 
-The James core module is licensed under the Apache License, Version 2.0, see LICENSE file or http://www.apache.org/licenses/LICENSE-2.0.
+The JAMES core module is licensed under the Apache License, Version 2.0, see LICENSE file or http://www.apache.org/licenses/LICENSE-2.0.
 Copyright information is stated in the NOTICE file.
 
 Contact
 =======
 
-The James core module is developed and maintained by
+The JAMES core module is developed and maintained by
 
  - Herman De Beukelaer (Herman.DeBeukelaer@UGent.be)
  
