@@ -1,6 +1,8 @@
 JAMES Core Module
 =================
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jamesframework/james-core/badge.svg?style=flat)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22james-core%22)
+
 The JAMES core module is part of the [JAMES framework][james-github].
 
 The core module includes many general components for both problem specification and search application.
