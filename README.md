@@ -1,6 +1,8 @@
 JAMES Core Module
 =================
 
+[![Build Status](https://img.shields.io/travis/hdbeukel/james-core.svg?style=flat)](https://travis-ci.org/hdbeukel/james-core)
+[![Coverage Status](http://img.shields.io/coveralls/hdbeukel/james-core.svg?style=flat)](https://coveralls.io/r/hdbeukel/james-core)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jamesframework/james-core/badge.svg?style=flat)](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22james-core%22)
 
 The JAMES core module is part of the [JAMES framework][james-github].
