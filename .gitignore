@@ -6,3 +6,4 @@
 *.log
 *.jar
 *.zip
+/target/
