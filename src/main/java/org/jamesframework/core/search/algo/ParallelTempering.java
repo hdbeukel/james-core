@@ -70,9 +70,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The overall best solution found by all replicas is tracked and eventually returned by the parallel tempering algorithm.
  * The main algorithm does not actively generate nor apply any moves to its current solution, but simply updates it when a
- * replica has found a new global improvement, in which case the best solution is also updated. After setting a current
- * solution using {@link #setCurrentSolution(Solution)} the main algorithm's current solution may differ from its best
- * solution, until a new global improvement is found and both are again updated.
+ * replica has found a new global improvement, in which case the best solution is also updated.
  * </p>
  * <p>
  * The reported number of accepted and rejected moves (see {@link #getNumAcceptedMoves()} and {@link #getNumRejectedMoves()})
