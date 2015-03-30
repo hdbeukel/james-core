@@ -39,6 +39,13 @@ import org.jamesframework.core.util.SetUtilities;
  * contrast to a {@link SingleSwapNeighbourhood}.
  * </p>
  * <p>
+ * When sampling random moves from this neighbourhood, every individual move is generated with equal probability,
+ * taking into account the different number of possible moves of each type. In general this means that more swap
+ * moves will be generated because there are usually more possible swaps compared to deletions or additions. If
+ * it is desired to change this behaviour, take a look at the composite neighbourhood which is provided in the
+ * extensions module and allows to combine any set of neighbourhoods with custom weights.
+ * </p>
+ * <p>
  * A single perturbation neighbourhood respects the optional minimum and maximum subset size specified at construction.
  * When the given subset solution has minimal size, no deletion moves will be generated. Similarly, when the current
  * solution has maximum size, no addition moves will be generated.
