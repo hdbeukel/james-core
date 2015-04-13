@@ -18,24 +18,23 @@ package org.jamesframework.core.util;
 
 import org.jamesframework.core.problems.Problem;
 import org.jamesframework.core.problems.Solution;
-import org.jamesframework.core.search.LocalSearch;
+import org.jamesframework.core.search.Search;
 
 /**
- * Interface of a <em>local</em> search factory used to create a <em>local</em> search given the problem to be solved.
+ * Interface of a search factory used to create a search given the problem to be solved.
  * 
- * @param <SolutionType> solution type of created local searches, required to extend {@link Solution}
+ * @param <SolutionType> solution type of created searches, required to extend {@link Solution}
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
 @FunctionalInterface
-public interface LocalSearchFactory<SolutionType extends Solution> extends SearchFactory<SolutionType>{
+public interface SearchFactory<SolutionType extends Solution> {
     
     /**
-     * Create a local search, given the problem to solve.
+     * Create a search, given the problem to solve.
      * 
      * @param problem problem to solve
-     * @return created local search
+     * @return created search
      */
-    @Override
-    public LocalSearch<SolutionType> create(Problem<SolutionType> problem);
+    public Search<SolutionType> create(Problem<SolutionType> problem);
 
 }
