@@ -20,16 +20,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.jamesframework.core.exceptions.SolutionModificationException;
 import org.jamesframework.core.problems.Solution;
 
 /**
- * High-level subset solution modeled in terms of IDs of selected items. The subset is sampled from a data set
- * of items which are each assumed to be identified using a unique integer ID.
+ * High-level subset solution modeled in terms of IDs of selected items. The subset is sampled from a
+ * data set of items which are each required to be identified with a unique integer ID. By default, the
+ * IDs are unordered. If desired, they can be ordered according to the natural ordering of integers
+ * (ascending) or a custom comparator, by using an appropriate constructor. In the latter case, it is
+ * safe to cast the views returned by {@link #getSelectedIDs()}, {@link #getUnselectedIDs()} and
+ * {@link #getAllIDs()} to the {@link NavigableSet} subtype.
  * 
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
@@ -45,12 +51,15 @@ public class SubsetSolution extends Solution {
     // comparator according to which IDs are sorted;
     // null in case no order has been imposed
     private Comparator<Integer> orderOfIDs;
+    // wraps set of selected, unselected and all IDs in an unmodifiable view when accessed
+    // returns navigable sets when IDs are ordered, else general sets
+    private final Function<Set<Integer>, Set<Integer>> unmodifiableSetWrapper;
     
     /**
      * Creates a new subset solution given the set of all IDs, each corresponding to an underlying entity,
      * from which a subset is to be selected. Initially, no IDs are selected. Note: IDs are copied to the
      * internal data structures of the subset solution; no reference is stored to the set given at construction.
-     * IDs are stored in sets that do not impose any order.
+     * IDs are stored in general unordered sets.
      * 
      * @param allIDs set of all IDs from which a subset is to be selected
      * @throws NullPointerException if <code>allIDs</code> is <code>null</code>
@@ -63,7 +72,7 @@ public class SubsetSolution extends Solution {
     /**
      * Creates a new subset solution given the set of all IDs, and the set of currently selected IDs. Note: IDs
      * are copied to the internal data structures of the subset solution; no reference is stored to the sets given
-     * at construction. IDs are stored in sets that do not impose any ordering.
+     * at construction. IDs are stored in general unordered sets.
      * 
      * @param allIDs set of all IDs from which a subset is to be selected
      * @param selectedIDs set of currently selected IDs (subset of all IDs)
@@ -79,8 +88,9 @@ public class SubsetSolution extends Solution {
      * Creates a new subset solution given the set of all IDs, each corresponding to an underlying entity,
      * from which a subset is to be selected. Initially, no IDs are selected. Note: IDs are copied to the
      * internal data structures of the subset solution; no reference is stored to the set given at construction.
-     * If <code>naturalOrder</code> is <code>true</code>, the set of selected, unselected and all IDs will be
-     * ordered according to the natural ordering of integers (ascending); else, no ordering is imposed on the IDs.
+     * If <code>naturalOrder</code> is <code>true</code>, the sets of selected, unselected and all IDs are represented
+     * as navigable sorted sets ordered according to the natural ordering of integers (ascending); else, no ordering
+     * is imposed.
      * 
      * @param allIDs set of all IDs from which a subset is to be selected
      * @param naturalOrder if <code>naturalOrder</code> is <code>true</code>, IDs will be ordered according to
@@ -95,9 +105,9 @@ public class SubsetSolution extends Solution {
     /**
      * Creates a new subset solution given the set of all IDs, and the set of currently selected IDs. Note: IDs
      * are copied to the internal data structures of the subset solution; no reference is stored to the sets given
-     * at construction. If <code>naturalOrder</code> is <code>true</code>, the set of selected, unselected and all
-     * IDs will be ordered according to the natural ordering of integers (ascending); else, no ordering is imposed
-     * on the IDs.
+     * at construction. If <code>naturalOrder</code> is <code>true</code>, the sets of selected, unselected and all
+     * IDs are represented as navigable sorted sets ordered according to the natural ordering of integers (ascending);
+     * else, no ordering is imposed.
      * 
      * @param allIDs set of all IDs from which a subset is to be selected
      * @param selectedIDs set of currently selected IDs (subset of all IDs)
@@ -115,8 +125,8 @@ public class SubsetSolution extends Solution {
      * Creates a new subset solution given the set of all IDs, each corresponding to an underlying entity,
      * from which a subset is to be selected. Initially, no IDs are selected. Note: IDs are copied to the
      * internal data structures of the subset solution; no reference is stored to the set given at construction.
-     * The order defined by the given <code>comparator</code> is imposed on the set of selected, unselected and
-     * all IDs; if this argument is <code>null</code> no order is imposed.
+     * If <code>orderOfIDs</code> is not <code>null</code>, the sets of selected, unselected and all IDs are
+     * represented as navigable sorted sets ordered according to this comparator; else, no ordering is imposed.
      * 
      * @param allIDs set of all IDs from which a subset is to be selected
      * @param orderOfIDs comparator according to which IDs are ordered, allowed to be
@@ -133,23 +143,31 @@ public class SubsetSolution extends Solution {
         }
         this.orderOfIDs = orderOfIDs;
         if(orderOfIDs == null){
-            all = new LinkedHashSet<>(allIDs);         // set with all IDs (copy)
-            selected = new LinkedHashSet<>();          // set with selected IDs (empty)
-            unselected = new LinkedHashSet<>(allIDs);  // set with unselected IDs (all)
+            all = new LinkedHashSet<>(allIDs);                      // set with all IDs (copy)
+            selected = new LinkedHashSet<>();                       // set with selected IDs (empty)
+            unselected = new LinkedHashSet<>(allIDs);               // set with unselected IDs (all)
+            unmodifiableSetWrapper = Collections::unmodifiableSet;  // use general unmodifiable set wrapper
         } else {
             all = new TreeSet<>(orderOfIDs);           // sorted set with all IDs (copy)
             all.addAll(allIDs);
             selected = new TreeSet<>(orderOfIDs);      // sorted set with selected IDs (empty)
             unselected = new TreeSet<>(orderOfIDs);    // sorted set with unselected IDs (all)
             unselected.addAll(allIDs);
+            // wrap sets in unmodifiable navigable sets when accessed
+            unmodifiableSetWrapper = set -> {
+                // safe (and necessary!) to cast (only used for tree sets)
+                NavigableSet<Integer> nset = (NavigableSet<Integer>) set;
+                return Collections.unmodifiableNavigableSet(nset);
+            };
         }
     }
     
     /**
      * Creates a new subset solution given the set of all IDs, and the set of currently selected IDs. Note: IDs
      * are copied to the internal data structures of the subset solution; no reference is stored to the sets given
-     * at construction. The order defined by the given <code>comparator</code> is imposed on the set of selected,
-     * unselected and all IDs; if this argument is <code>null</code> no order is imposed.
+     * at construction. If <code>orderOfIDs</code> is not <code>null</code>, the sets of selected, unselected and
+     * all IDs are represented as navigable sorted sets ordered according to this comparator; else, no ordering is
+     * imposed.
      * 
      * @param allIDs set of all IDs from which a subset is to be selected
      * @param selectedIDs set of currently selected IDs (subset of all IDs)
@@ -187,15 +205,14 @@ public class SubsetSolution extends Solution {
      * solution will have exactly the same selected/unselected IDs as the given solution, and will impose the
      * same ordering on the IDs (if any).
      * 
-     * @param sol solution to copy
+     * @param sol solution to copy (deep copy)
      */
     public SubsetSolution(SubsetSolution sol){
         this(sol.getAllIDs(), sol.getSelectedIDs(), sol.getOrderOfIDs());
     }
     
     /**
-     * Create a deep copy of this subset solution, obtained through the copy constructor,
-     * passing <code>this</code> as argument.
+     * Create a deep copy of this subset solution, obtained through the copy constructor.
      * 
      * @return deep copy of this subset solution
      */
@@ -205,7 +222,7 @@ public class SubsetSolution extends Solution {
     }
     
     /**
-     * Get the comparator used to impose an order on the set of selected, unselected and all IDs.
+     * Get the comparator according to which the IDs are ordered, as specified at construction.
      * May return <code>null</code> which means that no order has been imposed.
      * 
      * @return comparator according to which IDs are ordered, may be <code>null</code>
@@ -319,34 +336,40 @@ public class SubsetSolution extends Solution {
     }
     
     /**
-     * Returns an unmodifiable view of the set of currently selected IDs. Any attempt to modify the returned set
-     * will result in an {@link UnsupportedOperationException}.
+     * Returns an unmodifiable view of the set of currently selected IDs.  Any attempt to
+     * modify the returned set will result in an {@link UnsupportedOperationException}. If
+     * the IDs are orderd (see {@link #getOrderOfIDs()}), it is safe to cast the returned
+     * view to the {@link NavigableSet} subtype.
      * 
      * @return unmodifiable view of currently selected IDs
      */
     public Set<Integer> getSelectedIDs(){
-        return Collections.unmodifiableSet(selected);
+        return unmodifiableSetWrapper.apply(selected);
     }
     
     /**
-     * Returns an unmodifiable view of the set of currently non selected IDs. Any attempt to modify the returned set
-     * will result in an {@link UnsupportedOperationException}.
+     * Returns an unmodifiable view of the set of currently non selected IDs. Any attempt to
+     * modify the returned set will result in an {@link UnsupportedOperationException}. If
+     * the IDs are orderd (see {@link #getOrderOfIDs()}), it is safe to cast the returned
+     * view to the {@link NavigableSet} subtype.
      * 
      * @return unmodifiable view of currently non selected IDs
      */
     public Set<Integer> getUnselectedIDs(){
-        return Collections.unmodifiableSet(unselected);
+        return unmodifiableSetWrapper.apply(unselected);
     }
     
     /**
-     * Returns an unmodifiable view of the set of all IDs. Any attempt to modify the returned set
-     * will result in an {@link UnsupportedOperationException}. This set will always be equal to
-     * the union of {@link #getSelectedIDs()} and {@link #getUnselectedIDs()}.
+     * Returns an unmodifiable view of the set of all IDs. Any attempt to modify the returned
+     * set will result in an {@link UnsupportedOperationException}. If the IDs are orderd (see
+     * {@link #getOrderOfIDs()}), it is safe to cast the returned view to the {@link NavigableSet}
+     * subtype. This set will always be equal to the union of {@link #getSelectedIDs()} and
+     * {@link #getUnselectedIDs()}.
      * 
      * @return unmodifiable view of all IDs
      */
     public Set<Integer> getAllIDs(){
-        return Collections.unmodifiableSet(all);
+        return unmodifiableSetWrapper.apply(all);
     }
     
     /**

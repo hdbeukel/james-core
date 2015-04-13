@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.NavigableSet;
 import java.util.Random;
 import java.util.Set;
 import org.jamesframework.core.exceptions.SolutionModificationException;
@@ -808,6 +809,16 @@ public class SubsetSolutionTest {
             }
         }
         
+        // try to cast views to navigable sets
+        Set<Integer> s;
+        NavigableSet<Integer> ns;
+        s = subsetSolution.getSelectedIDs();
+        ns = (NavigableSet<Integer>) s;
+        s = subsetSolution.getUnselectedIDs();
+        ns = (NavigableSet<Integer>) s;
+        s = subsetSolution.getAllIDs();
+        ns = (NavigableSet<Integer>) s;
+        
         // again with reverse order
         subsetSolution = new SubsetSolution(subsetSolution.getAllIDs(), Comparator.reverseOrder());
         
@@ -840,6 +851,14 @@ public class SubsetSolutionTest {
                 prevID = ID;
             }
         }
+        
+        // try to cast views to navigable sets
+        s = subsetSolution.getSelectedIDs();
+        ns = (NavigableSet<Integer>) s;
+        s = subsetSolution.getUnselectedIDs();
+        ns = (NavigableSet<Integer>) s;
+        s = subsetSolution.getAllIDs();
+        ns = (NavigableSet<Integer>) s;
         
     }
 
