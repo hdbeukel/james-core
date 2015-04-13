@@ -23,6 +23,16 @@ package org.jamesframework.core.problems.objectives.evaluations;
  */
 public class SimpleEvaluation implements Evaluation {
 
+    /**
+     * Creates a simple evaluation with the specified value.
+     * 
+     * @param value assigned value
+     * @return simple evaluation with the given value
+     */
+    public static final SimpleEvaluation WITH_VALUE(double value){
+        return new SimpleEvaluation(value);
+    }
+    
     // contained double value
     private final double value;
 
