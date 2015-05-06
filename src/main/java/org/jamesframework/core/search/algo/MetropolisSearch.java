@@ -168,26 +168,26 @@ public class MetropolisSearch<SolutionType extends Solution> extends SingleNeigh
         // got move?
         if(move != null){
             // valid move?
-            if(validateMove(move).passed()){
+            if(validate(move).passed()){
                 // valid move: improvement?
                 if(isImprovement(move)){
                     // improvement: always accept
-                    acceptMove(move);
+                    accept(move);
                 } else {
                     // no improvement: accept with probability based on temperature and delta
-                    double delta = computeDelta(evaluateMove(move), getCurrentSolutionEvaluation());
+                    double delta = computeDelta(evaluate(move), getCurrentSolutionEvaluation());
                     double r = ThreadLocalRandom.current().nextDouble();
                     if(Math.exp(delta/(scale*temperature)) > r){
                         // accept inferior move
-                        acceptMove(move);
+                        accept(move);
                     } else {
                         // reject inferior move
-                        rejectMove(move);
+                        reject(move);
                     }
                 }
             } else {
                 // invalid move: reject
-                rejectMove(move);
+                reject(move);
             }
         } else {
             // no move/neighbour found

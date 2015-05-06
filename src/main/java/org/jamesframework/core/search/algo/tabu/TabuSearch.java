@@ -128,9 +128,9 @@ public class TabuSearch<SolutionType extends Solution> extends SingleNeighbourho
      * @return <code>true</code> if the update was successful, <code>false</code> if the move is invalid
      */
     @Override
-    protected boolean acceptMove(Move<? super SolutionType> move){
+    protected boolean accept(Move<? super SolutionType> move){
         // call super
-        if(super.acceptMove(move)){
+        if(super.accept(move)){
             // update tabu memory
             tabuMemory.registerVisitedSolution(getCurrentSolution(), move);
             // update successful
@@ -187,11 +187,11 @@ public class TabuSearch<SolutionType extends Solution> extends SingleNeighbourho
                                             false,
                                             // filter tabu moves (with aspiration criterion)
                                             m -> !tabuMemory.isTabu(m, getCurrentSolution())
-                                                    || computeDelta(evaluateMove(m), getBestSolutionEvaluation()) > 0
+                                                    || computeDelta(evaluate(m), getBestSolutionEvaluation()) > 0
         );                                               
         if(move != null){
             // accept move (also updates tabu memory by overriding move acceptance)
-            acceptMove(move);
+            accept(move);
         } else {
             // no valid, non tabu neighbour found: stop search
             stop();

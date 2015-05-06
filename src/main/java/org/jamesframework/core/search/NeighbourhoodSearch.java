@@ -225,13 +225,13 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
     
     /**
      * Evaluates a move to be applied to the current solution. If this move has been evaluated
-     * before and the obtained evaluation is still available in the cache, the cached object will
-     * be returned. Else, the evaluation will be computed and offered to the cache.
+     * before and the obtained evaluation is still available in the cache, the cached evaluation
+     * will be returned. Else, the evaluation will be computed and offered to the cache.
      * 
      * @param move move to be applied to the current solution
      * @return evaluation of obtained neighbour, possibly retrieved from the evaluated move cache
      */
-    protected Evaluation evaluateMove(Move<? super SolutionType> move){
+    protected Evaluation evaluate(Move<? super SolutionType> move){
         Evaluation eval = null;
         // check cache
         if(cache != null){
@@ -252,13 +252,13 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
     
     /**
      * Validates a move to be applied to the current solution. If this move has been validated
-     * before and the obtained validation is still available in the cache, the cached object will
-     * be returned. Else, the validation will be computed and offered to the cache.
+     * before and the obtained validation is still available in the cache, the cached validation
+     * will be returned. Else, the validation will be computed and offered to the cache.
      * 
      * @param move move to be applied to the current solution
      * @return validation of obtained neighbour, possibly retrieved from the evaluated move cache
      */
-    protected Validation validateMove(Move<? super SolutionType> move){
+    protected Validation validate(Move<? super SolutionType> move){
         Validation val = null;
         // check cache
         if(cache != null){
@@ -293,9 +293,9 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
      */
     protected boolean isImprovement(Move<? super SolutionType> move){
         return move != null
-                && validateMove(move).passed()
+                && validate(move).passed()
                 && (!getCurrentSolutionValidation().passed()
-                    || computeDelta(evaluateMove(move), getCurrentSolutionEvaluation()) > 0);
+                    || computeDelta(evaluate(move), getCurrentSolutionEvaluation()) > 0);
     }
     
     /**
@@ -339,10 +339,10 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
             // check filters
             if(Arrays.stream(filters).allMatch(filter -> filter.test(move))){
                 // validate move
-                curMoveValidation = validateMove(move);
+                curMoveValidation = validate(move);
                 if (curMoveValidation.passed()) {
                     // evaluate move
-                    curMoveEvaluation = evaluateMove(move);
+                    curMoveEvaluation = evaluate(move);
                     // compute delta
                     curMoveDelta = computeDelta(curMoveEvaluation, getCurrentSolutionEvaluation());
                     // compare with current best move
@@ -381,12 +381,12 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
      *         <code>false</code> if the update was cancelled because the obtained
      *         neighbour is invalid
      */
-    protected boolean acceptMove(Move<? super SolutionType> move){
+    protected boolean accept(Move<? super SolutionType> move){
         // validate move (often retrieved from cache)
-        Validation newValidation = validateMove(move);
+        Validation newValidation = validate(move);
         if(newValidation.passed()){
             // evaluate move (often retrieved from cache)
-            Evaluation newEvaluation = evaluateMove(move);
+            Evaluation newEvaluation = evaluate(move);
             // apply move to current solution (IMPORTANT: after evaluation/validation of the move!)
             move.apply(getCurrentSolution());
             // update current solution and best solution
@@ -416,7 +416,7 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
      * 
      * @param move rejected move (ignored)
      */
-    protected void rejectMove(Move<? super SolutionType> move){
+    protected void reject(Move<? super SolutionType> move){
         incNumRejectedMoves(1);
     }
     

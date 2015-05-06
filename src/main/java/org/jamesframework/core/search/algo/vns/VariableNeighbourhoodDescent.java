@@ -104,7 +104,7 @@ public class VariableNeighbourhoodDescent<SolutionType extends Solution> extends
             // found improvement ?
             if(move != null){
                 // improvement: accept move and reset k
-                acceptMove(move);
+                accept(move);
                 k = 0;
             } else {
                 // switch to next neighbourhood (to be used in next step)

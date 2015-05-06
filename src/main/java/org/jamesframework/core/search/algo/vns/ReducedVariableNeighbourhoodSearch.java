@@ -145,10 +145,10 @@ public class ReducedVariableNeighbourhoodSearch<SolutionType extends Solution> e
             // check: improvement ?
             if(isImprovement(move)){
                 // improvement: accept move and reset k
-                acceptMove(move);
+                accept(move);
                 k = 0;
             } else {
-                rejectMove(move);
+                reject(move);
                 // no improvement: switch to next neighbourhood, if any
                 nextNeighbourhood();
             }

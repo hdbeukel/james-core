@@ -93,7 +93,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
     }
     
     @Test
-    public void testSetRandomInitialSolution(){
+    public void testGenerateRandomInitialSolution(){
         System.out.println(" - test generateRandomInitialSolution");
         
         neighSearch.generateRandomInitialSolution();
@@ -145,7 +145,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         int n = 10;
         for(int i = 0; i < n; i++){
             // accept random move
-            neighSearch.acceptMove(neigh.getRandomMove(neighSearch.getCurrentSolution()));
+            neighSearch.accept(neigh.getRandomMove(neighSearch.getCurrentSolution()));
         }
         
         // verify
@@ -188,9 +188,9 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         for(int i=0; i<30; i++){
             m = neigh.getRandomMove(neighSearch.getCurrentSolution());
             if(i%3 == 0){
-                neighSearch.rejectMove(m);
+                neighSearch.reject(m);
             } else {
-                neighSearch.acceptMove(m);
+                neighSearch.accept(m);
             }
         }
         
@@ -225,9 +225,9 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         for(int i=0; i<30; i++){
             m = neigh.getRandomMove(neighSearch.getCurrentSolution());
             if(i%3 == 0){
-                neighSearch.rejectMove(m);
+                neighSearch.reject(m);
             } else {
-                neighSearch.acceptMove(m);
+                neighSearch.accept(m);
             }
         }
         
@@ -310,7 +310,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
             // verify: addition should increase score
             assertTrue(neighSearch.isImprovement(m));
             // apply move
-            neighSearch.acceptMove(m);
+            neighSearch.accept(m);
 
             // create corresponding deletion move
             DeletionMove m2 = new DeletionMove(m.getAddedID());
@@ -326,7 +326,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
             m = new AdditionMove(SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getUnselectedIDs(), RG));
             assertFalse(neighSearch.isImprovement(m));
             // apply addition
-            neighSearch.acceptMove(m);
+            neighSearch.accept(m);
             // verify: deletion now is improvement
             m2 = new DeletionMove(m.getAddedID());
             assertTrue(neighSearch.isImprovement(m2));
@@ -408,7 +408,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         // apply best move until no more improvements found (important: only positive deltas allowed)
         while(bestMove != null){
             // apply move
-            neighSearch.acceptMove(bestMove);
+            neighSearch.accept(bestMove);
             // verify: improvement?
             assertTrue(neighSearch.getCurrentSolutionEvaluation().getValue() > prevSolutionEvaluation.getValue());
             prevSolutionEvaluation = neighSearch.getCurrentSolutionEvaluation();
@@ -444,20 +444,20 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         bestMove = neighSearch.getBestMove(moves, true);
         // verify: move with negative delta selected although improvement was required
         assertNotNull(bestMove);
-        assertTrue(neighSearch.computeDelta(neighSearch.evaluateMove(bestMove), neighSearch.getCurrentSolutionEvaluation()) < 0);
-        assertTrue(neighSearch.validateMove(bestMove).passed());
+        assertTrue(neighSearch.computeDelta(neighSearch.evaluate(bestMove), neighSearch.getCurrentSolutionEvaluation()) < 0);
+        assertTrue(neighSearch.validate(bestMove).passed());
         // remove constraint
         assertTrue(problem.removeMandatoryConstraint(c));
         
     }
 
     /**
-     * Test of acceptMove method, of class NeighbourhoodSearch.
+     * Test of accept method, of class NeighbourhoodSearch.
      */
     @Test
-    public void testAcceptMove() {
+    public void testAccept() {
         
-        System.out.println(" - test acceptMove");
+        System.out.println(" - test accept");
         
         // initialize
         neighSearch.searchStarted();
@@ -470,7 +470,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
             // generate random move
             m = neigh.getRandomMove(neighSearch.getCurrentSolution());
             // accept it
-            neighSearch.acceptMove(m);
+            neighSearch.accept(m);
             // apply to copy
             m.apply(copy);
             // evaluate copy
@@ -485,12 +485,12 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
     }
     
     /**
-     * Test of acceptMove method, of class NeighbourhoodSearch, with minimizing objective.
+     * Test of accept method, of class NeighbourhoodSearch, with minimizing objective.
      */
     @Test
-    public void testAcceptMoveMinimizing() {
+    public void testAcceptMinimizing() {
         
-        System.out.println(" - test acceptMove with minimizing objective");
+        System.out.println(" - test accept with minimizing objective");
         
         // set minimizing
         obj.setMinimizing();
@@ -506,7 +506,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
             // generate random move
             m = neigh.getRandomMove(neighSearch.getCurrentSolution());
             // accept it
-            neighSearch.acceptMove(m);
+            neighSearch.accept(m);
             // apply to copy
             m.apply(copy);
             // evaluate

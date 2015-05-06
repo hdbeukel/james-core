@@ -77,7 +77,7 @@ public class SteepestDescent<SolutionType extends Solution> extends SingleNeighb
         // found improvement ?
         if(move != null){
             // accept move
-            acceptMove(move);
+            accept(move);
         } else {
             // no improvement found
             stop();
