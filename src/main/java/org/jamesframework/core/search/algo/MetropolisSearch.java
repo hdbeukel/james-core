@@ -67,7 +67,9 @@ public class MetropolisSearch<SolutionType extends Solution> extends SingleNeigh
      * @param neighbourhood neighbourhood used to create neighbouring solutions
      * @param temperature temperature of the system
      */
-    public MetropolisSearch(Problem<SolutionType> problem, Neighbourhood<? super SolutionType> neighbourhood, double temperature){
+    public MetropolisSearch(Problem<SolutionType> problem,
+                            Neighbourhood<? super SolutionType> neighbourhood,
+                            double temperature){
         this(null, problem, neighbourhood, temperature);
     }
     
@@ -84,7 +86,9 @@ public class MetropolisSearch<SolutionType extends Solution> extends SingleNeigh
      * @param neighbourhood neighbourhood used to create neighbouring solutions
      * @param temperature temperature of the system
      */
-    public MetropolisSearch(String name, Problem<SolutionType> problem, Neighbourhood<? super SolutionType> neighbourhood, double temperature){
+    public MetropolisSearch(String name, Problem<SolutionType> problem,
+                            Neighbourhood<? super SolutionType> neighbourhood,
+                            double temperature){
         super(name != null ? name : "MetropolisSearch", problem, neighbourhood);
         // check temperature
         if(temperature <= 0.0){

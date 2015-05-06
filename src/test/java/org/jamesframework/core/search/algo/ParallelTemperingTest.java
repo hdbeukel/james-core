@@ -90,6 +90,8 @@ public class ParallelTemperingTest extends SearchTestTemplate {
         search = new ParallelTempering<>(problem, neigh, numReplicas, MIN_TEMP, MAX_TEMP);
         // set temperature scale
         search.setTemperatureScaleFactor(scale);
+        // verify
+        search.getReplicas().forEach(r -> assertEquals(scale, r.getTemperatureScaleFactor(), TestConstants.DOUBLE_COMPARISON_PRECISION));
     }
     
     @After
@@ -189,6 +191,16 @@ public class ParallelTemperingTest extends SearchTestTemplate {
             assertEquals(neigh, rep.getNeighbourhood());
             assertTrue(rep.getTemperature() >= MIN_TEMP && rep.getTemperature() <= MAX_TEMP);
         });
+        
+        // check unmodifiable
+        boolean thrown = false;
+        try {
+            reps.clear();
+        } catch (UnsupportedOperationException ex){
+            thrown = true;
+        }
+        assertTrue(thrown);
+        
     }
     
     @Test
@@ -240,11 +252,14 @@ public class ParallelTemperingTest extends SearchTestTemplate {
     }
     
     @Test
-    public void testCorreuptReplicas(){
+    public void testCorruptReplicas(){
         System.out.println(" - test corrupt replicas");
         
         List<MetropolisSearch<SubsetSolution>> reps = search.getReplicas();
-        Collections.reverse(reps); // whoops! I just broke order of temperatures
+        // whoops! break order of temperatures
+        double temp = reps.get(0).getTemperature();
+        reps.get(0).setTemperature(reps.get(1).getTemperature());
+        reps.get(1).setTemperature(temp);
         
         boolean thrown = false;
         try{
