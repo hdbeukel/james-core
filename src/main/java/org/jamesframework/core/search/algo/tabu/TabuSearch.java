@@ -152,20 +152,20 @@ public class TabuSearch<SolutionType extends Solution> extends SingleNeighbourho
     public void setCurrentSolution(SolutionType solution){
         // call super (also verifies search status)
         super.setCurrentSolution(solution);
-        // update tabu memory (no move has been applied to obtain this solution, pass null as move)
+        // update tabu memory (no move has been applied to obtain this solution, pass null)
         tabuMemory.registerVisitedSolution(solution, null);
     }
     
     /**
-     * Updates the tabu memory when a random initial solution is set.
+     * Updates the tabu memory if a random initial solution is generated.
      * 
      * @throws SearchException if a current solution is already set when calling this method
      */
     @Override
-    public void setRandomInitialSolution(){
+    protected void generateRandomInitialSolution(){
         // call super
-        super.setRandomInitialSolution();
-        // update tabu memory (no move has been applied to obtain this solution, pass null as move)
+        super.generateRandomInitialSolution();
+        // update tabu memory (no move has been applied to obtain this solution, pass null)
         tabuMemory.registerVisitedSolution(getCurrentSolution(), null);
     }
     

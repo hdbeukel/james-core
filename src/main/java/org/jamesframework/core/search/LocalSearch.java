@@ -86,16 +86,16 @@ public abstract class LocalSearch<SolutionType extends Solution> extends Search<
         super.searchStarted();
         // create random initial solution if none is set
         if(curSolution == null){
-            setRandomInitialSolution();
+            generateRandomInitialSolution();
         }
     }
     
     /**
-     * Sets a randomly generated initial solution. Method is called from {@link #searchStarted()}.
+     * Generates a random initial solution. Called from {@link #searchStarted()}.
      * 
      * @throws SearchException if a current solution is already set when calling this method
      */
-    protected void setRandomInitialSolution(){
+    protected void generateRandomInitialSolution(){
         if(curSolution != null){
             throw new SearchException("Cannot set random initial solution in local search: current solution is already set.");
         }

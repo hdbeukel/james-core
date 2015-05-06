@@ -94,13 +94,13 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
     
     @Test
     public void testSetRandomInitialSolution(){
-        System.out.println(" - test setRandomInitialSolution");
+        System.out.println(" - test generateRandomInitialSolution");
         
-        neighSearch.setRandomInitialSolution();
+        neighSearch.generateRandomInitialSolution();
         
         boolean thrown = false;
         try {
-            neighSearch.setRandomInitialSolution();
+            neighSearch.generateRandomInitialSolution();
         } catch (SearchException ex) {
             thrown = true;
         }
