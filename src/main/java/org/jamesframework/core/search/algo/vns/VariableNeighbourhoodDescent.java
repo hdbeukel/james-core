@@ -107,7 +107,6 @@ public class VariableNeighbourhoodDescent<SolutionType extends Solution> extends
                 acceptMove(move);
                 k = 0;
             } else {
-                rejectMove();
                 // switch to next neighbourhood (to be used in next step)
                 k++;
             }

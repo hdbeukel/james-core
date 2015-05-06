@@ -148,7 +148,7 @@ public class ReducedVariableNeighbourhoodSearch<SolutionType extends Solution> e
                 acceptMove(move);
                 k = 0;
             } else {
-                rejectMove();
+                rejectMove(move);
                 // no improvement: switch to next neighbourhood, if any
                 nextNeighbourhood();
             }

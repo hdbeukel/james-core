@@ -378,7 +378,8 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
      * 
      * @param move accepted move to be applied to the current solution
      * @return <code>true</code> if the update has been successfully performed,
-     *         <code>false</code> if the update was cancelled because the obtained neighbour is invalid
+     *         <code>false</code> if the update was cancelled because the obtained
+     *         neighbour is invalid
      */
     protected boolean acceptMove(Move<? super SolutionType> move){
         // validate move (often retrieved from cache)
@@ -391,7 +392,7 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
             // update current solution and best solution
             updateCurrentAndBestSolution(getCurrentSolution(), newEvaluation, newValidation);
             // increase accepted move counter
-            numAcceptedMoves++;
+            incNumAcceptedMoves(1);
             // update successful
             return true;
         } else {
@@ -410,10 +411,12 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
     }
     
     /**
-     * Indicate that a move was rejected. This method only updates the rejected move counter. If this method
-     * is called for every rejected move, the number of rejected moves will be correctly reported.
+     * Reject the given move. The default implementation ignores the specified move and simply updates
+     * the <em>number</em> of rejected moves. Specific searches can override this behaviour if desired.
+     * 
+     * @param move rejected move (ignored)
      */
-    protected void rejectMove(){
+    protected void rejectMove(Move<? super SolutionType> move){
         incNumRejectedMoves(1);
     }
     

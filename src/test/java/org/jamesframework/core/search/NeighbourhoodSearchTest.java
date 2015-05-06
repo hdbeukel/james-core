@@ -30,7 +30,6 @@ import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
 import org.jamesframework.core.search.listeners.SearchListener;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.search.neigh.Move;
-import org.jamesframework.core.search.stopcriteria.MaxRuntime;
 import org.jamesframework.core.search.stopcriteria.MaxSteps;
 import org.jamesframework.core.subset.neigh.SingleDeletionNeighbourhood;
 import org.jamesframework.core.subset.neigh.moves.AdditionMove;
@@ -189,7 +188,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         for(int i=0; i<30; i++){
             m = neigh.getRandomMove(neighSearch.getCurrentSolution());
             if(i%3 == 0){
-                neighSearch.rejectMove();
+                neighSearch.rejectMove(m);
             } else {
                 neighSearch.acceptMove(m);
             }
@@ -226,7 +225,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         for(int i=0; i<30; i++){
             m = neigh.getRandomMove(neighSearch.getCurrentSolution());
             if(i%3 == 0){
-                neighSearch.rejectMove();
+                neighSearch.rejectMove(m);
             } else {
                 neighSearch.acceptMove(m);
             }

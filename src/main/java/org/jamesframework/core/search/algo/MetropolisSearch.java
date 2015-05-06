@@ -178,12 +178,12 @@ public class MetropolisSearch<SolutionType extends Solution> extends SingleNeigh
                         acceptMove(move);
                     } else {
                         // reject inferior move
-                        rejectMove();
+                        rejectMove(move);
                     }
                 }
             } else {
                 // invalid move: reject
-                rejectMove();
+                rejectMove(move);
             }
         } else {
             // no move/neighbour found
