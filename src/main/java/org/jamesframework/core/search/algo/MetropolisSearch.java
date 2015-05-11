@@ -16,13 +16,13 @@
 
 package org.jamesframework.core.search.algo;
 
-import java.util.concurrent.ThreadLocalRandom;
 import org.jamesframework.core.exceptions.JamesRuntimeException;
 import org.jamesframework.core.problems.Problem;
 import org.jamesframework.core.problems.Solution;
 import org.jamesframework.core.search.SingleNeighbourhoodSearch;
 import org.jamesframework.core.search.neigh.Move;
 import org.jamesframework.core.search.neigh.Neighbourhood;
+import org.jamesframework.core.util.Randomization;
 
 /**
  * Metropolis search with fixed temperature. Iteratively samples a random neighbour and accepts it based on a
@@ -176,7 +176,7 @@ public class MetropolisSearch<SolutionType extends Solution> extends SingleNeigh
                 } else {
                     // no improvement: accept with probability based on temperature and delta
                     double delta = computeDelta(evaluate(move), getCurrentSolutionEvaluation());
-                    double r = ThreadLocalRandom.current().nextDouble();
+                    double r = Randomization.getRandom().nextDouble();
                     if(Math.exp(delta/(scale*temperature)) > r){
                         // accept inferior move
                         accept(move);

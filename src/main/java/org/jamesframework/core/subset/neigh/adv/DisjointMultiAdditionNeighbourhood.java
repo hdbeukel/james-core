@@ -20,14 +20,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import org.jamesframework.core.subset.neigh.moves.GeneralSubsetMove;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.subset.neigh.SingleAdditionNeighbourhood;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
 import org.jamesframework.core.subset.neigh.SubsetNeighbourhood;
+import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 import org.jamesframework.core.util.SubsetIterator;
 
@@ -155,10 +154,8 @@ public class DisjointMultiAdditionNeighbourhood extends SubsetNeighbourhood {
         if(curNumAdd == 0){
             return null;
         }
-        // use thread local random for better concurrent performance
-        Random rg = ThreadLocalRandom.current();
         // pick random IDs to add to selection
-        Set<Integer> add = SetUtilities.getRandomSubset(addCandidates, curNumAdd, rg);
+        Set<Integer> add = SetUtilities.getRandomSubset(addCandidates, curNumAdd, Randomization.getRandom());
         // create and return move
         return new GeneralSubsetMove(add, Collections.emptySet());
     }

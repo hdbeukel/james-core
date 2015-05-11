@@ -32,9 +32,6 @@ import org.junit.Test;
  */
 public class RouletteSelectorTest {
     
-    // roulette selector
-    private static final RouletteSelector<String> roulette = new RouletteSelector<>();
-    
     /**
      * Set up test class.
      */
@@ -59,7 +56,7 @@ public class RouletteSelectorTest {
         
         thrown = false;
         try {
-            roulette.select(null, Arrays.asList(1.0));
+            RouletteSelector.select(null, Arrays.asList(1.0), Randomization.getRandom());
         } catch (NullPointerException ex) {
             thrown = true;
         }
@@ -67,7 +64,7 @@ public class RouletteSelectorTest {
         
         thrown = false;
         try {
-            roulette.select(Arrays.asList("abc"), null);
+            RouletteSelector.select(Arrays.asList("abc"), null, Randomization.getRandom());
         } catch (NullPointerException ex) {
             thrown = true;
         }
@@ -75,7 +72,9 @@ public class RouletteSelectorTest {
         
         thrown = false;
         try {
-            roulette.select(Arrays.asList("abc", "xyz", "qtl"), Arrays.asList(1.0, null, 5.0));
+            RouletteSelector.select(Arrays.asList("abc", "xyz", "qtl"),
+                                    Arrays.asList(1.0, null, 5.0),
+                                    Randomization.getRandom());
         } catch (NullPointerException ex) {
             thrown = true;
         }
@@ -83,7 +82,9 @@ public class RouletteSelectorTest {
         
         thrown = false;
         try {
-            roulette.select(Arrays.asList("a", "b", "c"), Arrays.asList(0.3, 0.7));
+            RouletteSelector.select(Arrays.asList("a", "b", "c"),
+                                    Arrays.asList(0.3, 0.7),
+                                    Randomization.getRandom());
         } catch (IllegalArgumentException ex) {
             thrown = true;
         }
@@ -91,7 +92,9 @@ public class RouletteSelectorTest {
         
         thrown = false;
         try {
-            roulette.select(Arrays.asList("a", "c"), Arrays.asList(0.3, 0.5, 0.2));
+            RouletteSelector.select(Arrays.asList("a", "c"),
+                                    Arrays.asList(0.3, 0.5, 0.2),
+                                    Randomization.getRandom());
         } catch (IllegalArgumentException ex) {
             thrown = true;
         }
@@ -99,19 +102,29 @@ public class RouletteSelectorTest {
         
         thrown = false;
         try {
-            roulette.select(Arrays.asList("a", "b", "c"), Arrays.asList(0.3, 0.3, -0.4));
+            RouletteSelector.select(Arrays.asList("a", "b", "c"),
+                                    Arrays.asList(0.3, 0.3, -0.4),
+                                    Randomization.getRandom());
         } catch (IllegalArgumentException ex) {
             thrown = true;
         }
         assertTrue(thrown);
         
         for(int i=0; i<100; i++){
-            assertNull(roulette.select(Arrays.asList(null, null), Arrays.asList(1.0, 0.6)));
-            assertNull(roulette.select(Arrays.asList("a", "b", "c"), Arrays.asList(0.0, 0.0, 0.0)));
-            assertEquals("b", roulette.select(Arrays.asList("a", "b", "c"), Arrays.asList(0.0, 123.0, 0.0)));
+            assertNull(RouletteSelector.select(Arrays.asList(null, null),
+                                               Arrays.asList(1.0, 0.6),
+                                               Randomization.getRandom()));
+            assertNull(RouletteSelector.select(Arrays.asList("a", "b", "c"),
+                                               Arrays.asList(0.0, 0.0, 0.0),
+                                               Randomization.getRandom()));
+            assertEquals("b", RouletteSelector.select(Arrays.asList("a", "b", "c"),
+                                                      Arrays.asList(0.0, 123.0, 0.0),
+                                                      Randomization.getRandom()));
         }
         
-        assertNull(roulette.select(Collections.emptyList(), Collections.emptyList()));
+        assertNull(RouletteSelector.select(Collections.emptyList(),
+                                           Collections.emptyList(),
+                                           Randomization.getRandom()));
     }
 
     /**
@@ -123,27 +136,31 @@ public class RouletteSelectorTest {
         System.out.println(" - testing select");
         
         // empty lists
-        assertNull(roulette.select(new ArrayList<>(), new ArrayList<>()));
+        assertNull(RouletteSelector.select(new ArrayList<>(), new ArrayList<>(), Randomization.getRandom()));
         
         // create item list
         List<String> items = Arrays.asList("Banana", "Peach", "Strawberry", "Mango");
         
         // all weights zero
-        assertNull(roulette.select(items, Arrays.asList(0.0, 0.0, 0.0, 0.0)));
+        assertNull(RouletteSelector.select(items,
+                                           Arrays.asList(0.0, 0.0, 0.0, 0.0),
+                                           Randomization.getRandom()));
         
         // all but one weight zero
-        assertEquals("Strawberry", roulette.select(items, Arrays.asList(0.0, 0.0, 123.4, 0.0)));
+        assertEquals("Strawberry", RouletteSelector.select(items,
+                                                           Arrays.asList(0.0, 0.0, 123.4, 0.0),
+                                                           Randomization.getRandom()));
         
         // all but one weight not zero
         List<Double> weights = Arrays.asList(1.2, 0.0, 3.2, 4.0);
         for(int i=0; i<100; i++){
-            assertNotEquals("Peach", roulette.select(items, weights));
+            assertNotEquals("Peach", RouletteSelector.select(items, weights, Randomization.getRandom()));
         }
         
         // no weights zero
         weights = Arrays.asList(1.2, 0.3, 3.2, 4.0);
         for(int i=0; i<100; i++){
-            String selected = roulette.select(items, weights);
+            String selected = RouletteSelector.select(items, weights, Randomization.getRandom());
             assertNotNull(selected);
             assertTrue(items.contains(selected));
         }
@@ -151,7 +168,7 @@ public class RouletteSelectorTest {
         // check: item list can contain null elements
         items = Arrays.asList(null, null, null, null);
         for(int i=0; i<100; i++){
-            assertNull(roulette.select(items, weights));
+            assertNull(RouletteSelector.select(items, weights, Randomization.getRandom()));
         }
         
     }

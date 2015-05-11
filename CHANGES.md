@@ -4,6 +4,7 @@ JAMES Core Module Changes
 Version 1.0 (under development)
 -------------------------------
 
+ - Support for custom global random generator used in all randomized components.
  - Improved test coverage.
  - Minor bugfixes and improvements.
  - Moved to SLF4J API 1.7.12.

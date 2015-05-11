@@ -25,8 +25,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import org.jamesframework.core.subset.SubsetSolution;
+import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.RouletteSelector;
 import org.jamesframework.core.util.SetUtilities;
 
@@ -141,8 +141,8 @@ public class SinglePerturbationNeighbourhood extends SubsetNeighbourhood {
      */
     @Override
     public SubsetMove getRandomMove(SubsetSolution solution) {
-        // use thread local random for concurrent performance
-        Random rg = ThreadLocalRandom.current();
+        // retrieve random generator
+        Random rg = Randomization.getRandom();
         // get set of candidate IDs for deletion and addition (fixed IDs are discarded)
         Set<Integer> removeCandidates = getRemoveCandidates(solution);
         Set<Integer> addCandidates = getAddCandidates(solution);
@@ -151,9 +151,10 @@ public class SinglePerturbationNeighbourhood extends SubsetNeighbourhood {
         int numDel = canRemove(solution, removeCandidates) ? removeCandidates.size(): 0;
         int numSwap = canSwap(solution, addCandidates, removeCandidates) ? addCandidates.size()*removeCandidates.size() : 0;
         // pick move type using roulette selector
-        MoveType selectedMoveType = new RouletteSelector<MoveType>(rg).select(
+        MoveType selectedMoveType = RouletteSelector.select(
                                         Arrays.asList(MoveType.ADDITION, MoveType.DELETION, MoveType.SWAP),
-                                        Arrays.asList((double) numAdd, (double) numDel, (double) numSwap)
+                                        Arrays.asList((double) numAdd, (double) numDel, (double) numSwap),
+                                        rg
                                     );
         // in case of no valid moves: return null
         if(selectedMoveType == null){

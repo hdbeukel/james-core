@@ -22,12 +22,12 @@ import org.jamesframework.core.subset.neigh.moves.GeneralSubsetMove;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.subset.neigh.SingleAdditionNeighbourhood;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
 import org.jamesframework.core.subset.neigh.SubsetNeighbourhood;
+import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 import org.jamesframework.core.util.SubsetIterator;
 
@@ -174,8 +174,8 @@ public class MultiAdditionNeighbourhood extends SubsetNeighbourhood {
         if(curMaxAdds == 0){
             return null;
         }
-        // use thread local random for better concurrent performance
-        Random rg = ThreadLocalRandom.current();
+        // retrieve random generator
+        Random rg = Randomization.getRandom();
         // pick number of additions (in [1, curMaxAdds])
         int numAdds = rg.nextInt(curMaxAdds) + 1;
         // pick random IDs to add to selection

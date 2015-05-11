@@ -19,12 +19,11 @@ package org.jamesframework.core.subset.neigh;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.subset.neigh.moves.AdditionMove;
+import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 
 /**
@@ -114,10 +113,8 @@ public class SingleAdditionNeighbourhood extends SubsetNeighbourhood {
         if(addCandidates.isEmpty()){
             return null;
         }
-        // use thread local random for better concurrent performance
-        Random rg = ThreadLocalRandom.current();
         // select random ID to add to selection
-        int add = SetUtilities.getRandomElement(addCandidates, rg);
+        int add = SetUtilities.getRandomElement(addCandidates, Randomization.getRandom());
         // create and return addition move
         return new AdditionMove(add);
     }

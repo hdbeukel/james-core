@@ -25,7 +25,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadLocalRandom;
 import org.jamesframework.core.exceptions.JamesRuntimeException;
 import org.jamesframework.core.exceptions.SearchException;
 import org.jamesframework.core.problems.Problem;
@@ -38,6 +37,7 @@ import org.jamesframework.core.search.SingleNeighbourhoodSearch;
 import org.jamesframework.core.search.listeners.SearchListener;
 import org.jamesframework.core.search.neigh.Neighbourhood;
 import org.jamesframework.core.search.stopcriteria.MaxSteps;
+import org.jamesframework.core.util.Randomization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -372,7 +372,7 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
                                                 + "ordered by temperature (ascending).");
                 }
                 // generate random number
-                double r = ThreadLocalRandom.current().nextDouble();
+                double r = Randomization.getRandom().nextDouble();
                 // swap with probability p
                 if(r < p){
                     swap = true;

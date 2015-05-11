@@ -18,11 +18,10 @@ package org.jamesframework.core.util;
 
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * <p>
- * A selection object which simulates a roulette wheel where all items have a weight expressing the
+ * Simulates selection based on a roulette wheel where all items have a weight expressing the
  * size of their section of the wheel. The size of the wheel is the sum of all item weights. During
  * selection a random number in (0, wheel size) is picked and then the item corresponding to this
  * section of the wheel is selected.
@@ -38,34 +37,13 @@ import java.util.concurrent.ThreadLocalRandom;
  * project (<a href="http://hadoop.apache.org" target="_blank">http://hadoop.apache.org</a>).
  * </p>
  * 
- * @param <E> type of items from which one is to be selected
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
-public class RouletteSelector<E> {
-    
-    // applied random generator
-    private final Random picker;
-
-    /**
-     * Create a roulette selector. The random generator used for selection is set to
-     * <code>ThreadLocalRandom.current()</code>.
-     */
-    public RouletteSelector(){
-        this(ThreadLocalRandom.current());
-    }
-    
-    /**
-     * Create a roulette selector with a given random generator.
-     * 
-     * @param rnd applied random generator
-     */
-    public RouletteSelector(Random rnd) {
-        this.picker = rnd;
-    }
+public class RouletteSelector {
     
     /**
      * Select an item from a given list by roulette selection, where each item has a weight expressing
-     * the size of its share of the roulette wheel. The total size of the wheel is the sum of all item
+     * the size of its section of the roulette wheel. The total size of the wheel is the sum of all item
      * weights. The list of items and weights should be of the same size and all weights should be
      * positive. A weight of zero is allowed, in which case the respective item will never be selected.
      * One item is always selected, except when the item list is empty or when all weights are zero in
@@ -73,14 +51,16 @@ public class RouletteSelector<E> {
      * 
      * @param items items from which one is to be selected
      * @param weights item weights (same order as items)
+     * @param random random generator (cannot be <code>null</code>)
      * @return item selected by roulette selection, <code>null</code> if all weights are zero
      *              or the item list is empty
      * @throws IllegalArgumentException if both lists are not of the same size or if any of the
      *                                  given weights is &lt; 0
-     * @throws NullPointerException if <code>items</code> or <code>weights</code> are <code>null</code>
-     *                              or if <code>weights</code> contains any <code>null</code> elements
+     * @throws NullPointerException if <code>items</code>, <code>weights</code> or <code>random</code>
+     *                              are <code>null</code> or if <code>weights</code> contains any
+     *                              <code>null</code> elements
      */
-    public E select(List<E> items, List<Double> weights){
+    public static <E> E select(List<E> items, List<Double> weights, Random random){
         // check null
         if(items == null){
             throw new NullPointerException("List of items can not be null.");
@@ -112,7 +92,7 @@ public class RouletteSelector<E> {
         }
         if(totalWeight > 0){
             // roulette wheel selection
-            double r = picker.nextDouble() * totalWeight;
+            double r = random.nextDouble() * totalWeight;
             int i=0;
             while(i < items.size() && r > 0){
                 r -= weights.get(i);

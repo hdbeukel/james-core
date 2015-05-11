@@ -19,12 +19,11 @@ package org.jamesframework.core.subset.neigh;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.subset.neigh.moves.DeletionMove;
+import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 
 /**
@@ -114,10 +113,8 @@ public class SingleDeletionNeighbourhood extends SubsetNeighbourhood {
         if(removeCandidates.isEmpty()){
             return null;
         }
-        // use thread local random for better concurrent performance
-        Random rg = ThreadLocalRandom.current();
         // select random ID to remove from selection
-        int del = SetUtilities.getRandomElement(removeCandidates, rg);
+        int del = SetUtilities.getRandomElement(removeCandidates, Randomization.getRandom());
         // create and return deletion move
         return new DeletionMove(del);
     }

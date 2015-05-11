@@ -20,14 +20,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import org.jamesframework.core.subset.neigh.moves.GeneralSubsetMove;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.subset.neigh.SingleDeletionNeighbourhood;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
 import org.jamesframework.core.subset.neigh.SubsetNeighbourhood;
+import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 import org.jamesframework.core.util.SubsetIterator;
 
@@ -155,10 +154,8 @@ public class DisjointMultiDeletionNeighbourhood extends SubsetNeighbourhood {
         if(curNumDel == 0){
             return null;
         }
-        // use thread local random for better concurrent performance
-        Random rg = ThreadLocalRandom.current();
         // pick random IDs to remove from selection
-        Set<Integer> del = SetUtilities.getRandomSubset(delCandidates, curNumDel, rg);
+        Set<Integer> del = SetUtilities.getRandomSubset(delCandidates, curNumDel, Randomization.getRandom());
         // create and return move
         return new GeneralSubsetMove(Collections.emptySet(), del);
     }

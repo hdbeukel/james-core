@@ -19,7 +19,6 @@ package org.jamesframework.core.subset;
 import java.util.Comparator;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import org.jamesframework.core.exceptions.IncompatibleDeltaValidationException;
 import org.jamesframework.core.problems.AbstractProblem;
 import org.jamesframework.core.problems.constraints.validations.Validation;
@@ -28,6 +27,7 @@ import org.jamesframework.core.problems.datatypes.IntegerIdentifiedData;
 import org.jamesframework.core.problems.objectives.Objective;
 import org.jamesframework.core.search.neigh.Move;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
+import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 
 /**
@@ -189,8 +189,8 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Abstr
      */
     @Override
     public SubsetSolution createRandomSolution() {
-        // get thread local random generator
-        Random rg = ThreadLocalRandom.current();
+        // retrieve random generator
+        Random rg = Randomization.getRandom();
         // pick random number of selected IDs within bounds
         int size = minSubsetSize + rg.nextInt(maxSubsetSize-minSubsetSize+1);
         // randomly generate selection

@@ -21,12 +21,12 @@ import org.jamesframework.core.subset.neigh.moves.GeneralSubsetMove;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.subset.neigh.SingleSwapNeighbourhood;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
 import org.jamesframework.core.subset.neigh.SubsetNeighbourhood;
+import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 import org.jamesframework.core.util.SubsetIterator;
 
@@ -130,8 +130,8 @@ public class DisjointMultiSwapNeighbourhood extends SubsetNeighbourhood {
             // impossible to perform a swap
             return null;
         }
-        // use thread local random for better concurrent performance
-        Random rg = ThreadLocalRandom.current();
+        // retrieve random generator
+        Random rg = Randomization.getRandom();
         // pick random IDs to remove from selection
         Set<Integer> del = SetUtilities.getRandomSubset(removeCandidates, curNumSwaps, rg);
         // pick random IDs to add to selection
