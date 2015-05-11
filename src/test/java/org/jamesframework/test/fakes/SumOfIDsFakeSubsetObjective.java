@@ -16,7 +16,6 @@
 
 package org.jamesframework.test.fakes;
 
-import java.util.stream.IntStream;
 import org.jamesframework.core.exceptions.IncompatibleDeltaValidationException;
 import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
 import org.jamesframework.core.problems.objectives.evaluations.SimpleEvaluation;

@@ -21,7 +21,6 @@ import java.util.Collections;
 import org.jamesframework.core.subset.neigh.moves.GeneralSubsetMove;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.IntStream;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.subset.neigh.SingleAdditionNeighbourhood;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
@@ -208,7 +207,7 @@ public class DisjointMultiAdditionNeighbourhood extends SubsetNeighbourhood {
      * @return number of additions to be performed
      */
     private int numAdditions(Set<Integer> addCandidates, SubsetSolution sol){
-        int a = IntStream.of(numAdditions, addCandidates.size(), maxSubsetSize-sol.getNumSelectedIDs()).min().getAsInt();
+        int a = Math.min(numAdditions, Math.min(addCandidates.size(), maxSubsetSize-sol.getNumSelectedIDs()));
         return Math.max(a, 0);
     }
 

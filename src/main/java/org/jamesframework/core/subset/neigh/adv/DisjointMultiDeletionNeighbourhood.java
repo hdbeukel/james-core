@@ -21,7 +21,6 @@ import java.util.Collections;
 import org.jamesframework.core.subset.neigh.moves.GeneralSubsetMove;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.IntStream;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.subset.neigh.SingleDeletionNeighbourhood;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
@@ -208,7 +207,7 @@ public class DisjointMultiDeletionNeighbourhood extends SubsetNeighbourhood {
      * @return number of deletions to be performed
      */
     private int numDeletions(Set<Integer> remCandidates, SubsetSolution sol){
-        int d = IntStream.of(numDeletions, remCandidates.size(), sol.getNumSelectedIDs()-minSubsetSize).min().getAsInt();
+        int d = Math.min(numDeletions, Math.min(remCandidates.size(), sol.getNumSelectedIDs()-minSubsetSize));
         return Math.max(d, 0);
     }
 
