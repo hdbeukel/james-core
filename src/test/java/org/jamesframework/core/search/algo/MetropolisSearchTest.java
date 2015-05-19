@@ -89,6 +89,10 @@ public class MetropolisSearchTest extends SearchTestTemplate {
         searchLowTemp = new MetropolisSearch<>(problem, neigh, LOW_TEMP);
         searchMedTemp = new MetropolisSearch<>(problem, neigh, MED_TEMP);
         searchHighTemp = new MetropolisSearch<>(problem, neigh, HIGH_TEMP);
+        // set and log random seeds
+        setRandomSeed(searchLowTemp);
+        setRandomSeed(searchMedTemp);
+        setRandomSeed(searchHighTemp);
     }
     
     @After

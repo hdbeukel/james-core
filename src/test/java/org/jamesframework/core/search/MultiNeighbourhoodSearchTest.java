@@ -68,6 +68,7 @@ public class MultiNeighbourhoodSearchTest extends SearchTestTemplate {
         // create random search with internal max steps
         neighs = Arrays.asList(new SingleSwapNeighbourhood(), new SinglePerturbationNeighbourhood());
         search = new DummyMultiNeighbourhoodSearch(problem, neighs);
+        setRandomSeed(search);
     }
     
     @After

@@ -78,6 +78,8 @@ public class LRSubsetSearchTest extends SearchTestTemplate {
         super.setUp();
         // create LR subset search 
         search = new LRSubsetSearch(problem, DEFAULT_L, DEFAULT_R);
+        // set and log random seed
+        setRandomSeed(search);
     }
     
     @After

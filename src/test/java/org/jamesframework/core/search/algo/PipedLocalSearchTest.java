@@ -86,6 +86,10 @@ public class PipedLocalSearchTest extends SearchTestTemplate {
         pipeline.add(rd);
         // create piped local search
         pipedLocalSearch = new PipedLocalSearch<>(problem, pipeline);
+        // set and log random seeds
+        setRandomSeed(sd);
+        setRandomSeed(rd);
+        setRandomSeed(pipedLocalSearch);
     }
     
     @After

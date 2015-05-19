@@ -75,6 +75,7 @@ public class SearchTest extends SearchTestTemplate {
         super.setUp();
         // create random search with internal max steps
         search = new RandomSearchWithInternalMaxSteps<>(problem, NUM_STEPS);
+        setRandomSeed(search);
     }
     
     @After

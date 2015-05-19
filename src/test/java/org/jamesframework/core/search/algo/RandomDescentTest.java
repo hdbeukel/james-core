@@ -77,6 +77,8 @@ public class RandomDescentTest extends SearchTestTemplate {
         super.setUp();
         // create random descent
         search = new RandomDescent<>(problem, neigh);
+        // set and log random seed
+        setRandomSeed(search);
     }
     
     @After

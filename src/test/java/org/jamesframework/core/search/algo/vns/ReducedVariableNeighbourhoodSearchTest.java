@@ -98,6 +98,8 @@ public class ReducedVariableNeighbourhoodSearchTest extends SearchTestTemplate {
         neighs.add(multiSwapNeigh);
         // create reduced variable neighbourhood search
         search = new ReducedVariableNeighbourhoodSearch<>(problem, neighs);
+        // set and log random seed
+        setRandomSeed(search);
         // create and add rejected moves listener
         listener = new RejectedMovesListener();
         search.addSearchListener(listener);

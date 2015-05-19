@@ -95,6 +95,8 @@ public class VariableNeighbourhoodDescentTest extends SearchTestTemplate {
         neighs.add(multiSwapNeigh);
         // create variable neighbourhood descent search
         search = new VariableNeighbourhoodDescent<>(problem, neighs);
+        // set and log random seed
+        setRandomSeed(search);
         // create and add rejected moves listener
         listener = new RejectedMovesListener();
         search.addSearchListener(listener);

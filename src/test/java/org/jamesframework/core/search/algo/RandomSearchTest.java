@@ -72,6 +72,8 @@ public class RandomSearchTest extends SearchTestTemplate {
         super.setUp();
         // create random search
         search = new RandomSearch<>(problem);
+        // set and log random seed
+        setRandomSeed(search);
     }
     
     @After

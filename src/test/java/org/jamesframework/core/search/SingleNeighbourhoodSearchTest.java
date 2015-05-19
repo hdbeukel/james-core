@@ -63,6 +63,7 @@ public class SingleNeighbourhoodSearchTest extends SearchTestTemplate {
         // create random search with internal max steps
         neigh = new SingleSwapNeighbourhood();
         search = new DummySingleNeighbourhoodSearch(problem, neigh);
+        setRandomSeed(search);
     }
     
     @After

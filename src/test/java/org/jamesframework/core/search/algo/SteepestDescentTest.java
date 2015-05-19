@@ -77,6 +77,8 @@ public class SteepestDescentTest extends SearchTestTemplate {
         super.setUp();
         // create steepest descent search
         search = new SteepestDescent<>(problem, neigh);
+        // set and log random seed
+        setRandomSeed(search);
     }
     
     @After

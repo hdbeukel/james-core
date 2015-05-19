@@ -71,7 +71,13 @@ public class SearchTestTemplate {
     protected SingleSwapNeighbourhood neigh;
     
     // random generator
-    protected static final Random RG = new Random();
+    protected static final Random RG;
+    static {
+        //long seed = -860416432637447914L;
+        long seed = new Random().nextLong();
+        RG = new Random(seed);
+        logger.info("Set search test template random generator seed to {}", seed);
+    }
     
     /**
      * Create data (same for every test method).

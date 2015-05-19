@@ -42,7 +42,23 @@ import org.junit.Before;
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
 public class ParallelTemperingTest extends SearchTestTemplate {
-
+    
+    // set custom seeds if desired (null for random seeds)
+    // - seeds[0]:    main parallel tempering search seed
+    // - seeds[1-10]: replica seeds
+    private static final long[] seeds = null;
+    /*private static final long[] seeds = new long[]{-2236172874615269829L,
+                                                     -5188315990827871739L,
+                                                     -7319285098849436177L,
+                                                     -713556478495592021L,
+                                                     -4012602022630517470L,
+                                                     1957185940936080323L,
+                                                     -7751036578472904675L,
+                                                     -7937324089557802382L,
+                                                     6315018116614864482L,
+                                                     5844242055203561180L,
+                                                     2379339502611672320L};*/
+    
     // parallel tempering search
     private ParallelTempering<SubsetSolution> search;
     
@@ -87,6 +103,16 @@ public class ParallelTemperingTest extends SearchTestTemplate {
         super.setUp();
         // create parallel tempering search
         search = new ParallelTempering<>(problem, neigh, numReplicas, MIN_TEMP, MAX_TEMP);
+        // set and log seeds for replicas and main search
+        if(seeds == null){
+            setRandomSeed(search);
+            search.getReplicas().forEach(r -> setRandomSeed(r));
+        } else {
+            setSeed(search, seeds[0]);
+            for (int i = 0; i < 10; i++) {
+                setSeed(search.getReplicas().get(i), seeds[i+1]);
+            }
+        }
         // set temperature scale
         search.setTemperatureScaleFactor(scale);
         // verify

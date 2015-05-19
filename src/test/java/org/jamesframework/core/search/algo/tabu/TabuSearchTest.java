@@ -118,6 +118,8 @@ public class TabuSearchTest extends SearchTestTemplate {
         super.setUp();
         // create tabu search
         search = new TabuSearch<>(problem, neigh, tabuMemoryFactory.createTabuMemory());
+        // set and log random seed
+        setRandomSeed(search);
         // print description of applied tabu memory
         System.out.println(" - TABU MEMORY: " + tabuMemoryDesc);
     }
