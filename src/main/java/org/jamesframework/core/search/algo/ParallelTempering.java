@@ -354,6 +354,15 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
             MetropolisSearch<SolutionType> r2 = replicas.get(i+1);
             // compute delta
             double delta = computeDelta(r2.getCurrentSolutionEvaluation(), r1.getCurrentSolutionEvaluation());
+            // compute factor based on difference in temperature
+            double b1 = 1.0 / (r1.getTemperatureScaleFactor() * r1.getTemperature());
+            double b2 = 1.0 / (r2.getTemperatureScaleFactor() * r2.getTemperature());
+            double diffb = b1 - b2;
+            // double check if replicas are correctly ordered by temperature (ascending)
+            if(diffb <= 0){
+                throw new SearchException("Error in parallel tempering algorithm: replicas are not correctly "
+                                            + "ordered by temperature (ascending).");
+            }
             // check if solutions should be swapped
             boolean swap = false;
             if(delta >= 0){
@@ -361,15 +370,7 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
                 swap = true;
             } else {
                 // randomized swap (with probability p)
-                double b1 = 1.0 / (r1.getTemperatureScaleFactor() * r1.getTemperature());
-                double b2 = 1.0 / (r2.getTemperatureScaleFactor() * r2.getTemperature());
-                double p = Math.exp((b1 - b2) * delta);
-                // double check: p should be a probability in [0,1], else the replicas are not
-                // correctly orederd by temperature (ascending)
-                if(p > 1.0){
-                    throw new SearchException("Error in parallel tempering algorithm: replicas are not correctly "
-                                                + "ordered by temperature (ascending).");
-                }
+                double p = Math.exp(diffb * delta);
                 // generate random number
                 double r = getRandom().nextDouble();
                 // swap with probability p
