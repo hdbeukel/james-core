@@ -34,6 +34,8 @@ import org.jamesframework.test.util.TestConstants;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Template for search tests solving a basic subset problem, where every item is assigned a real value with the
@@ -42,6 +44,9 @@ import org.junit.BeforeClass;
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
 public class SearchTestTemplate {
+    
+    // logger
+    private static final Logger logger = LoggerFactory.getLogger(SearchTestTemplate.class);
 
     // fake subset data (scored entities)
     protected static ScoredFakeSubsetData data;
@@ -93,6 +98,16 @@ public class SearchTestTemplate {
         System.out.println("# Selecting " + SUBSET_SIZE + " out of " + DATASET_SIZE + " items");
         System.out.println("# Maximum subset evaluation: " + max);
         System.out.println("# Minimum subset evaluation: " + min);
+    }
+    
+    public static void setRandomSeed(Search<?> search){
+        setSeed(search, RG.nextLong());
+    }
+    
+    public static void setSeed(Search<?> search, long seed){
+        Random rnd = new Random(seed);
+        search.setRandom(rnd);
+        logger.info("Set seed for search {} to {}", search, seed);
     }
     
     /**

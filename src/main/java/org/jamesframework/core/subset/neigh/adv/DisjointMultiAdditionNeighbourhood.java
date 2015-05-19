@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import org.jamesframework.core.subset.neigh.moves.GeneralSubsetMove;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.subset.neigh.SingleAdditionNeighbourhood;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
 import org.jamesframework.core.subset.neigh.SubsetNeighbourhood;
-import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 import org.jamesframework.core.util.SubsetIterator;
 
@@ -141,10 +141,11 @@ public class DisjointMultiAdditionNeighbourhood extends SubsetNeighbourhood {
      * fewer additions (as many as possible). If no items can be added, <code>null</code> is returned.
      * 
      * @param solution solution for which a random multi addition move is generated
+     * @param rnd source of randomness used to generate random move
      * @return random multi addition move, <code>null</code> if no items can be added
      */
     @Override
-    public SubsetMove getRandomMove(SubsetSolution solution) {
+    public SubsetMove getRandomMove(SubsetSolution solution, Random rnd) {
         // get set of candidate IDs for addition (fixed IDs are discarded)
         Set<Integer> addCandidates = getAddCandidates(solution);
         // compute number of additions
@@ -154,7 +155,7 @@ public class DisjointMultiAdditionNeighbourhood extends SubsetNeighbourhood {
             return null;
         }
         // pick random IDs to add to selection
-        Set<Integer> add = SetUtilities.getRandomSubset(addCandidates, curNumAdd, Randomization.getRandom());
+        Set<Integer> add = SetUtilities.getRandomSubset(addCandidates, curNumAdd, rnd);
         // create and return move
         return new GeneralSubsetMove(add, Collections.emptySet());
     }

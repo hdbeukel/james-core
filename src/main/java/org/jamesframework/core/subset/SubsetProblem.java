@@ -27,7 +27,6 @@ import org.jamesframework.core.problems.datatypes.IntegerIdentifiedData;
 import org.jamesframework.core.problems.objectives.Objective;
 import org.jamesframework.core.search.neigh.Move;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
-import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 
 /**
@@ -185,16 +184,15 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Abstr
      * Create a random solution within the allowed minimum and maximum subset size. The set of all IDs
      * is retrieved from the underlying data and a random subset of these IDs is selected.
      * 
+     * @param rnd source of randomness used to generate random subset solution
      * @return random subset solution within minimum and maximum size
      */
     @Override
-    public SubsetSolution createRandomSolution() {
-        // retrieve random generator
-        Random rg = Randomization.getRandom();
+    public SubsetSolution createRandomSolution(Random rnd) {
         // pick random number of selected IDs within bounds
-        int size = minSubsetSize + rg.nextInt(maxSubsetSize-minSubsetSize+1);
+        int size = minSubsetSize + rnd.nextInt(maxSubsetSize-minSubsetSize+1);
         // randomly generate selection
-        Set<Integer> selection = SetUtilities.getRandomSubset(getData().getIDs(), size, rg);
+        Set<Integer> selection = SetUtilities.getRandomSubset(getData().getIDs(), size, rnd);
         // create subset solution with this selection
         SubsetSolution sol = new SubsetSolution(getData().getIDs(), selection, orderOfIDs);
         // return random solution

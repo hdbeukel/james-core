@@ -52,6 +52,7 @@ public class RouletteSelector {
      * @param items items from which one is to be selected
      * @param weights item weights (same order as items)
      * @param random random generator (cannot be <code>null</code>)
+     * @param <E> type of items
      * @return item selected by roulette selection, <code>null</code> if all weights are zero
      *              or the item list is empty
      * @throws IllegalArgumentException if both lists are not of the same size or if any of the

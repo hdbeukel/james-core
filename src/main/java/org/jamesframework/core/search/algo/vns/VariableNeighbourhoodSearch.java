@@ -211,7 +211,7 @@ public class VariableNeighbourhoodSearch<SolutionType extends Solution> extends 
         // 1) SHAKING
         
         // get random move from current shaking neighbourhood
-        Move<? super SolutionType> shakeMove = getNeighbourhoods().get(s).getRandomMove(shakedSolution);
+        Move<? super SolutionType> shakeMove = getNeighbourhoods().get(s).getRandomMove(shakedSolution, getRandom());
         // shake only if a move was obtained
         if(shakeMove != null){
             shakeMove.apply(shakedSolution);

@@ -20,6 +20,7 @@ import org.jamesframework.core.subset.algo.tabu.IDBasedSubsetTabuMemory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.jamesframework.core.problems.Solution;
 import org.jamesframework.core.problems.objectives.Objective;
@@ -227,7 +228,7 @@ public class TabuSearchTest extends SearchTestTemplate {
         // create empty neighbourhood
         Neighbourhood<SubsetSolution> emptyNeigh = new Neighbourhood<SubsetSolution>() {
             @Override
-            public Move<? super SubsetSolution> getRandomMove(SubsetSolution solution) {
+            public Move<? super SubsetSolution> getRandomMove(SubsetSolution solution, Random rnd) {
                 return null;
             }
             @Override

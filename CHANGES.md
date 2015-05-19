@@ -4,9 +4,11 @@ JAMES Core Module Changes
 Version 1.0 (under development)
 -------------------------------
 
- - Support for custom global random generator used in all randomized components.
+ - Use dedicated customizable random generator per search.
  - Improved test coverage.
- - Minor bugfixes and improvements.
+ - Minor bug fixes and improvements.
+ - Cleaned up log messages.
+ - Moved SearchFactory interface from extensions to core module.
  - Moved to SLF4J API 1.7.12.
 
 Version 0.2 (12/11/2014)
@@ -23,7 +25,7 @@ Version 0.2 (12/11/2014)
  - Removed MinMaxObjective.
  - Removed EmptySearchListener, LocalSearchListener and EmptyLocalSearchListener. Default empty implementations of all callbacks are now directly provided in the SearchListener interface.
  - Various code simplifications and optimizations (e.g. using functional operations).
- - Minor bugfixes and improvements.
+ - Minor bug fixes and improvements.
  - Moved to SLF4J API 1.7.7.
  - Moved to Java 8.
 

@@ -16,6 +16,8 @@
 
 package org.jamesframework.core.problems;
 
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import org.jamesframework.core.exceptions.IncompatibleDeltaEvaluationException;
 import org.jamesframework.core.exceptions.IncompatibleDeltaValidationException;
 import org.jamesframework.core.problems.constraints.validations.Validation;
@@ -142,11 +144,23 @@ public interface Problem<SolutionType extends Solution> {
     public boolean isMinimizing();
     
     /**
-     * Creates a random solution. Such random solutions can for example be used as initial solution
-     * for neighbourhood searches.
+     * Creates a random solution using the given source of randomness. Such random solutions are for
+     * example be used as default initial solution in most neighbourhood searches.
+     * 
+     * @param rnd source of randomness used to generate a random solution
+     * @return a random solution
+     */
+    public SolutionType createRandomSolution(Random rnd);
+    
+    /**
+     * Creates a random solution, using a default source of randomness. The default implementation
+     * delegates to <code>createRandomSolution(ThreadLocalRandom.current())</code> where a thread
+     * local random generator is used to avoid overhead and contention for parallel calls.
      * 
      * @return a random solution
      */
-    public SolutionType createRandomSolution();
+    default public SolutionType createRandomSolution(){
+        return createRandomSolution(ThreadLocalRandom.current());
+    }
     
 }

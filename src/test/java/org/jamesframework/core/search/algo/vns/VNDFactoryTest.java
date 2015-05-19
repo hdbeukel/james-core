@@ -19,6 +19,7 @@ package org.jamesframework.core.search.algo.vns;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import org.jamesframework.core.problems.Problem;
 import org.jamesframework.core.problems.constraints.validations.Validation;
 import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
@@ -122,7 +123,7 @@ public class VNDFactoryTest {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
             @Override
-            public SubsetSolution createRandomSolution() {
+            public SubsetSolution createRandomSolution(Random rnd) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };

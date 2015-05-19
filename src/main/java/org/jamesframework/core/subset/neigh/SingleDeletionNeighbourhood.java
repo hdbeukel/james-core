@@ -19,11 +19,11 @@ package org.jamesframework.core.subset.neigh;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.subset.neigh.moves.DeletionMove;
-import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 
 /**
@@ -99,10 +99,11 @@ public class SingleDeletionNeighbourhood extends SubsetNeighbourhood {
      * If no deletion move can be generated, <code>null</code> is returned.
      * 
      * @param solution solution for which a random deletion move is generated
+     * @param rnd source of randomness used to generate random move
      * @return random deletion move, <code>null</code> if no move can be generated
      */
     @Override
-    public SubsetMove getRandomMove(SubsetSolution solution) {
+    public SubsetMove getRandomMove(SubsetSolution solution, Random rnd) {
         // check minimum size
         if(minSizeReached(solution)){
             return null;
@@ -114,7 +115,7 @@ public class SingleDeletionNeighbourhood extends SubsetNeighbourhood {
             return null;
         }
         // select random ID to remove from selection
-        int del = SetUtilities.getRandomElement(removeCandidates, Randomization.getRandom());
+        int del = SetUtilities.getRandomElement(removeCandidates, rnd);
         // create and return deletion move
         return new DeletionMove(del);
     }

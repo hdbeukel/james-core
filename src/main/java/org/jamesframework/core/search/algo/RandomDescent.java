@@ -71,7 +71,7 @@ public class RandomDescent<SolutionType extends Solution> extends SingleNeighbou
     @Override
     protected void searchStep() {
         // get random move
-        Move<? super SolutionType> move = getNeighbourhood().getRandomMove(getCurrentSolution());
+        Move<? super SolutionType> move = getNeighbourhood().getRandomMove(getCurrentSolution(), getRandom());
         // got move ?
         if(move != null){
             // accept if improvement

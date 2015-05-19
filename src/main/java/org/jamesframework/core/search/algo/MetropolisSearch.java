@@ -22,7 +22,6 @@ import org.jamesframework.core.problems.Solution;
 import org.jamesframework.core.search.SingleNeighbourhoodSearch;
 import org.jamesframework.core.search.neigh.Move;
 import org.jamesframework.core.search.neigh.Neighbourhood;
-import org.jamesframework.core.util.Randomization;
 
 /**
  * Metropolis search with fixed temperature. Iteratively samples a random neighbour and accepts it based on a
@@ -164,7 +163,7 @@ public class MetropolisSearch<SolutionType extends Solution> extends SingleNeigh
     @Override
     protected void searchStep() {
         // get random move
-        Move<? super SolutionType> move = getNeighbourhood().getRandomMove(getCurrentSolution());
+        Move<? super SolutionType> move = getNeighbourhood().getRandomMove(getCurrentSolution(), getRandom());
         // got move?
         if(move != null){
             // valid move?
@@ -176,7 +175,7 @@ public class MetropolisSearch<SolutionType extends Solution> extends SingleNeigh
                 } else {
                     // no improvement: accept with probability based on temperature and delta
                     double delta = computeDelta(evaluate(move), getCurrentSolutionEvaluation());
-                    double r = Randomization.getRandom().nextDouble();
+                    double r = getRandom().nextDouble();
                     if(Math.exp(delta/(scale*temperature)) > r){
                         // accept inferior move
                         accept(move);

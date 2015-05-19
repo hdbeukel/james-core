@@ -102,7 +102,7 @@ public class SingleSwapNeighbourhoodTest {
         sol.deselectAll(SetUtilities.getRandomSubset(sol.getSelectedIDs(), (int)(0.5*sol.getNumSelectedIDs()), RG));
         
         // generate, apply and undo 50 moves
-        Move<SubsetSolution> move;
+        Move<? super SubsetSolution> move;
         SubsetSolution copy;
         for(int i=0; i<50; i++){
             // generate move

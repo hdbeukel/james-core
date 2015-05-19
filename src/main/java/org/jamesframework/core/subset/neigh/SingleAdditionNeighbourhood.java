@@ -19,11 +19,11 @@ package org.jamesframework.core.subset.neigh;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.subset.neigh.moves.AdditionMove;
-import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 
 /**
@@ -98,10 +98,11 @@ public class SingleAdditionNeighbourhood extends SubsetNeighbourhood {
      * If no addition move can be generated, <code>null</code> is returned.
      * 
      * @param solution solution for which a random addition move is generated
+     * @param rnd source of randomness used to generate random move
      * @return random addition move, <code>null</code> if no move can be generated
      */
     @Override
-    public SubsetMove getRandomMove(SubsetSolution solution) {
+    public SubsetMove getRandomMove(SubsetSolution solution, Random rnd) {
         // check size limit
         if(maxSizeReached(solution)){
             // size limit would be exceeded
@@ -114,7 +115,7 @@ public class SingleAdditionNeighbourhood extends SubsetNeighbourhood {
             return null;
         }
         // select random ID to add to selection
-        int add = SetUtilities.getRandomElement(addCandidates, Randomization.getRandom());
+        int add = SetUtilities.getRandomElement(addCandidates, rnd);
         // create and return addition move
         return new AdditionMove(add);
     }

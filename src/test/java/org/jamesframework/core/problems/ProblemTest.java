@@ -18,6 +18,7 @@ package org.jamesframework.core.problems;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 import org.jamesframework.core.problems.constraints.validations.SimpleValidation;
 import org.jamesframework.core.problems.constraints.validations.Validation;
@@ -161,7 +162,7 @@ public class ProblemTest {
         }
 
         @Override
-        public SubsetSolution createRandomSolution() {
+        public SubsetSolution createRandomSolution(Random rnd) {
             return null;
         }
         

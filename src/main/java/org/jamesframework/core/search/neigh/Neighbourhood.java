@@ -17,6 +17,8 @@
 package org.jamesframework.core.search.neigh;
 
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import org.jamesframework.core.problems.Solution;
 
 /**
@@ -33,10 +35,24 @@ public interface Neighbourhood<SolutionType extends Solution> {
      * contain any neighbours for the given solution, <code>null</code> is returned.
      * 
      * @param solution solution to which the move is to be applied
+     * @param rnd source of randomness used to generate a random move
      * @return random move transforming the given solution into a random neighbour,
      *         <code>null</code> if the given solution does not have any neighbours
      */
-    public Move<? super SolutionType> getRandomMove(SolutionType solution);
+    public Move<? super SolutionType> getRandomMove(SolutionType solution, Random rnd);
+    
+    /**
+     * Generates a random move, using a default source of randomness. The default implementation
+     * delegates to <code>getRandomMove(solution, ThreadLocalRandom.current())</code> where a thread
+     * local random generator is used to avoid overhead and contention for parallel calls.
+     * 
+     * @param solution solution to which the move is to be applied
+     * @return random move transforming the given solution into a random neighbour,
+     *         <code>null</code> if the given solution does not have any neighbours
+     */
+    default public Move<? super SolutionType> getRandomMove(SolutionType solution){
+        return getRandomMove(solution, ThreadLocalRandom.current());
+    }
     
     /**
      * Get a list of all moves that can be applied to the given solution to transform

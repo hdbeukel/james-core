@@ -16,6 +16,7 @@
 
 package org.jamesframework.core.problems;
 
+import java.util.Random;
 import org.jamesframework.core.problems.constraints.Constraint;
 import org.jamesframework.core.problems.constraints.PenalizingConstraint;
 import org.jamesframework.core.problems.constraints.validations.SimpleValidation;
@@ -429,7 +430,7 @@ public class AbstractProblemTest {
          * @return null
          */
         @Override
-        public SolutionType createRandomSolution() {
+        public SolutionType createRandomSolution(Random rnd) {
             return null;
         }
 

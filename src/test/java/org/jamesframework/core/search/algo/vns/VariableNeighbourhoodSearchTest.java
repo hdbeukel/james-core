@@ -19,14 +19,13 @@ package org.jamesframework.core.search.algo.vns;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.jamesframework.core.problems.Solution;
 import org.jamesframework.core.problems.objectives.evaluations.PenalizedEvaluation;
+import org.jamesframework.core.search.LocalSearch;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.search.NeighbourhoodSearch;
 import org.jamesframework.core.search.Search;
 import org.jamesframework.core.search.SearchTestTemplate;
 import org.jamesframework.core.search.algo.RandomDescent;
-import org.jamesframework.core.search.algo.RandomSearch;
 import org.jamesframework.core.search.algo.SteepestDescent;
 import org.jamesframework.core.search.listeners.SearchListener;
 import org.jamesframework.core.search.neigh.Neighbourhood;
@@ -54,6 +53,15 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class VariableNeighbourhoodSearchTest extends SearchTestTemplate {
 
+    private static final List<Neighbourhood<SubsetSolution>> NEIGHS = new ArrayList<>();
+    
+    static {
+        // create list of neighbourhoods with 1 up to 5 swaps
+        for(int s=1; s<=5; s++){
+            NEIGHS.add(new DisjointMultiSwapNeighbourhood(s));
+        }
+    }
+    
     // repeat all tests with both default VND modification algorithm and a custom Random Descent modifier
     @Parameterized.Parameters
     public static List<Object[]> data(){
@@ -63,16 +71,28 @@ public class VariableNeighbourhoodSearchTest extends SearchTestTemplate {
         run1[0] = "VND (default)";
         run1[1] = null;
         params.add(run1);
-        // second run: custom random descent local search algorithm
+        // second run: VND with custom settings
         Object[] run2 = new Object[2];
-        run2[0] = "Random Descent (custom)";
+        run2[0] = "VND (custom)";
         run2[1] = (LocalSearchFactory<SubsetSolution>) (p) -> {
+            LocalSearch<SubsetSolution> vnd = new VariableNeighbourhoodDescent<>(p, NEIGHS.subList(0, 2));
+            long seed = RG.nextLong();
+            setSeed(vnd, seed);
+            return vnd;
+        };
+        params.add(run2);
+        // third run: custom random descent local search algorithm
+        Object[] run3 = new Object[2];
+        run3[0] = "Random Descent (custom)";
+        run3[1] = (LocalSearchFactory<SubsetSolution>) (p) -> {
             NeighbourhoodSearch<SubsetSolution> ls = new RandomDescent<>(p, new SingleSwapNeighbourhood());
             ls.addStopCriterion(new MaxRuntime(50, TimeUnit.MILLISECONDS));
             ls.setStopCriterionCheckPeriod(50, TimeUnit.MILLISECONDS);
+            long seed = RG.nextLong();
+            setSeed(ls, seed);
             return ls;
         };
-        params.add(run2);
+        params.add(run3);
         // return params
         return params;
     }
@@ -126,20 +146,15 @@ public class VariableNeighbourhoodSearchTest extends SearchTestTemplate {
     public void setUp(){
         // call super
         super.setUp();
-        // create list of neighbourhoods with 1 up to 5 swaps
-        List<Neighbourhood<SubsetSolution>> neighs = new ArrayList<>();
-        neighs.add(neigh);
-        for(int s=2; s<=5; s++){
-            neighs.add(new DisjointMultiSwapNeighbourhood(s));
-        }
         // create variable neighbourhood search
         if(modAlgoFactory == null){
             // default VND modifier using only the first 2 neighbourhoods
-            search = new VariableNeighbourhoodSearch<>(problem, neighs, neighs.subList(0, 2));
+            search = new VariableNeighbourhoodSearch<>(problem, NEIGHS, NEIGHS.subList(0, 2));
         } else {
             // custom modifier
-            search = new VariableNeighbourhoodSearch<>(problem, neighs, modAlgoFactory);
+            search = new VariableNeighbourhoodSearch<>(problem, NEIGHS, modAlgoFactory);
         }
+        setRandomSeed(search);
         // create and add listener
         listener = new Listener();
         search.addSearchListener(listener);

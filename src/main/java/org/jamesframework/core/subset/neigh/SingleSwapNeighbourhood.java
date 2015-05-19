@@ -24,7 +24,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jamesframework.core.subset.SubsetSolution;
-import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 
 /**
@@ -66,10 +65,11 @@ public class SingleSwapNeighbourhood extends SubsetNeighbourhood {
      * swapped. If no swap move can be generated, <code>null</code> is returned.
      * 
      * @param solution solution for which a random swap move is generated
+     * @param rnd source of randomness used to generate random move
      * @return random swap move, <code>null</code> if no swap move can be generated
      */
     @Override
-    public SubsetMove getRandomMove(SubsetSolution solution) {
+    public SubsetMove getRandomMove(SubsetSolution solution, Random rnd) {
         // get set of candidate IDs for removal and addition (possibly fixed IDs are discarded)
         Set<Integer> removeCandidates = getRemoveCandidates(solution);
         Set<Integer> addCandidates = getAddCandidates(solution);
@@ -78,12 +78,10 @@ public class SingleSwapNeighbourhood extends SubsetNeighbourhood {
             // impossible to perform a swap
             return null;
         }
-        // retrieve random generator
-        Random rg = Randomization.getRandom();
         // select random ID to remove from selection
-        int del = SetUtilities.getRandomElement(removeCandidates, rg);
+        int del = SetUtilities.getRandomElement(removeCandidates, rnd);
         // select random ID to add to selection
-        int add = SetUtilities.getRandomElement(addCandidates, rg);
+        int add = SetUtilities.getRandomElement(addCandidates, rnd);
         // create and return swap move
         return new SwapMove(add, del);
     }

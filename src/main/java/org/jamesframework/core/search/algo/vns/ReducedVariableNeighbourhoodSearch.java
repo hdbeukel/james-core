@@ -139,7 +139,7 @@ public class ReducedVariableNeighbourhoodSearch<SolutionType extends Solution> e
     @Override
     protected void searchStep() {
         // use k-th neighbourhood to get a random valid move
-        Move<? super SolutionType> move = getNeighbourhoods().get(k).getRandomMove(getCurrentSolution());
+        Move<? super SolutionType> move = getNeighbourhoods().get(k).getRandomMove(getCurrentSolution(), getRandom());
         // check: got move ?
         if(move != null){
             // check: improvement ?

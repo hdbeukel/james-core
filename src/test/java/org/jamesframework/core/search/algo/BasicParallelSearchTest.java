@@ -18,6 +18,7 @@ package org.jamesframework.core.search.algo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.jamesframework.core.exceptions.SearchException;
 import org.jamesframework.core.problems.Problem;
@@ -121,7 +122,7 @@ public class BasicParallelSearchTest extends SearchTestTemplate {
         // try to add a search that solves a different problem
         Problem<SubsetSolution> p = new AbstractProblem<SubsetSolution, ScoredFakeSubsetData>(obj, data) {
             @Override
-            public SubsetSolution createRandomSolution() {return null;}
+            public SubsetSolution createRandomSolution(Random rnd) {return null;}
         };
         parallelSearch.addSearch(new RandomSearch<>(p));
     }

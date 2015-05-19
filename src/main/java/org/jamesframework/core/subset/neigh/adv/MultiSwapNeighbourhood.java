@@ -25,7 +25,6 @@ import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.subset.neigh.SingleSwapNeighbourhood;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
 import org.jamesframework.core.subset.neigh.SubsetNeighbourhood;
-import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 import org.jamesframework.core.util.SubsetIterator;
 
@@ -135,10 +134,11 @@ public class MultiSwapNeighbourhood extends SubsetNeighbourhood {
      * </p>
      * 
      * @param solution solution for which a random multi swap move is generated
+     * @param rnd source of randomness used to generate random move
      * @return random multi swap move, <code>null</code> if no swaps can be performed
      */
     @Override
-    public SubsetMove getRandomMove(SubsetSolution solution) {
+    public SubsetMove getRandomMove(SubsetSolution solution, Random rnd) {
         // get set of candidate IDs for deletion and addition (fixed IDs are discarded)
         Set<Integer> removeCandidates = getRemoveCandidates(solution);
         Set<Integer> addCandidates = getAddCandidates(solution);
@@ -149,14 +149,12 @@ public class MultiSwapNeighbourhood extends SubsetNeighbourhood {
             // impossible to perform a swap
             return null;
         }
-        // retrieve random generator
-        Random rg = Randomization.getRandom();
         // pick number of swaps (in [1, curMaxSwaps])
-        int numSwaps = rg.nextInt(curMaxSwaps) + 1;
+        int numSwaps = rnd.nextInt(curMaxSwaps) + 1;
         // pick random IDs to remove from selection
-        Set<Integer> del = SetUtilities.getRandomSubset(removeCandidates, numSwaps, rg);
+        Set<Integer> del = SetUtilities.getRandomSubset(removeCandidates, numSwaps, rnd);
         // pick random IDs to add to selection
-        Set<Integer> add = SetUtilities.getRandomSubset(addCandidates, numSwaps, rg);
+        Set<Integer> add = SetUtilities.getRandomSubset(addCandidates, numSwaps, rnd);
         // create and return move
         return new GeneralSubsetMove(add, del);
     }

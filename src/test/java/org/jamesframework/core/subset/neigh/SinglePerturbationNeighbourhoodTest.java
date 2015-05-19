@@ -192,7 +192,7 @@ public class SinglePerturbationNeighbourhoodTest {
         neighs.add(neighFixedSize);
         neighs.add(neighVarSize);
         neighs.add(neighUnboundedSize);
-        Move<SubsetSolution> move;
+        Move<? super SubsetSolution> move;
         SubsetSolution copy;
         for(SinglePerturbationNeighbourhood neigh : neighs){
             for(int i=0; i<100; i++){

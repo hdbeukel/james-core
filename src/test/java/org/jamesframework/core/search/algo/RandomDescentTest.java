@@ -18,6 +18,7 @@ package org.jamesframework.core.search.algo;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.jamesframework.core.problems.objectives.evaluations.PenalizedEvaluation;
 import org.jamesframework.core.subset.SubsetSolution;
@@ -100,7 +101,7 @@ public class RandomDescentTest extends SearchTestTemplate {
         // create empty neighbourhood
         Neighbourhood<SubsetSolution> emptyNeigh = new Neighbourhood<SubsetSolution>() {
             @Override
-            public Move<? super SubsetSolution> getRandomMove(SubsetSolution solution) {
+            public Move<? super SubsetSolution> getRandomMove(SubsetSolution solution, Random rnd) {
                 return null;
             }
             @Override

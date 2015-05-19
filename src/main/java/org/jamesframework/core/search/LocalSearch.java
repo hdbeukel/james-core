@@ -99,7 +99,7 @@ public abstract class LocalSearch<SolutionType extends Solution> extends Search<
         if(curSolution != null){
             throw new SearchException("Cannot set random initial solution in local search: current solution is already set.");
         }
-        updateCurrentAndBestSolution(getProblem().createRandomSolution());
+        updateCurrentAndBestSolution(getProblem().createRandomSolution(getRandom()));
     }
     
     /***********************************************************************/

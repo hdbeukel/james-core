@@ -184,7 +184,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         neighSearch.searchStarted();
         
         // accept 2 out of 3 moves, 30 total moves --> 20/10
-        Move<SubsetSolution> m;
+        Move<? super SubsetSolution> m;
         for(int i=0; i<30; i++){
             m = neigh.getRandomMove(neighSearch.getCurrentSolution());
             if(i%3 == 0){
@@ -221,7 +221,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         neighSearch.searchStarted();
         
         // accept 2 out of 3 moves, 30 total moves --> 20/10
-        Move<SubsetSolution> m;
+        Move<? super SubsetSolution> m;
         for(int i=0; i<30; i++){
             m = neigh.getRandomMove(neighSearch.getCurrentSolution());
             if(i%3 == 0){
@@ -465,7 +465,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         // copy initial solution
         SubsetSolution copy = Solution.checkedCopy(neighSearch.getCurrentSolution());
         Evaluation copyEval;
-        Move<SubsetSolution> m;
+        Move<? super SubsetSolution> m;
         for(int i=0; i<1000; i++){
             // generate random move
             m = neigh.getRandomMove(neighSearch.getCurrentSolution());
@@ -501,7 +501,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         // copy initial solution
         SubsetSolution copy = Solution.checkedCopy(neighSearch.getCurrentSolution());
         Evaluation copyEval;
-        Move<SubsetSolution> m;
+        Move<? super SubsetSolution> m;
         for(int i=0; i<100; i++){
             // generate random move
             m = neigh.getRandomMove(neighSearch.getCurrentSolution());

@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import org.jamesframework.core.subset.neigh.moves.GeneralSubsetMove;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.subset.neigh.SingleDeletionNeighbourhood;
 import org.jamesframework.core.subset.neigh.moves.SubsetMove;
 import org.jamesframework.core.subset.neigh.SubsetNeighbourhood;
-import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.SetUtilities;
 import org.jamesframework.core.util.SubsetIterator;
 
@@ -141,10 +141,11 @@ public class DisjointMultiDeletionNeighbourhood extends SubsetNeighbourhood {
      * fewer deletions (as many as possible). If no items can be removed, <code>null</code> is returned.
      * 
      * @param solution solution for which a random multi deletion move is generated
+     * @param rnd source of randomness used to generate random move
      * @return random multi deletion move, <code>null</code> if no items can be removed
      */
     @Override
-    public SubsetMove getRandomMove(SubsetSolution solution) {
+    public SubsetMove getRandomMove(SubsetSolution solution, Random rnd) {
         // get set of candidate IDs for deletion (fixed IDs are discarded)
         Set<Integer> delCandidates = getRemoveCandidates(solution);
         // compute number of deletions
@@ -154,7 +155,7 @@ public class DisjointMultiDeletionNeighbourhood extends SubsetNeighbourhood {
             return null;
         }
         // pick random IDs to remove from selection
-        Set<Integer> del = SetUtilities.getRandomSubset(delCandidates, curNumDel, Randomization.getRandom());
+        Set<Integer> del = SetUtilities.getRandomSubset(delCandidates, curNumDel, rnd);
         // create and return move
         return new GeneralSubsetMove(Collections.emptySet(), del);
     }

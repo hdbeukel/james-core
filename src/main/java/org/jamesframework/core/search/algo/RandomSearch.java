@@ -59,7 +59,7 @@ public class RandomSearch<SolutionType extends Solution> extends Search<Solution
     @Override
     protected void searchStep() {
         // sample random solution
-        SolutionType sol = getProblem().createRandomSolution();
+        SolutionType sol = getProblem().createRandomSolution(getRandom());
         // check if new best solution found
         updateBestSolution(sol);
     }

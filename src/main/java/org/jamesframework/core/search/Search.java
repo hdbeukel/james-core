@@ -21,6 +21,7 @@ import org.jamesframework.core.search.status.SearchStatus;
 import org.jamesframework.core.search.listeners.SearchListener;
 import org.jamesframework.core.search.stopcriteria.StopCriterion;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.jamesframework.core.exceptions.IncompatibleStopCriterionException;
@@ -125,6 +126,9 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
     // search status
     private SearchStatus status;
     
+    // dedicated random generator
+    private Random rnd;
+    
     /************************/
     /* PRIVATE FINAL FIELDS */
     /************************/
@@ -194,6 +198,8 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
         searchListeners = new ArrayList<>();
         // create dedicated stop criterion checker
         stopCriterionChecker = new StopCriterionChecker(this);
+        // create dedicated random generator
+        rnd = new Random();
         // set initial status to idle
         status = SearchStatus.IDLE;
         // initially, best solution and its evaluation/validation are null
@@ -223,6 +229,10 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
         return nextID++;
     }
     
+    /***********/
+    /* PROBLEM */
+    /***********/
+    
     /**
      * Get the problem being solved, as specified at construction.
      * 
@@ -230,6 +240,30 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
      */
     public Problem<SolutionType> getProblem(){
         return problem;
+    }
+    
+    /********************/
+    /* RANDOM GENERATOR */
+    /********************/
+    
+    /**
+     * Get the dedicated random generator used by this search. A custom random
+     * generator can be set using {@link #setRandom(Random)}. The search should
+     * pass this source of randomness to all applied randomized components.
+     * 
+     * @return dedicated random generator
+     */
+    public Random getRandom(){
+        return rnd;
+    }
+    
+    /**
+     * Set custom random generator.
+     * 
+     * @param rnd new dedicated random generator
+     */
+    public void setRandom(Random rnd){
+        this.rnd = rnd;
     }
     
     /***************************/
@@ -276,8 +310,8 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
      * {@link #getBestSolution()} and its corresponding evaluation with {@link #getBestSolutionEvaluation()}.
      * </p>
      * <p>
-     * Note that a search can only be (re)started when it is idle (see {@link #getStatus()}). If attempted to start
-     * a search which is already running (or terminating), an exception will be thrown.
+     * Note that a search can only be (re)started when it is idle (see {@link #getStatus()}). When attempting to start
+     * a search which is already running, terminating or disposed, an exception will be thrown.
      * </p>
      * <p>
      * Before the search is actually started, some initialization may take place. This initialization can also include
@@ -292,14 +326,14 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
      */
     public void start(){
         
-        logger.trace("Search {} started", this);
+        logger.info("Search {} started", this);
         
         // acquire status lock
         synchronized(statusLock) {
             // verify that search is idle
             assertIdle("Cannot start search.");
             // log
-            logger.trace("Search {} changed status: {} --> {}", this, status, SearchStatus.INITIALIZING);
+            logger.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.INITIALIZING);
             // set status to INITIALIZING
             status = SearchStatus.INITIALIZING;
             // fire status update
@@ -322,7 +356,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // initialization finished: update status
             synchronized(statusLock){
                 // log
-                logger.trace("Search {} changed status: {} --> {}", this, status, SearchStatus.RUNNING);
+                logger.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.RUNNING);
                 // update
                 status = SearchStatus.RUNNING;
                 // fire status update
@@ -363,12 +397,12 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
         // fire callback
         fireSearchStopped();
 
-        logger.trace("Search {} stopped (runtime: {} ms)", this, getRuntime());
+        logger.info("Search {} stopped (runtime: {} ms, steps: {})", this, getRuntime(), getSteps());
         
         // search run is complete: update status
         synchronized(statusLock){
             // log
-            logger.trace("Search {} changed status: {} --> {}", this, status, SearchStatus.IDLE);
+            logger.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.IDLE);
             // update
             status = SearchStatus.IDLE;
             // fire status update
@@ -395,7 +429,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // check current status
             if(status == SearchStatus.INITIALIZING || status == SearchStatus.RUNNING){
                 // log
-                logger.trace("Search {} changed status: {} --> {}", this, status, SearchStatus.TERMINATING);
+                logger.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.TERMINATING);
                 // update status
                 status = SearchStatus.TERMINATING;
                 // fire status update
@@ -424,7 +458,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // all good, handle disposed
             searchDisposed();
             // log
-            logger.trace("Search {} changed status: {} --> {}", this, status, SearchStatus.DISPOSED);
+            logger.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.DISPOSED);
             // update status
             status = SearchStatus.DISPOSED;
             // fire status update
@@ -468,7 +502,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // pass stop criterion to checker
             stopCriterionChecker.add(stopCriterion);
             // log
-            logger.info("{}: added stop criterion {}", this, stopCriterion);
+            logger.debug("{}: added stop criterion {}", this, stopCriterion);
         }
     }
     
@@ -488,7 +522,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // remove from checker
             if (stopCriterionChecker.remove(stopCriterion)){
                 // log
-                logger.info("{}: removed stop criterion {}", this, stopCriterion);
+                logger.debug("{}: removed stop criterion {}", this, stopCriterion);
                 return true;
             } else {
                 return false;
@@ -517,7 +551,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // pass new settings to checker
             stopCriterionChecker.setPeriod(period, timeUnit);
             // log
-            logger.info("{}: set stop criterion check period to {} ms", this, timeUnit.toMillis(period));
+            logger.debug("{}: set stop criterion check period to {} ms", this, timeUnit.toMillis(period));
         }
     }
     
@@ -536,7 +570,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // add listener
             searchListeners.add(listener);
             // log
-            logger.info("{}: added search listener {}", this, listener);
+            logger.debug("{}: added search listener {}", this, listener);
         }
     }
     
@@ -556,7 +590,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // remove listener
             if (searchListeners.remove(listener)){
                 // log
-                logger.info("{}: removed search listener {}", this, listener);
+                logger.debug("{}: removed search listener {}", this, listener);
                 return true;
             } else {
                 return false;
@@ -798,8 +832,6 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
                 bestSolution = Solution.checkedCopy(newSolution);
                 bestSolutionEvaluation = newSolutionEvaluation;
                 bestSolutionValidation = newSolutionValidation;
-                // log
-                logger.debug("{}: new best solution: {}", this, bestSolutionEvaluation);
                 // fire callback
                 fireNewBestSolution(bestSolution, bestSolutionEvaluation, bestSolutionValidation);
                 // found improvement

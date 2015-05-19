@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import org.jamesframework.core.subset.SubsetSolution;
-import org.jamesframework.core.util.Randomization;
 import org.jamesframework.core.util.RouletteSelector;
 import org.jamesframework.core.util.SetUtilities;
 
@@ -137,12 +136,11 @@ public class SinglePerturbationNeighbourhood extends SubsetNeighbourhood {
      * </p>
      * 
      * @param solution solution for which a random move is generated
+     * @param rnd source of randomness used to generate random move
      * @return random move, <code>null</code> if no valid move can be generated
      */
     @Override
-    public SubsetMove getRandomMove(SubsetSolution solution) {
-        // retrieve random generator
-        Random rg = Randomization.getRandom();
+    public SubsetMove getRandomMove(SubsetSolution solution, Random rnd) {
         // get set of candidate IDs for deletion and addition (fixed IDs are discarded)
         Set<Integer> removeCandidates = getRemoveCandidates(solution);
         Set<Integer> addCandidates = getAddCandidates(solution);
@@ -154,7 +152,7 @@ public class SinglePerturbationNeighbourhood extends SubsetNeighbourhood {
         MoveType selectedMoveType = RouletteSelector.select(
                                         Arrays.asList(MoveType.ADDITION, MoveType.DELETION, MoveType.SWAP),
                                         Arrays.asList((double) numAdd, (double) numDel, (double) numSwap),
-                                        rg
+                                        rnd
                                     );
         // in case of no valid moves: return null
         if(selectedMoveType == null){
@@ -162,11 +160,11 @@ public class SinglePerturbationNeighbourhood extends SubsetNeighbourhood {
         } else {
             // generate random move of chosen type
             switch(selectedMoveType){
-                case ADDITION : return new AdditionMove(SetUtilities.getRandomElement(addCandidates, rg));
-                case DELETION : return new DeletionMove(SetUtilities.getRandomElement(removeCandidates, rg));
+                case ADDITION : return new AdditionMove(SetUtilities.getRandomElement(addCandidates, rnd));
+                case DELETION : return new DeletionMove(SetUtilities.getRandomElement(removeCandidates, rnd));
                 case SWAP     : return new SwapMove(
-                                                    SetUtilities.getRandomElement(addCandidates, rg),
-                                                    SetUtilities.getRandomElement(removeCandidates, rg)
+                                                    SetUtilities.getRandomElement(addCandidates, rnd),
+                                                    SetUtilities.getRandomElement(removeCandidates, rnd)
                                                 );
                 default : throw new Error("This should never happen. If this exception is thrown, "
                                             + "there is a serious bug in SinglePerturbationNeighbourhood.");

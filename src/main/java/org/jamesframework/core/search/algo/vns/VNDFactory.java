@@ -19,7 +19,6 @@ package org.jamesframework.core.search.algo.vns;
 import java.util.List;
 import org.jamesframework.core.problems.Problem;
 import org.jamesframework.core.problems.Solution;
-import org.jamesframework.core.search.NeighbourhoodSearch;
 import org.jamesframework.core.search.neigh.Neighbourhood;
 import org.jamesframework.core.util.LocalSearchFactory;
 

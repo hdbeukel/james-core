@@ -37,7 +37,6 @@ import org.jamesframework.core.search.SingleNeighbourhoodSearch;
 import org.jamesframework.core.search.listeners.SearchListener;
 import org.jamesframework.core.search.neigh.Neighbourhood;
 import org.jamesframework.core.search.stopcriteria.MaxSteps;
-import org.jamesframework.core.util.Randomization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -335,20 +334,20 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
     protected void searchStep() {
         // submit replicas for execution in thread pool
         replicas.forEach(r -> futures.add(pool.submit(r)));
-        logger.trace("{}: started {} Metropolis replicas", this, futures.size());
+        logger.debug("{}: started {} Metropolis replicas", this, futures.size());
         // wait for completion of all replicas and remove corresponding future
-        logger.trace("{}: waiting for replicas to finish", this);
+        logger.debug("{}: waiting for replicas to finish", this);
         while(!futures.isEmpty()){
             // remove next future from queue and wait until it has completed
             try{
                 futures.poll().get();
-                logger.trace("{}: {}/{} replicas finished", this, replicas.size()-futures.size(), replicas.size());
+                logger.debug("{}: {}/{} replicas finished", this, replicas.size()-futures.size(), replicas.size());
             } catch (InterruptedException | ExecutionException ex){
                 throw new SearchException("An error occured during concurrent execution of Metropolis replicas "
                                             + "in the parallel tempering algorithm.", ex);
             }
         }
-        logger.trace("{}: swapping solutions", this);
+        logger.debug("{}: swapping solutions between neighbouring replicas", this);
         // consider swapping solutions of adjacent replicas
         for(int i=swapBase; i<replicas.size()-1; i+=2){
             MetropolisSearch<SolutionType> r1 = replicas.get(i);
@@ -372,7 +371,7 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
                                                 + "ordered by temperature (ascending).");
                 }
                 // generate random number
-                double r = Randomization.getRandom().nextDouble();
+                double r = getRandom().nextDouble();
                 // swap with probability p
                 if(r < p){
                     swap = true;
