@@ -27,7 +27,7 @@ import org.jamesframework.core.search.MultiNeighbourhoodSearch;
 import org.jamesframework.core.search.status.SearchStatus;
 import org.jamesframework.core.search.neigh.Move;
 import org.jamesframework.core.search.neigh.Neighbourhood;
-import org.jamesframework.core.util.LocalSearchFactory;
+import org.jamesframework.core.factory.LocalSearchFactory;
 
 /**
  * <p>
@@ -93,36 +93,39 @@ public class VariableNeighbourhoodSearch<SolutionType extends Solution> extends 
     
     /**
      * Creates a new variable neighbourhood search, specifying the problem to solve, the neighbourhoods used for shaking
-     * and the neighbourhoods used by the default VND local search algorithm. None of the arguments can be <code>null</code>
-     * and the lists of neighbourhoods can not be empty and can not contain any <code>null</code> elements. The search name
-     * defaults to "VariableNeighbourhoodSearch".
+     * and the neighbourhoods used by the default variable neighbourhood descent algorithm applied after shaking. None of the
+     * arguments can be <code>null</code> and the lists of neighbourhoods can not be empty and can not contain any
+     * <code>null</code> elements. Violating these requirements will either throw an exception here, or during search.
+     * The search name defaults to "VariableNeighbourhoodSearch".
      * 
-     * @throws NullPointerException if <code>problem</code>, <code>shakingNeighs</code> or <code>vndNeighs</code> are <code>null</code>,
-     *                              or if <code>shakingNeighs</code> or <code>vndNeighs</code> contain any <code>null</code> elements
-     * @throws IllegalArgumentException if <code>shakingNeighs</code> or <code>vndNeighs</code> are empty
+     * @throws NullPointerException if <code>problem</code> or <code>shakingNeighs</code> are <code>null</code>,
+     *                              or if <code>shakingNeighs</code> contain any <code>null</code> elements
+     * @throws IllegalArgumentException if <code>shakingNeighs</code> is empty
      * @param problem problem to solve
-     * @param shakingNeighs list of shaking neighbourhoods used by VNS
-     * @param vndNeighs list of neighbourhoods applied by VND, which is used as the default local search algorithm
+     * @param shakingNeighs list of shaking neighbourhoods used by the variable neighbourhood search
+     * @param vndNeighs list of neighbourhoods used by the default variable neighbourhood
+     *                  descent algorithm (applied after each shaking operation)
      */
     public VariableNeighbourhoodSearch(Problem<SolutionType> problem, List<? extends Neighbourhood<? super SolutionType>> shakingNeighs,
                                                                       List<? extends Neighbourhood<? super SolutionType>> vndNeighs){
-        this(problem, shakingNeighs, new VNDFactory<>(vndNeighs));
+        this(problem, shakingNeighs, p -> new VariableNeighbourhoodDescent<>(p, vndNeighs));
     }
     
     /**
      * Creates a new variable neighbourhood search, specifying the problem to solve, the neighbourhoods used for
-     * shaking in VNS, and a factory to create instances of a custom local search algorithm \(L\) to be applied to
-     * modify solutions obtained after shaking. None of the arguments can be <code>null</code>, and the list of shaking
-     * neighbourhoods can not be empty and can not contain any <code>null</code> elements. The search name defaults to
-     * "VariableNeighbourhoodSearch".
+     * shaking, and a factory to create instances of a custom local search algorithm \(L\) to be applied after
+     * shaking. None of the arguments can be <code>null</code>, and the list of shaking neighbourhoods can not
+     * be empty and can not contain any <code>null</code> elements.
+     * The search name defaults to "VariableNeighbourhoodSearch".
      * 
      * @throws NullPointerException if <code>problem</code>, <code>shakingNeighs</code> or
      *                              <code>localSearchFactory</code> are <code>null</code>, or if
      *                              <code>shakingNeighs</code> contains any <code>null</code> elements
      * @throws IllegalArgumentException if <code>shakingNeighs</code> is empty
      * @param problem problem to solve
-     * @param shakingNeighs list of shaking neighbourhoods used by VNS
+     * @param shakingNeighs list of shaking neighbourhoods used by the variable neighbourhood search
      * @param localSearchFactory factory to create instances of the local search algorithm \(L\)
+     *                           applied after each shaking operation
      */
     public VariableNeighbourhoodSearch(Problem<SolutionType> problem, List<? extends Neighbourhood<? super SolutionType>> shakingNeighs,
                                                 LocalSearchFactory<SolutionType> localSearchFactory){

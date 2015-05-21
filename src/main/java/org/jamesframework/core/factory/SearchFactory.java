@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.jamesframework.core.util;
+package org.jamesframework.core.factory;
 
 import org.jamesframework.core.problems.Problem;
 import org.jamesframework.core.problems.Solution;
 import org.jamesframework.core.search.Search;
 
 /**
- * Interface of a search factory used to create a search given the problem to be solved.
+ * Factory used to create a search given the problem to be solved.
  * 
  * @param <SolutionType> solution type of created searches, required to extend {@link Solution}
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
