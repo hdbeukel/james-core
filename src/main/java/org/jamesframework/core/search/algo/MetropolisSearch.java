@@ -24,16 +24,16 @@ import org.jamesframework.core.search.neigh.Move;
 import org.jamesframework.core.search.neigh.Neighbourhood;
 
 /**
- * Metropolis search with fixed temperature. Iteratively samples a random neighbour and accepts it based on a
- * criterion that depends on the difference in evaluation (\(\Delta E\)) and the temperature of the system (\(T\)).
- * When a valid neighbour is obtained with \(\Delta E &gt; 0\), which indicates improvement, it is always accepted
+ * Metropolis search (fixed temperature). Iteratively samples a random neighbour and accepts it based on a criterion
+ * that depends on both the improvement in evaluation (\(\Delta E\)) and the temperature of the system (\(T\)).
+ * When a valid neighbour is obtained with \(\Delta E \ge 0\), which indicates improvement, it is always accepted
  * as the new current solution. Else, it is accepted with
  * probability
  * \[
- *      e^{\frac{\Delta E}{kT}}
+ *      e^{\frac{\Delta E}{T}}
  * \]
- * where \(k\) is a constant temperature scale factor (by default, \(k = 1\)). The probability of acceptance
- * increases when the temperature \(T\) is higher or when (the negative) \(\Delta E\) is closer to zero.
+ * The probability of acceptance increases when the temperature \(T\) is higher or when (the negative) \(\Delta E\)
+ * is closer to zero.
  * <p>
  * Note that it is important to carefully choose the temperature, depending on the scale of the evaluations
  * and expected deltas, as well as the landscape of the objective function. Setting a high temperature decreases
@@ -52,8 +52,6 @@ public class MetropolisSearch<SolutionType extends Solution> extends SingleNeigh
 
     // temperature
     private double temperature;
-    // temperature scale factor
-    private double scale;
     
     /**
      * Creates a new Metropolis search, specifying the problem to solve, the applied neighbourhood and the temperature.
@@ -95,8 +93,6 @@ public class MetropolisSearch<SolutionType extends Solution> extends SingleNeigh
         }
         // set temperature
         this.temperature = temperature;
-        // set default temperature scale factor (= 1.0)
-        scale = 1.0;
     }
     
     /**
@@ -122,41 +118,16 @@ public class MetropolisSearch<SolutionType extends Solution> extends SingleNeigh
     public double getTemperature(){
         return temperature;
     }
-    
-    /**
-     * Set the temperature scale factor \(k &gt; 0\). All temperatures are multiplied with this factor.
-     * By default, the scale factor is set to 1.
-     * 
-     * @param scale temperature scale factor
-     * @throws IllegalArgumentException if <code>scale</code> is not strictly positive
-     */
-    public void setTemperatureScaleFactor(double scale){
-        // check scale
-        if(scale <= 0.0){
-            throw new IllegalArgumentException("Temperature scale factor of Metropolis search should be strictly positive.");
-        }
-        // update temperature scale factor
-        this.scale = scale;
-    }
-    
-    /**
-     * Get the temperature scale factor \(k\).
-     * 
-     * @return temperature scale factor
-     */
-    public double getTemperatureScaleFactor(){
-        return scale;
-    }
 
     /**
      * Creates a random neighbour of the current solution and accepts it as the new current solution
-     * if it is valid and either improves over the current solution or
+     * if it is valid and either improves the current solution or
      * \[
-     *      e^{\frac{\Delta E}{kT}} &gt; R(0,1)
+     *      e^{\frac{\Delta E}{T}} &gt; R(0,1)
      * \]
      * where \(\Delta E\) is the difference between the evaluation of the neighbour and that of the
-     * current solution, \(T\) is the temperature, \(k\) is a constant scale factor, and \(R(0,1)\)
-     * is a random number sampled from a uniform distribution in the interval \([0,1]\).
+     * current solution, \(T\) is the temperature, and \(R(0,1)\) is a random number in the interval
+     * \([0,1]\) sampled using the search's dedicated random generator.
      * 
      * @throws JamesRuntimeException if depending on malfunctioning components (problem, neighbourhood, ...)
      */
@@ -176,7 +147,7 @@ public class MetropolisSearch<SolutionType extends Solution> extends SingleNeigh
                     // no improvement: accept with probability based on temperature and delta
                     double delta = computeDelta(evaluate(move), getCurrentSolutionEvaluation());
                     double r = getRandom().nextDouble();
-                    if(Math.exp(delta/(scale*temperature)) > r){
+                    if(Math.exp(delta/temperature) > r){
                         // accept inferior move
                         accept(move);
                     } else {

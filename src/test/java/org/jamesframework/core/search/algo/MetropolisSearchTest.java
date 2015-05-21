@@ -155,33 +155,6 @@ public class MetropolisSearchTest extends SearchTestTemplate {
         
     }
     
-    @Test
-    public void testSetTemperatureScaleFactor(){
-        System.out.println(" - test setTemperatureScaleFactor");
-        
-        boolean thrown;
-        
-        thrown = false;
-        try {
-            searchLowTemp.setTemperatureScaleFactor(0.0);
-        } catch (IllegalArgumentException ex){
-            thrown = true;
-        }
-        assertTrue(thrown);
-        
-        thrown = false;
-        try {
-            searchLowTemp.setTemperatureScaleFactor(-1.0);
-        } catch (IllegalArgumentException ex){
-            thrown = true;
-        }
-        assertTrue(thrown);
-        
-        searchLowTemp.setTemperatureScaleFactor(123.456);
-        assertEquals(123.456, searchLowTemp.getTemperatureScaleFactor(), TestConstants.DOUBLE_COMPARISON_PRECISION);
-        
-    }
-    
     /**
      * Test single run.
      */

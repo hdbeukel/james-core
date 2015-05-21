@@ -66,10 +66,8 @@ public class ParallelTemperingTest extends SearchTestTemplate {
     private final int numReplicas = 10;
     
     // minium and maximum temperatures
-    private final double MIN_TEMP = 50.0;
-    private final double MAX_TEMP = 200.0;
-    // scale factor
-    private final double scale = 1e-6;
+    private final double MIN_TEMP = 50.0  * 1e-6;
+    private final double MAX_TEMP = 200.0 * 1e-6;
     
     // maximum runtime
     private final long SINGLE_RUN_RUNTIME = 1000;
@@ -113,10 +111,6 @@ public class ParallelTemperingTest extends SearchTestTemplate {
                 setSeed(search.getReplicas().get(i), seeds[i+1]);
             }
         }
-        // set temperature scale
-        search.setTemperatureScaleFactor(scale);
-        // verify
-        search.getReplicas().forEach(r -> assertEquals(scale, r.getTemperatureScaleFactor(), TestConstants.DOUBLE_COMPARISON_PRECISION));
     }
     
     @After

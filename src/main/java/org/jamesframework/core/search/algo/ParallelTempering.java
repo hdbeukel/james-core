@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>
- * Parallel tempering algorithm which uses several Metropolis search replicas with different
+ * The parallel tempering algorithm uses several Metropolis search replicas with different
  * temperatures in a given range, where good solutions are pushed towards cool replicas for
  * the sake of convergence, while bad solutions are pushed towards hot replicas in an attempt
  * to find further improvements. Each step of parallel tempering consists of the following
@@ -55,16 +55,14 @@ import org.slf4j.LoggerFactory;
  *  </li>
  *  <li>
  *      Solutions of adjacent replica (ordered by temperature) are considered to be swapped.
- *      Solutions of replicas \(R_1\) and \(R_2\) with temperatures \(T_1\) and \(T_2\) (\(T_1 &lt; T_2\))
+ *      Solutions of replicas \(R_1\) and \(R_2\) with temperatures \(T_1\) and \(T_2\) (\(T_1 \lt T_2\))
  *      and current solution evaluation \(E_1\) and \(E_2\), respectively, are always swapped if
- *      \(\Delta E \ge 0\), where \(\Delta E = computeDelta(E_2,E_1)\)
+ *      \(\Delta E \ge 0\), where \(\Delta E\) is defined as the improvement of \(E_1\) over \(E_2\)
  *      (see {@link #computeDelta(Evaluation, Evaluation)}).
- *      If \(\Delta E &lt; 0\), solutions are swapped with probability
+ *      If \(\Delta E \lt 0\), solutions are swapped with probability
  *      \[
- *          e^{(\frac{1}{k_1T_1}-\frac{1}{k_2T_2})\Delta E},
+ *          e^{(\frac{1}{T_1}-\frac{1}{T_2})\Delta E}.
  *      \]
- *      where \(k_1\) and \(k_2\) are the temperature scale factors of replica \(R_1\) and \(R_2\),
- *      respectively (scale factors default to 1, see {@link MetropolisSearch}).
  *  </li>
  * </ol>
  * <p>
@@ -89,13 +87,14 @@ import org.slf4j.LoggerFactory;
  * When creating the parallel tempering algorithm, the number of replicas and a minimum and maximum
  * temperature have to be specified. Temperatures assigned to the replicas are unique and equally
  * spaced in the desired interval. The number of replica steps defaults to 500 but it is strongly
- * advised to fine tune this parameter for a specific problem, e.g. in case of a computationally
+ * advised to fine tune this parameter for specific problems, e.g. in case of a computationally
  * expensive objective function, a lower number of steps may be more appropriate.
  * </p>
  * <p>
  * Note that every replica runs in a separate thread so that they will be executed in parallel on
- * multi core machines. Therefore, it is important that the problem (including all of its components
- * such as the objective, constraints, etc.) and neighbourhood specified at construction are thread-safe.
+ * multi-core processors or multi-processor machines. Therefore, it is important that the problem
+ * (including all of its components such as the objective, constraints, etc.) and neighbourhood
+ * specified at construction are thread-safe.
  * </p>
  * 
  * @param <SolutionType> solution type of the problems that may be solved using this search,
@@ -265,22 +264,7 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
     public List<MetropolisSearch<SolutionType>> getReplicas(){
         return replicas;
     }
-    
-    /**
-     * Set the same temperature scale factor \(k &gt; 0\) for each replica. Temperatures are multiplied
-     * with this factor in all computations. By default, the scale factor is set to 1 for every replica,
-     * see {@link MetropolisSearch}. This method should be used with care when called while the search
-     * is running, as the scale factor update is not guaranteed to happen atomically for all replicas
-     * and this might break the execution of the parallel tempering algorithm.
-     * 
-     * @param scale temperature scale factor to be set for each replica
-     * @throws IllegalArgumentException if <code>scale</code> is not strictly positive
-     */
-    public void setTemperatureScaleFactor(double scale){
-        // update scale factor in every replica
-        replicas.forEach(r -> r.setTemperatureScaleFactor(scale));
-    }
-    
+
     /**
      * Set the same neighbourhood for each replica. Note that <code>neighbourhood</code> can not
      * be <code>null</code> and that this method may only be called when the search is idle.
@@ -321,12 +305,10 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
     }
     
     /**
-     * Perform a search step, in which every replica performs several steps and solutions
-     * of adjacent replicas may be swapped.
+     * In each search step, every replica performs several steps after which solutions of adjacent
+     * replicas may be swapped.
      * 
-     * @throws SearchException if an error occurs during concurrent execution of the Metropolis
-     *                         replicas, or if it is detected that replicas are not correctly
-     *                         ordered by temperature (ascending)
+     * @throws SearchException if an error occurs during concurrent execution of the Metropolis replicas
      * @throws JamesRuntimeException if depending on malfunctioning components (problem,
      *                               neighbourhood, replicas, ...)
      */
@@ -355,8 +337,8 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
             // compute delta
             double delta = computeDelta(r2.getCurrentSolutionEvaluation(), r1.getCurrentSolutionEvaluation());
             // compute factor based on difference in temperature
-            double b1 = 1.0 / (r1.getTemperatureScaleFactor() * r1.getTemperature());
-            double b2 = 1.0 / (r2.getTemperatureScaleFactor() * r2.getTemperature());
+            double b1 = 1.0 / (r1.getTemperature());
+            double b2 = 1.0 / (r2.getTemperature());
             double diffb = b1 - b2;
             // double check if replicas are correctly ordered by temperature (ascending)
             if(diffb <= 0){
