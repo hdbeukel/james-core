@@ -156,12 +156,17 @@ public class ParallelTemperingTest extends SearchTestTemplate {
     }
 
     /**
-     * Test exceptions trown from constructor.
+     * Test constructors.
      */
     @Test
-    public void testConstructorExceptions(){
+    public void testConstructors(){
         
-        System.out.println(" - test constructor exceptions");
+        System.out.println(" - test constructors");
+        
+        // test basic constructor without custom Metropolis factory
+        search = new ParallelTempering<>(problem, neigh, numReplicas, MIN_TEMP, MAX_TEMP);
+        
+        // test exceptions
         
         boolean thrown;
         
@@ -193,6 +198,14 @@ public class ParallelTemperingTest extends SearchTestTemplate {
         try{
             search = new ParallelTempering<>(problem, neigh, numReplicas, MAX_TEMP, MIN_TEMP);
         } catch(IllegalArgumentException ex){
+            thrown = true;
+        }
+        assertTrue(thrown);
+        
+        thrown = false;
+        try{
+            search = new ParallelTempering<>(problem, neigh, numReplicas, MIN_TEMP, MAX_TEMP, null);
+        } catch(NullPointerException ex){
             thrown = true;
         }
         assertTrue(thrown);

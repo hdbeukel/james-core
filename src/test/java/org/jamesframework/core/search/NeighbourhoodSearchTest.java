@@ -34,6 +34,7 @@ import org.jamesframework.core.search.stopcriteria.MaxSteps;
 import org.jamesframework.core.subset.neigh.SingleDeletionNeighbourhood;
 import org.jamesframework.core.subset.neigh.moves.AdditionMove;
 import org.jamesframework.core.subset.neigh.moves.DeletionMove;
+import org.jamesframework.core.subset.neigh.moves.GeneralSubsetMove;
 import org.jamesframework.core.subset.neigh.moves.SwapMove;
 import org.jamesframework.core.util.JamesConstants;
 import org.jamesframework.core.util.SetUtilities;
@@ -483,6 +484,10 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
                     neighSearch.getBestSolutionEvaluation().getValue(), copyEval.getValue(), TestConstants.DOUBLE_COMPARISON_PRECISION));
         }
         
+        // try to accept an invalid move
+        m = new GeneralSubsetMove(Collections.emptySet(), neighSearch.getCurrentSolution().getSelectedIDs());
+        assertFalse(neighSearch.accept(m));
+                
     }
     
     /**

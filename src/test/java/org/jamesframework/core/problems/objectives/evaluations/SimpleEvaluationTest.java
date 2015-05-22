@@ -46,6 +46,19 @@ public class SimpleEvaluationTest {
     }
 
     /**
+     * Test of WITH_VALUE method, of class SimpleEvaluation.
+     */
+    @Test
+    public void testWithValue() {
+        
+        System.out.println(" - test WITH_VALUE");
+        
+        SimpleEvaluation e = SimpleEvaluation.WITH_VALUE(987.654);
+        assertEquals(987.654, e.getValue(), TestConstants.DOUBLE_COMPARISON_PRECISION);
+        
+    }
+    
+    /**
      * Test of getValue method, of class SimpleEvaluation.
      */
     @Test
