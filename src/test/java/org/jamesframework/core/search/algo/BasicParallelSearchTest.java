@@ -95,9 +95,13 @@ public class BasicParallelSearchTest extends SearchTestTemplate {
         subsearches.add(new MetropolisSearch<>(problem, neigh, 0.001));     // Metropolis search
         subsearches.add(new ExhaustiveSearch<>(problem,
                 new SubsetSolutionIterator(data.getIDs(), SUBSET_SIZE)));   // exhaustive search
-        ParallelTempering<SubsetSolution> pt = new ParallelTempering<>(problem, neigh, 5, 0.00001, 10.0);
-        // set and log random seed for replicas
-        pt.getReplicas().forEach(r -> setRandomSeed(r));
+        ParallelTempering<SubsetSolution> pt;
+        pt = new ParallelTempering<>(problem, neigh, 5, 0.00001, 10.0, (p, n, t) -> {
+            MetropolisSearch<SubsetSolution> ms = new MetropolisSearch<>(p, n, t);
+            // set and log random seed
+            setRandomSeed(ms);
+            return ms;
+        });
         subsearches.add(pt);                                                // parallel tempering (parallel inside parallel)
         // set and log random seed for all added searches
         subsearches.forEach(s -> setRandomSeed(s));

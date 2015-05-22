@@ -16,12 +16,16 @@
 
 package org.jamesframework.core.search.algo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.jamesframework.core.exceptions.SearchException;
+import org.jamesframework.core.factory.MetropolisSearchFactory;
+import org.jamesframework.core.problems.Problem;
 import org.jamesframework.core.problems.objectives.evaluations.PenalizedEvaluation;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.search.SearchTestTemplate;
+import static org.jamesframework.core.search.SearchTestTemplate.setRandomSeed;
 import org.jamesframework.core.search.neigh.Neighbourhood;
 import org.jamesframework.core.search.status.SearchStatus;
 import org.jamesframework.core.subset.neigh.SingleSwapNeighbourhood;
@@ -61,6 +65,7 @@ public class ParallelTemperingTest extends SearchTestTemplate {
     
     // parallel tempering search
     private ParallelTempering<SubsetSolution> search;
+    private List<MetropolisSearch<SubsetSolution>> replicas;
     
     // number of replicas
     private final int numReplicas = 10;
@@ -99,17 +104,41 @@ public class ParallelTemperingTest extends SearchTestTemplate {
     public void setUp(){
         // call super
         super.setUp();
+        // set Metropolis search factory (random or custom seeds)
+        // --> both store the created replicas externally
+        replicas = new ArrayList<>();
+        MetropolisSearchFactory<SubsetSolution> msf;
+        if(seeds == null){
+            msf = (p, n, t) -> {
+                MetropolisSearch<SubsetSolution> ms = new MetropolisSearch<>(p, n, t);
+                setRandomSeed(ms);
+                replicas.add(ms);
+                return ms;
+            };
+        } else {
+            msf = new MetropolisSearchFactory<SubsetSolution>() {
+
+                private int i = 1;
+                
+                @Override
+                public MetropolisSearch<SubsetSolution> create(Problem<SubsetSolution> p,
+                                                               Neighbourhood<? super SubsetSolution> n,
+                                                               double t) {
+                    MetropolisSearch<SubsetSolution> ms = new MetropolisSearch<>(p, n, t);
+                    setSeed(ms, seeds[i++]);
+                    replicas.add(ms);
+                    return ms;
+                }
+                
+            };
+        }
         // create parallel tempering search
-        search = new ParallelTempering<>(problem, neigh, numReplicas, MIN_TEMP, MAX_TEMP);
-        // set and log seeds for replicas and main search
+        search = new ParallelTempering<>(problem, neigh, numReplicas, MIN_TEMP, MAX_TEMP, msf);
+        // set and log seed for main search
         if(seeds == null){
             setRandomSeed(search);
-            search.getReplicas().forEach(r -> setRandomSeed(r));
         } else {
             setSeed(search, seeds[0]);
-            for (int i = 0; i < 10; i++) {
-                setSeed(search.getReplicas().get(i), seeds[i+1]);
-            }
         }
     }
     
@@ -198,31 +227,6 @@ public class ParallelTemperingTest extends SearchTestTemplate {
     }
     
     @Test
-    public void testGetReplicas(){
-        System.out.println(" - test get replicas");
-        
-        List<MetropolisSearch<SubsetSolution>> reps = search.getReplicas();
-        
-        assertEquals(numReplicas, reps.size());
-        
-        reps.forEach(rep -> {
-            assertEquals(problem, rep.getProblem());
-            assertEquals(neigh, rep.getNeighbourhood());
-            assertTrue(rep.getTemperature() >= MIN_TEMP && rep.getTemperature() <= MAX_TEMP);
-        });
-        
-        // check unmodifiable
-        boolean thrown = false;
-        try {
-            reps.clear();
-        } catch (UnsupportedOperationException ex){
-            thrown = true;
-        }
-        assertTrue(thrown);
-        
-    }
-    
-    @Test
     public void testSetNeighbourhood(){
         System.out.println(" - test set neighbourhood");
         
@@ -231,7 +235,7 @@ public class ParallelTemperingTest extends SearchTestTemplate {
         search.setNeighbourhood(newNeigh);
         assertEquals(newNeigh, search.getNeighbourhood());
         
-        search.getReplicas().forEach(rep -> {
+        replicas.forEach(rep -> {
             assertEquals(newNeigh, rep.getNeighbourhood());
         });
     }
@@ -244,8 +248,8 @@ public class ParallelTemperingTest extends SearchTestTemplate {
         
         search.setCurrentSolution(sol);
         assertEquals(sol, search.getCurrentSolution());
-        
-        search.getReplicas().forEach(rep -> {
+                
+        replicas.forEach(rep -> {
             assertNotSame(sol, rep.getCurrentSolution());
             assertEquals(sol, rep.getCurrentSolution());
         });
@@ -263,25 +267,6 @@ public class ParallelTemperingTest extends SearchTestTemplate {
         boolean thrown = false;
         try{
             search.setReplicaSteps(1000000000); // keep those replicas busy!
-            search.start();
-        } catch(SearchException ex){
-            thrown = true;
-        }
-        assertTrue(thrown);
-    }
-    
-    @Test
-    public void testCorruptReplicas(){
-        System.out.println(" - test corrupt replicas");
-        
-        List<MetropolisSearch<SubsetSolution>> reps = search.getReplicas();
-        // whoops! break order of temperatures
-        double temp = reps.get(0).getTemperature();
-        reps.get(0).setTemperature(reps.get(1).getTemperature());
-        reps.get(1).setTemperature(temp);
-        
-        boolean thrown = false;
-        try{
             search.start();
         } catch(SearchException ex){
             thrown = true;

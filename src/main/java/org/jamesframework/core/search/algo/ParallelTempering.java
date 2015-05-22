@@ -17,7 +17,6 @@
 package org.jamesframework.core.search.algo;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -27,6 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.jamesframework.core.exceptions.JamesRuntimeException;
 import org.jamesframework.core.exceptions.SearchException;
+import org.jamesframework.core.factory.MetropolisSearchFactory;
 import org.jamesframework.core.problems.Problem;
 import org.jamesframework.core.problems.Solution;
 import org.jamesframework.core.problems.constraints.validations.Validation;
@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  *      Solutions of adjacent replica (ordered by temperature) are considered to be swapped.
  *      Solutions of replicas \(R_1\) and \(R_2\) with temperatures \(T_1\) and \(T_2\) (\(T_1 \lt T_2\))
  *      and current solution evaluation \(E_1\) and \(E_2\), respectively, are always swapped if
- *      \(\Delta E \ge 0\), where \(\Delta E\) is defined as the improvement of \(E_1\) over \(E_2\)
+ *      \(\Delta E \ge 0\), where \(\Delta E\) is defined as the improvement of \(E_2\) over \(E_1\)
  *      (see {@link #computeDelta(Evaluation, Evaluation)}).
  *      If \(\Delta E \lt 0\), solutions are swapped with probability
  *      \[
@@ -66,10 +66,13 @@ import org.slf4j.LoggerFactory;
  *  </li>
  * </ol>
  * <p>
- * All replicas use the same neighbourhood which is specified when creating the parallel tempering
- * search. If an initial solution is set, a copy of this solution is set as initial solution in each
- * replica. Else, each replica starts with a distinct randomly generated solution. If desired, a
- * separate initial solution can be set for each replica through {@link #getReplicas()}.
+ * All replicas use the same neighbourhood, which is specified when creating the parallel tempering
+ * search. By default, each replica starts from an independently generated random solution. A custom
+ * initial solution can be set by calling {@link #setCurrentSolution(Solution)} on the parallel tempering
+ * algorithm before starting the search; in this case, a copy of this solution is set as initial solution
+ * in each replica. Note that this cancels the built-in multi-start of the parallel tempering algorithm.
+ * Setting an independent custom initial solution in each replica can be achieved by providing a custom
+ * Metropolis search factory at construction.
  * </p>
  * <p>
  * The overall best solution found by all replicas is tracked and eventually returned by the parallel
@@ -106,11 +109,11 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
     // logger
     private static final Logger logger = LoggerFactory.getLogger(ParallelTempering.class);
     
-    // Metropolis replicas (unmodifiable list)
+    // Metropolis replicas
     private final List<MetropolisSearch<SolutionType>> replicas;
     
     // number of steps performed by each replica
-    private int replicaSteps;
+    private long replicaSteps;
     
     // thread pool for replica execution and corresponding queue of futures of submitted tasks
     private final ExecutorService pool;
@@ -143,23 +146,73 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
      * @param problem problem to solve
      * @param neighbourhood neighbourhood used inside Metropolis search replicas
      * @param numReplicas number of Metropolis replicas
-     * @param minTemperature minimum temperature of Metropolis replica
-     * @param maxTemperature maximum temperature of Metropolis replica
+     * @param minTemperature minimum temperature of Metropolis replicas
+     * @param maxTemperature maximum temperature of Metropolis replicas
      */
     public ParallelTempering(Problem<SolutionType> problem, Neighbourhood<? super SolutionType> neighbourhood,
                                 int numReplicas, double minTemperature, double maxTemperature){
-        this(null, problem, neighbourhood, numReplicas, minTemperature, maxTemperature);
+        this(problem, neighbourhood, numReplicas,
+                minTemperature, maxTemperature,
+                (p, n, t) -> new MetropolisSearch<>(p, n, t));
     }
     
     /**
      * <p>
      * Creates a new parallel tempering algorithm, specifying the problem to solve,
      * the neighbourhood used in each replica, the number of replicas, the minimum
-     * and maximum temperature, and a custom search name. The problem and neighbourhood
-     * can not be <code>null</code>, the number of replicas and both temperature bounds
-     * should be strictly positive, and the minimum temperature should be smaller than the
-     * maximum temperature. The search name can be <code>null</code> in which case the default
-     * name "ParallelTempering" is assigned.
+     * and maximum temperature, and a custom Metropolis search factory. The Metropolis
+     * search factory can be used to customize the replicas, e.g. to set a custom initial
+     * solution per replica. The factory should always respect the contract as defined in
+     * the interface {@link MetropolisSearchFactory}. Else, the algorithm may not function
+     * correctly and exceptions might be thrown during search.
+     * </p>
+     * <p>
+     * The problem, neighbourhood and Metropolis factory can not be <code>null</code>,
+     * the number of replicas and both temperature bounds should be strictly positive,
+     * and the minimum temperature should be smaller than the maximum temperature.
+     * </p>
+     * <p>
+     * Note that it is important that the given problem (including all of its components such
+     * as the objective, constraints, etc.) and neighbourhood are thread-safe, because they
+     * will be accessed concurrently from several Metropolis searches running in separate threads.
+     * </p>
+     * 
+     * @throws NullPointerException if <code>problem</code> or <code>neighbourhood</code> are
+     *                              <code>null</code>
+     * @throws IllegalArgumentException if <code>numReplicas</code>, <code>minTemperature</code>
+     *                                  or <code>maxTemperature</code> are not strictly positive,
+     *                                  or if <code>minTemperature &ge; maxTemperature</code>
+     * @param problem problem to solve
+     * @param neighbourhood neighbourhood used inside Metropolis search replicas
+     * @param numReplicas number of Metropolis replicas
+     * @param minTemperature minimum temperature of Metropolis replicas
+     * @param maxTemperature maximum temperature of Metropolis replicas
+     * @param metropolisFactory custom factory used to create Metropolis searches
+     */
+    public ParallelTempering(Problem<SolutionType> problem,
+                             Neighbourhood<? super SolutionType> neighbourhood,
+                             int numReplicas, double minTemperature, double maxTemperature,
+                             MetropolisSearchFactory<SolutionType> metropolisFactory){
+        this(null, problem, neighbourhood, numReplicas, minTemperature, maxTemperature, metropolisFactory);
+    }
+    
+    /**
+     * <p>
+     * Creates a new parallel tempering algorithm, specifying the problem to solve,
+     * the neighbourhood used in each replica, the number of replicas, the minimum
+     * and maximum temperature, a custom search name, and a custom Metropolis search
+     * factory. The Metropolis search factory can be used to customize the replicas,
+     * e.g. to set a custom initial solution per replica. The factory should always
+     * respect the contract as defined in the interface {@link MetropolisSearchFactory}.
+     * Else, the algorithm may not function correctly and exceptions might be thrown
+     * during search.
+     * </p>
+     * <p>
+     * The problem, neighbourhood and Metropolis factory can not be <code>null</code>,
+     * the number of replicas and both temperature bounds should be strictly positive,
+     * and the minimum temperature should be smaller than the maximum temperature. The
+     * search name can be <code>null</code> in which case the default name "ParallelTempering"
+     * is assigned.
      * </p>
      * <p>
      * Note that it is important that the given problem (including all of its components such
@@ -176,13 +229,15 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
      * @param problem problem to solve
      * @param neighbourhood neighbourhood used inside Metropolis search replicas
      * @param numReplicas number of Metropolis replicas
-     * @param minTemperature minimum temperature of Metropolis replica
-     * @param maxTemperature maximum temperature of Metropolis replica
+     * @param minTemperature minimum temperature of Metropolis replicas
+     * @param maxTemperature maximum temperature of Metropolis replicas
+     * @param metropolisFactory custom factory used to create Metropolis searches
      */
     public ParallelTempering(String name,
                              Problem<SolutionType> problem,
                              Neighbourhood<? super SolutionType> neighbourhood,
-                             int numReplicas, double minTemperature, double maxTemperature){
+                             int numReplicas, double minTemperature, double maxTemperature,
+                             MetropolisSearchFactory<SolutionType> metropolisFactory){
         super(name != null ? name : "ParallelTempering", problem, neighbourhood);
         // check number of replicas
         if(numReplicas <= 0){
@@ -203,14 +258,17 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
                                                 + "minimum temperature should be smaller than "
                                                 + "maximum temperature.");
         }
+        if(metropolisFactory == null){
+            throw new NullPointerException("Error while creating parallel tempering algorithm: "
+                                                + "metropolis search factory cannot be null.");
+        }
         // create replicas
-        List<MetropolisSearch<SolutionType>> mReplicas = new ArrayList<>();
+        replicas = new ArrayList<>();
         for(int i=0; i<numReplicas; i++){
             double temperature = minTemperature + i*(maxTemperature - minTemperature)/(numReplicas - 1);
-            mReplicas.add(new MetropolisSearch<>(problem, neighbourhood, temperature));
+            MetropolisSearch<SolutionType> ms = metropolisFactory.create(problem, neighbourhood, temperature);
+            replicas.add(ms);
         }
-        // make list of replicas unmodifiable
-        replicas = Collections.unmodifiableList(mReplicas);
         // set default replica steps
         replicaSteps = 500;
         // create thread pool
@@ -221,7 +279,7 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
         swapBase = 0;
         // listen to events fired by replicas
         ReplicaListener listener = new ReplicaListener();
-        mReplicas.forEach(r -> r.addSearchListener(listener));
+        replicas.forEach(r -> r.addSearchListener(listener));
     }
     
     /**
@@ -232,7 +290,7 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
      * @throws IllegalArgumentException if <code>steps</code> is not strictly positive
      * @param steps number of steps performed by replicas in each iteration
      */
-    public void setReplicaSteps(int steps){
+    public void setReplicaSteps(long steps){
         // check number of steps
         if(steps <= 0){
             throw new IllegalArgumentException("Number of replica steps in parallel tempering "
@@ -245,26 +303,14 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
     /**
      * Get the number of steps performed by each replica in every iteration of the global parallel
      * tempering algorithm, before considering solution swaps. Defaults to 500 and can be changed
-     * using {@link #setReplicaSteps(int)}.
+     * using {@link #setReplicaSteps(long)}.
      * 
      * @return number of steps performed by replicas in each iteration
      */
-    public int getReplicaSteps(){
+    public long getReplicaSteps(){
         return replicaSteps;
     }
     
-    /**
-     * Get (unmodifiable) list of Metropolis replicas used by this parallel tempering algorithm.
-     * Replicas are ordered by temperature (ascending). This method should be used with care; in
-     * particular the temperatures (and respective scales) should not be altered as this will
-     * likely break the execution of the parallel tempering search.
-     * 
-     * @return Metropolis replicas (unmodifiable list view)
-     */
-    public List<MetropolisSearch<SolutionType>> getReplicas(){
-        return replicas;
-    }
-
     /**
      * Set the same neighbourhood for each replica. Note that <code>neighbourhood</code> can not
      * be <code>null</code> and that this method may only be called when the search is idle.
@@ -285,8 +331,8 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
     }
     
     /**
-     * Set a custom current solution, of which a copy is passed to each replica. Note that
-     * <code>solution</code> can not be <code>null</code> and that this method may only be
+     * Set a custom current solution, of which a copy is set as the current solution in each replica.
+     * Note that <code>solution</code> can not be <code>null</code> and that this method may only be
      * called when the search is idle.
      * 
      * @param solution current solution to be set for each replica
@@ -336,21 +382,16 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
             MetropolisSearch<SolutionType> r2 = replicas.get(i+1);
             // compute delta
             double delta = computeDelta(r2.getCurrentSolutionEvaluation(), r1.getCurrentSolutionEvaluation());
-            // compute factor based on difference in temperature
-            double b1 = 1.0 / (r1.getTemperature());
-            double b2 = 1.0 / (r2.getTemperature());
-            double diffb = b1 - b2;
-            // double check if replicas are correctly ordered by temperature (ascending)
-            if(diffb <= 0){
-                throw new SearchException("Error in parallel tempering algorithm: replicas are not correctly "
-                                            + "ordered by temperature (ascending).");
-            }
             // check if solutions should be swapped
             boolean swap = false;
             if(delta >= 0){
                 // always swap
                 swap = true;
             } else {
+                // compute factor based on difference in temperature
+                double b1 = 1.0 / (r1.getTemperature());
+                double b2 = 1.0 / (r2.getTemperature());
+                double diffb = b1 - b2;
                 // randomized swap (with probability p)
                 double p = Math.exp(diffb * delta);
                 // generate random number
@@ -417,8 +458,8 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
         /**
          * Whenever a replica has completed a step it is verified whether the desired number of steps have been
          * performed and, if so, the replica is stopped. This approach is favoured here over attaching a generic
-         * maximum steps stop criterion (see {@link MaxSteps}) to each replica because of its finer granularity,
-         * i.e. because the number of performed steps is checked after every single step.
+         * maximum steps stop criterion (see {@link MaxSteps}) to each replica because it involves less overhead
+         * (the stop criterion checker is never activated).
          * 
          * @param replica Metropolis replica that completed a search step
          * @param numSteps number of steps completed so far
