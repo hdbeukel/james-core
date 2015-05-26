@@ -23,9 +23,12 @@ import org.jamesframework.core.exceptions.SearchException;
 import org.jamesframework.core.factory.MetropolisSearchFactory;
 import org.jamesframework.core.problems.Problem;
 import org.jamesframework.core.problems.objectives.evaluations.PenalizedEvaluation;
+import org.jamesframework.core.search.NeighbourhoodSearch;
+import org.jamesframework.core.search.Search;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.search.SearchTestTemplate;
 import static org.jamesframework.core.search.SearchTestTemplate.setRandomSeed;
+import org.jamesframework.core.search.listeners.SearchListener;
 import org.jamesframework.core.search.neigh.Neighbourhood;
 import org.jamesframework.core.search.status.SearchStatus;
 import org.jamesframework.core.subset.neigh.SingleSwapNeighbourhood;
@@ -298,6 +301,26 @@ public class ParallelTemperingTest extends SearchTestTemplate {
     }
     
     /**
+     * Test number of accepted/rejected moves.
+     */
+    @Test
+    public void testNumAcceptedAndRejectedMoves() {
+        System.out.println(" - test number of accepted/rejected moves");
+        // attach separate listener to each replica to count number of accepted/rejected moves
+        List<AcceptedRejectedMovesListener> listeners = new ArrayList<>();
+        replicas.forEach(r -> {
+            AcceptedRejectedMovesListener l = new AcceptedRejectedMovesListener();
+            listeners.add(l);
+            r.addSearchListener(l);
+        });
+        // single run
+        singleRunWithMaxRuntime(search, SINGLE_RUN_RUNTIME, MAX_RUNTIME_TIME_UNIT);
+        // verify
+        assertEquals(listeners.stream().mapToLong(l -> l.getAccepted()).sum(), search.getNumAcceptedMoves());
+        assertEquals(listeners.stream().mapToLong(l -> l.getRejected()).sum(), search.getNumRejectedMoves());
+    }
+    
+    /**
      * Test single run with unsatisfiable constraint.
      */
     @Test
@@ -396,6 +419,27 @@ public class ParallelTemperingTest extends SearchTestTemplate {
             System.out.println("   >>> constraint not satisfied, penalty "
                     + constraint.validate(search.getBestSolution(), data).getPenalty());
         }
+    }
+    
+    private class AcceptedRejectedMovesListener implements SearchListener<SubsetSolution>{
+        
+        private long accepted = 0, rejected = 0;
+        
+        @Override
+        public void searchStopped(Search<? extends SubsetSolution> search){
+            NeighbourhoodSearch<?> nsearch = (NeighbourhoodSearch<?>) search;
+            accepted += nsearch.getNumAcceptedMoves();
+            rejected += nsearch.getNumRejectedMoves();
+        }
+
+        public long getAccepted() {
+            return accepted;
+        }
+
+        public long getRejected() {
+            return rejected;
+        }
+        
     }
     
 }

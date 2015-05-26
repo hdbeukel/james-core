@@ -481,7 +481,7 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
         @Override
         public synchronized void searchStopped(Search<? extends SolutionType> replica) {
             // cast to neighbourhood search (should never fail, callback is only fired by Metropolis searches)
-            NeighbourhoodSearch nreplica = (NeighbourhoodSearch) replica;
+            NeighbourhoodSearch<?> nreplica = (NeighbourhoodSearch<?>) replica;
             // update number of accepted moves
             incNumAcceptedMoves(nreplica.getNumAcceptedMoves());
             // update number of rejected moves
