@@ -96,8 +96,13 @@ public class StopCriterionChecker {
      * Add a stop criterion to check.
      *
      * @param stopCriterion stop criterion to add
+     * @throws IncompatibleStopCriterionException if the given stop criterion is not compatible with the search
+     *                                            to which this checker belongs
      */
     public void add(StopCriterion stopCriterion) {
+        // check compatibility through a fake call (throws error if incompatible)
+        stopCriterion.searchShouldStop(search);
+        // add to list
         stopCriteria.add(stopCriterion);
     }
 
@@ -167,68 +172,39 @@ public class StopCriterionChecker {
     }
     
     /**
-     * Force the checker to check all stop criteria now.
+     * Check whether at least one stop criterion is satisfied.
+     * 
+     * @return <code>true</code> if a stop condition is satisfied
      */
-    public void checkNow(){
-        // synchronize with attempts to update the running task
-        synchronized(runningTaskLock){
-            if(runningTask != null){
-                runningTask.check();
-            }
+    public boolean stopCriterionSatisfied(){
+        int i = 0;
+        while (i < stopCriteria.size() && !stopCriteria.get(i).searchShouldStop(search)) {
+            i++;
         }
+        return i < stopCriteria.size();
     }
 
     /**
      * Runnable submitted to scheduler for checking the stop criteria.
      */
     private class StopCriterionCheckTask implements Runnable {
-
-        // only warn once (per run) in case of incompatible stop criterion
-        private boolean warned = false;
         
         /**
-         * Performs the check when being scheduled on the timer thread.
+         * Check stop criteria.
          */
         @Override
         public void run() {
-            // check stop criteria
-            check();
-        }
-        
-        /**
-         * Check the stop criteria.
-         */
-        public void check(){
-            // log
-            logger.debug("Checking stop criteria for search {}", search);
-            
-            boolean stopSearch = false;
-            int i = 0;
-            // check every stop criterion, until one is found to be satisfied or all have been checked
-            while (!stopSearch && i < stopCriteria.size()) {
-                try {
-                    stopSearch = stopCriteria.get(i).searchShouldStop(search);
-                } catch (IncompatibleStopCriterionException ex){
-                    // incompatible stop criterion; usually should not happen as search verifies compatibility when adding stop criteria
-                    if(!warned){
-                        // issue a single warning (per run, i.e. once during the lifetime of this specific check task)
-                        logger.warn("Stop criterion checker for " + search + " contains an incompatible stop criterion", ex);
-                        warned = true;
-                    }
-                }
-                i++;
-            }            
             
             // if a stop criterion is satisfied, the search is requested to stop, but ONLY IF this task
             // is still running: it might have been cancelled during its current run, in which case no
             // actions should be taken anymore (stopping the search could be dangerous because a next
             // search run might have been initiated in the meantime)
             
-            // synchronize on running task updates to ensure that this task
-            // is not cancelled while executing the following code block
-            synchronized(runningTaskLock){
-                if (runningTask == this) {
-                    if(stopSearch){
+            if(stopCriterionSatisfied()){
+                // synchronize on running task updates to ensure that this task
+                // is not cancelled while executing the following code block
+                synchronized(runningTaskLock){
+                    if (runningTask == this) {
                         // stop checking
                         stopChecking();
                         // log
@@ -236,19 +212,17 @@ public class StopCriterionChecker {
                         // stop the search
                         search.stop();
                     } else {
-                        // log
-                        logger.debug("Search {} may continue", search);
-                    }
-                } else {
-                    if(logger.isDebugEnabled()){
-                        // log
-                        logger.debug("Aborting cancelled stop criterion check task @{} for search {} (currently scheduled task: @{})",
-                                            Integer.toHexString(this.hashCode()),
-                                            search,
-                                            Integer.toHexString(runningTask.hashCode()));
+                        if(logger.isDebugEnabled()){
+                            // log
+                            logger.debug("Aborting cancelled stop criterion check task @{} for search {} (currently scheduled task: @{})",
+                                                Integer.toHexString(this.hashCode()),
+                                                search,
+                                                Integer.toHexString(runningTask.hashCode()));
+                        }
                     }
                 }
             }
+            
         }
 
     }

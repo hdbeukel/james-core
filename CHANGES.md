@@ -5,6 +5,7 @@ Version 1.0 (under development)
 -------------------------------
 
  - Use dedicated customizable random generator per search.
+ - Reduced overhead of checking stop criteria.
  - Improved test coverage.
  - Minor bug fixes and improvements.
  - Cleaned up log messages.
