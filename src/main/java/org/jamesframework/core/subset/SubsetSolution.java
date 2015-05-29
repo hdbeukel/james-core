@@ -338,7 +338,7 @@ public class SubsetSolution extends Solution {
     /**
      * Returns an unmodifiable view of the set of currently selected IDs.  Any attempt to
      * modify the returned set will result in an {@link UnsupportedOperationException}. If
-     * the IDs are orderd (see {@link #getOrderOfIDs()}), it is safe to cast the returned
+     * the IDs are ordered (see {@link #getOrderOfIDs()}), it is safe to cast the returned
      * view to the {@link NavigableSet} subtype.
      * 
      * @return unmodifiable view of currently selected IDs
@@ -350,7 +350,7 @@ public class SubsetSolution extends Solution {
     /**
      * Returns an unmodifiable view of the set of currently non selected IDs. Any attempt to
      * modify the returned set will result in an {@link UnsupportedOperationException}. If
-     * the IDs are orderd (see {@link #getOrderOfIDs()}), it is safe to cast the returned
+     * the IDs are ordered (see {@link #getOrderOfIDs()}), it is safe to cast the returned
      * view to the {@link NavigableSet} subtype.
      * 
      * @return unmodifiable view of currently non selected IDs
@@ -361,7 +361,7 @@ public class SubsetSolution extends Solution {
     
     /**
      * Returns an unmodifiable view of the set of all IDs. Any attempt to modify the returned
-     * set will result in an {@link UnsupportedOperationException}. If the IDs are orderd (see
+     * set will result in an {@link UnsupportedOperationException}. If the IDs are ordered (see
      * {@link #getOrderOfIDs()}), it is safe to cast the returned view to the {@link NavigableSet}
      * subtype. This set will always be equal to the union of {@link #getSelectedIDs()} and
      * {@link #getUnselectedIDs()}.
