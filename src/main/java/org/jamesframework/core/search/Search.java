@@ -325,9 +325,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
      *                               execution or finalization
      */
     public void start(){
-        
-        logger.info("Search {} started", this);
-        
+                
         // acquire status lock
         synchronized(statusLock) {
             // verify that search is idle
@@ -339,6 +337,8 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // fire status update
             fireStatusChanged(status);
         }
+        
+        logger.info("Search {} started", this);
         
         // fire callback
         fireSearchStarted();
@@ -383,7 +383,9 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
                 // fire callback
                 fireStepCompleted(currentSteps);
                 // check stop criteria
-                stopCriterionChecker.checkNow();
+                if(stopCriterionChecker.stopCriterionSatisfied()){
+                    stop();
+                }
             }
         
             // instruct stop criterion checker to stop checking
@@ -497,9 +499,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
         synchronized(statusLock){
             // assert idle
             assertIdle("Cannot add stop criterion.");
-            // check compatibility by performing a dummy call (throws error if incompatible)
-            stopCriterion.searchShouldStop(this);
-            // pass stop criterion to checker
+            // pass stop criterion to checker (throws error if incompatible)
             stopCriterionChecker.add(stopCriterion);
             // log
             logger.debug("{}: added stop criterion {}", this, stopCriterion);
