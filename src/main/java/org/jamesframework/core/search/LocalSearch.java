@@ -114,10 +114,11 @@ public abstract class LocalSearch<SolutionType extends Solution> extends Search<
     private void fireNewCurrentSolution(SolutionType newCurrentSolution,
                                         Evaluation newCurrentSolutionEvaluation,
                                         Validation newCurrentSolutionValidation){
-        fireListenerCallback(l -> l.newCurrentSolution(this,
-                                                       newCurrentSolution,
-                                                       newCurrentSolutionEvaluation,
-                                                       newCurrentSolutionValidation));
+        for(SearchListener<? super SolutionType> l : getSearchListeners()){
+            l.newCurrentSolution(this, newCurrentSolution,
+                                       newCurrentSolutionEvaluation,
+                                       newCurrentSolutionValidation);
+        }
     }
     
     /******************************************/
