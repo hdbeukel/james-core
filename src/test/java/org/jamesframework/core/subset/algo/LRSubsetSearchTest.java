@@ -47,8 +47,8 @@ public class LRSubsetSearchTest extends SearchTestTemplate {
     private final int DEFAULT_R = 1;
     
     // maximum runtime
-    private final long SINGLE_RUN_RUNTIME = 100;
-    private final long MULTI_RUN_RUNTIME = 30;
+    private final long SINGLE_RUN_RUNTIME = Long.MAX_VALUE;
+    private final long MULTI_RUN_RUNTIME = Long.MAX_VALUE;
     private final TimeUnit MAX_RUNTIME_TIME_UNIT = TimeUnit.MILLISECONDS;
     
     // number of runs in multi run tests
@@ -158,8 +158,8 @@ public class LRSubsetSearchTest extends SearchTestTemplate {
         System.out.println(" - test single run, decreasing (L=1, R=2)");
         // create LR search with L=1 and R=2
         search = new LRSubsetSearch(problem, 1, 2);
-        // single run (increase runtime because we are going from all 500 to a selection of 20 items)
-        singleRunWithMaxRuntime(search, 50*SINGLE_RUN_RUNTIME, MAX_RUNTIME_TIME_UNIT);
+        // single run
+        singleRunWithMaxRuntime(search, SINGLE_RUN_RUNTIME, MAX_RUNTIME_TIME_UNIT);
     }
     
     /**

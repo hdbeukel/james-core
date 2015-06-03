@@ -40,7 +40,8 @@ import org.jamesframework.core.subset.neigh.SubsetNeighbourhood;
  * selected. Alternatively, a custom initial solution can be set by calling {@link #setCurrentSolution(Solution)}
  * before starting the search.
  * <p>
- * The search terminates as soon as the entire valid subset size range has been explored.
+ * The search terminates as soon as the entire valid subset size range has been explored or when there are no
+ * valid additions/removals.
  * 
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
@@ -200,20 +201,24 @@ public class LRSubsetSearch extends LocalSearch<SubsetSolution> {
             // we are done
             stop();
         } else {
+            int numAdd, numDel;
             if(isIncreasing()){
                 // perform L additions
-                int numAdded = greedyMoves(l, singleAddNeigh);
+                numAdd = greedyMoves(l, singleAddNeigh);
                 // perform number of deletions (<= R) that yields a delta of |L-R|,
                 // taking into account the actual number of added items
-                int numDelete = numAdded - getDelta();
-                greedyMoves(numDelete, singleDelNeigh);
+                numDel = numAdd - getDelta();
+                greedyMoves(numDel, singleDelNeigh);
             } else {
                 // perform R deletions
-                int numDeleted = greedyMoves(r, singleDelNeigh);
+                numDel = greedyMoves(r, singleDelNeigh);
                 // perform number of additions (<= L) that yields a delta of |L-R|,
                 // taking into account the actual number of deleted items
-                int numAdd = numDeleted - getDelta();
+                numAdd = numDel - getDelta();
                 greedyMoves(numAdd, singleAddNeigh);
+            }
+            if(numAdd == 0 || numDel == 0){
+                stop();
             }
         }
     }
