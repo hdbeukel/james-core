@@ -31,16 +31,16 @@ import org.slf4j.LoggerFactory;
  * A stop criterion checker is responsible for checking the stop criteria of a given search, while this
  * search is running. At construction, a reference to the search is given. Stop criteria can be added
  * using {@link #add(StopCriterion)}, which usually only happens from within the search, which passes
- * all its stop criteria to its dedicated checker after verifying compatibility.
+ * all its stop criteria to its dedicated checker.
  * <p>
  * When {@link #startChecking()} is called, a task will be scheduled to periodically check the stop
  * criteria in the background, by default with a period of 1 second, while the search is running.
  * These tasks are executed by a dedicated thread which is shared among all stop criterion checker
- * instances, as checking stop criteria is not an intensive task. A manual request to immediately
- * check all stop criteria can also be made by calling {@link #checkNow()}.
+ * instances, as checking stop criteria is not an intensive task. A manual check can be performed
+ * with {@link #stopCriterionSatisfied()}.
  * <p>
- * As soon as some stop criterion is satisfied, the checker will request the search to stop and will
- * also cancel the scheduled task for further execution.
+ * As soon as some stop criterion is satisfied, the checker will cancel the scheduled task for
+ * further execution and will request the search to stop.
  *
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
