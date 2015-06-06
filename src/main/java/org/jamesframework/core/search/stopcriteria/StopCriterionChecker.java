@@ -200,25 +200,25 @@ public class StopCriterionChecker {
             // actions should be taken anymore (stopping the search could be dangerous because a next
             // search run might have been initiated in the meantime)
             
-            if(stopCriterionSatisfied()){
-                // synchronize on running task updates to ensure that this task
-                // is not cancelled while executing the following code block
-                synchronized(runningTaskLock){
-                    if (runningTask == this) {
+            // synchronize on running task updates to ensure that this task
+            // is not cancelled while executing the following code block
+            synchronized(runningTaskLock){
+                if (runningTask == this) {
+                    if(stopCriterionSatisfied()){
                         // stop checking
                         stopChecking();
                         // log
                         logger.debug("Requesting search {} to stop", search);
                         // stop the search
                         search.stop();
-                    } else {
-                        if(logger.isDebugEnabled()){
-                            // log
-                            logger.debug("Aborting cancelled stop criterion check task @{} for search {} (currently scheduled task: @{})",
-                                                Integer.toHexString(this.hashCode()),
-                                                search,
-                                                Integer.toHexString(runningTask.hashCode()));
-                        }
+                    }
+                } else {
+                    if(logger.isDebugEnabled()){
+                        // log
+                        logger.debug("Aborting cancelled stop criterion check task @{} for search {} (currently scheduled task: @{})",
+                                            Integer.toHexString(this.hashCode()),
+                                            search,
+                                            Integer.toHexString(runningTask.hashCode()));
                     }
                 }
             }
