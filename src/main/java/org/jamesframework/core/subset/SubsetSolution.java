@@ -24,7 +24,6 @@ import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.jamesframework.core.exceptions.SolutionModificationException;
 import org.jamesframework.core.problems.Solution;
@@ -41,19 +40,15 @@ import org.jamesframework.core.problems.Solution;
  */
 public class SubsetSolution extends Solution {
     
-    // set of selected IDs
-    private final Set<Integer> selected;
-    // set of unselected IDs
-    private final Set<Integer> unselected;
-    // set of all IDs (stored for efficiency, will always
-    // be equal to the union of selected and unselected)
-    private final Set<Integer> all;
+    // set of selected IDs (+ unmodifiable view)
+    private final Set<Integer> selected, selectedView;
+    // set of unselected IDs (+ unmodifiable view)
+    private final Set<Integer> unselected, unselectedView;
+    // set of all IDs (+ unmodifiable view)
+    private final Set<Integer> all, allView;
     // comparator according to which IDs are sorted;
     // null in case no order has been imposed
     private Comparator<Integer> orderOfIDs;
-    // wraps set of selected, unselected and all IDs in an unmodifiable view when accessed
-    // returns navigable sets when IDs are ordered, else general sets
-    private final Function<Set<Integer>, Set<Integer>> unmodifiableSetWrapper;
     
     /**
      * Creates a new subset solution given the set of all IDs, each corresponding to an underlying entity,
@@ -146,19 +141,20 @@ public class SubsetSolution extends Solution {
             all = new LinkedHashSet<>(allIDs);                      // set with all IDs (copy)
             selected = new LinkedHashSet<>();                       // set with selected IDs (empty)
             unselected = new LinkedHashSet<>(allIDs);               // set with unselected IDs (all)
-            unmodifiableSetWrapper = Collections::unmodifiableSet;  // use general unmodifiable set wrapper
+            // create views
+            allView = Collections.unmodifiableSet(all);
+            selectedView = Collections.unmodifiableSet(selected);
+            unselectedView = Collections.unmodifiableSet(unselected);
         } else {
             all = new TreeSet<>(orderOfIDs);           // sorted set with all IDs (copy)
             all.addAll(allIDs);
             selected = new TreeSet<>(orderOfIDs);      // sorted set with selected IDs (empty)
             unselected = new TreeSet<>(orderOfIDs);    // sorted set with unselected IDs (all)
             unselected.addAll(allIDs);
-            // wrap sets in unmodifiable navigable sets when accessed
-            unmodifiableSetWrapper = set -> {
-                // safe (and necessary!) to cast (only used for tree sets)
-                NavigableSet<Integer> nset = (NavigableSet<Integer>) set;
-                return Collections.unmodifiableNavigableSet(nset);
-            };
+            // create views (navigable!)
+            allView = Collections.unmodifiableNavigableSet((TreeSet<Integer>) all);
+            selectedView = Collections.unmodifiableNavigableSet((TreeSet<Integer>) selected);
+            unselectedView = Collections.unmodifiableNavigableSet((TreeSet<Integer>) unselected);
         }
     }
     
@@ -344,7 +340,7 @@ public class SubsetSolution extends Solution {
      * @return unmodifiable view of currently selected IDs
      */
     public Set<Integer> getSelectedIDs(){
-        return unmodifiableSetWrapper.apply(selected);
+        return selectedView;
     }
     
     /**
@@ -356,7 +352,7 @@ public class SubsetSolution extends Solution {
      * @return unmodifiable view of currently non selected IDs
      */
     public Set<Integer> getUnselectedIDs(){
-        return unmodifiableSetWrapper.apply(unselected);
+        return unselectedView;
     }
     
     /**
@@ -369,7 +365,7 @@ public class SubsetSolution extends Solution {
      * @return unmodifiable view of all IDs
      */
     public Set<Integer> getAllIDs(){
-        return unmodifiableSetWrapper.apply(all);
+        return allView;
     }
     
     /**

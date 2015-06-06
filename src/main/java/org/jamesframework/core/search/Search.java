@@ -673,6 +673,8 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
     
     /**
      * Retrieve search listeners (unmodifiable view).
+     * 
+     * @return attached search listeners (unmodifiable list view)
      */
     protected List<SearchListener<? super SolutionType>> getSearchListeners(){
         return searchListenersView;

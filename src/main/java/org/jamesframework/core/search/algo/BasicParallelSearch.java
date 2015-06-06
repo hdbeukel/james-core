@@ -61,8 +61,9 @@ public class BasicParallelSearch<SolutionType extends Solution> extends Search<S
     // futures of running searches
     private final Queue<Future<?>> futures;
 
-    // searches to be executed in parallel
+    // searches to be executed in parallel (+ unmodifiable view)
     private final List<Search<SolutionType>> searches;
+    private final List<Search<SolutionType>> searchesView;
     // subsearch listener
     private final SearchListener<SolutionType> subsearchListener;
 
@@ -92,8 +93,9 @@ public class BasicParallelSearch<SolutionType extends Solution> extends Search<S
         pool = Executors.newCachedThreadPool();
         // initialize futures queue
         futures = new LinkedList<>();
-        // initialize search list
+        // initialize search list and unmodifiable view
         searches = new ArrayList<>();
+        searchesView = Collections.unmodifiableList(searches);
         // create subsearch listener
         subsearchListener = new SubsearchListener();
     }
@@ -154,7 +156,7 @@ public class BasicParallelSearch<SolutionType extends Solution> extends Search<S
      * @return list of all contained searches (unmodifiable view)
      */
     public List<Search<SolutionType>> getSearches() {
-        return Collections.unmodifiableList(searches);
+        return searchesView;
     }
 
     /**
@@ -256,7 +258,7 @@ public class BasicParallelSearch<SolutionType extends Solution> extends Search<S
         }
 
         /**
-         * When a subsearch has started, the main parallel search verifies that it has not yet been requested
+         * When a subsearch has started, it is verified that the main search has not yet been requested
          * to stop in the meantime. Else, the subsearch is stopped before executing any search steps.
          *
          * @param search subsearch which is starting

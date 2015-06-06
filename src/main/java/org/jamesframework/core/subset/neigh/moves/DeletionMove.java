@@ -38,6 +38,7 @@ public class DeletionMove extends AbstractSubsetMove {
      * @param delete ID to be removed from the selection
      */
     public DeletionMove(int delete){
+        // store ID
         this.delete = delete;
     }
 

@@ -34,19 +34,19 @@ public class GeneralSubsetMove extends AbstractSubsetMove {
     private final Set<Integer> delete;
     
     /**
-     * Creates a general subset move, indicating which IDs are to be added to and removed from
+     * Creates a general subset move, indicating which IDs are to be added to and deleted from
      * the current selection when being applied to a given subset solution. Note that the sets
-     * <code>add</code> and <code>remove</code> are <b>not</b> copied: a reference to the given
+     * <code>add</code> and <code>delete</code> are <b>not</b> copied: a reference to the given
      * sets is stored in the subset move. If any of both sets is <code>null</code>, it will be
      * replaced with an empty set.
      * 
      * @param add set of IDs to add to the selection
-     * @param remove set of IDs to remove from the selection
+     * @param delete set of IDs to delete from the selection
      */
-    public GeneralSubsetMove(Set<Integer> add, Set<Integer> remove){
-        // store sets (set empty set in case of nullpointers)
-        this.add = add != null ? add : Collections.emptySet();
-        this.delete = remove != null ? remove : Collections.emptySet();
+    public GeneralSubsetMove(Set<Integer> add, Set<Integer> delete){
+        // store sets of added/deleted IDs (empty set in case of null)
+        this.add = (add == null ? Collections.emptySet() : add);
+        this.delete = (delete == null ? Collections.emptySet() : delete);
     }
     
     /**

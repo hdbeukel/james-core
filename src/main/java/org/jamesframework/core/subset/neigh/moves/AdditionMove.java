@@ -38,6 +38,7 @@ public class AdditionMove extends AbstractSubsetMove{
      * @param add ID to add to selection
      */
     public AdditionMove(int add){
+        // store ID
         this.add = add;
     }
     
