@@ -26,6 +26,7 @@ import org.jamesframework.core.exceptions.IncompatibleDeltaValidationException;
 import org.jamesframework.core.problems.constraints.Constraint;
 import org.jamesframework.core.problems.constraints.PenalizingConstraint;
 import org.jamesframework.core.problems.constraints.validations.PenalizingValidation;
+import org.jamesframework.core.problems.constraints.validations.SimpleValidation;
 import org.jamesframework.core.problems.constraints.validations.Validation;
 import org.jamesframework.core.problems.constraints.validations.UnanimousValidation;
 import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
@@ -198,6 +199,11 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
      */
     @Override
     public Validation validate(SolutionType solution){
+        // skip validation if no mandatory constraints
+        if(mandatoryConstraints.isEmpty()){
+            return SimpleValidation.PASSED;
+        }
+        // validate all mandatory constraints
         UnanimousValidation val = new UnanimousValidation();
         mandatoryConstraints.stream()
                             .allMatch(c -> {
@@ -232,6 +238,11 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
     public Validation validate(Move<? super SolutionType> move,
                                         SolutionType curSolution,
                                         Validation curValidation){
+        // skip validation if no mandatory constraints
+        if(mandatoryConstraints.isEmpty()){
+            return SimpleValidation.PASSED;
+        }
+        // perform delta validation for all mandatory constraints
         UnanimousValidation curUnanimousVal = (UnanimousValidation) curValidation;
         UnanimousValidation newUnanimousVal = new UnanimousValidation();
         mandatoryConstraints.stream()
@@ -278,6 +289,10 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
     public Evaluation evaluate(SolutionType solution) {
         // evaluate objective function
         Evaluation eval = objective.evaluate(solution, data);
+        // return plain evaluation if no penalizing constraints
+        if(penalizingConstraints.isEmpty()){
+            return eval;
+        }
         // initialize penalized evaluation object
         PenalizedEvaluation penEval = new PenalizedEvaluation(eval, isMinimizing());
         // add penalties
@@ -304,23 +319,29 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
      */
     @Override
     public Evaluation evaluate(Move<? super SolutionType> move, SolutionType curSolution, Evaluation curEvaluation){
-        PenalizedEvaluation curPenalizedEval = (PenalizedEvaluation) curEvaluation;
-        // retrieve current evaluation without penalties
-        Evaluation curEval = curPenalizedEval.getEvaluation();
-        // perform delta evaluation
-        Evaluation newEval = objective.evaluate(move, curSolution, curEval, data);
-        // initialize new penalized evaluation
-        PenalizedEvaluation newPenalizedEval = new PenalizedEvaluation(newEval, isMinimizing());
-        // perform delta validation for each penalizing constraint
-        penalizingConstraints.forEach(pc -> {
-            // retrieve current penalizing validation
-            PenalizingValidation curVal = curPenalizedEval.getPenalizingValidation(pc);
-            // delta validation
-            PenalizingValidation newVal = pc.validate(move, curSolution, curVal, data);
-            // add penalty
-            newPenalizedEval.addPenalizingValidation(pc, newVal);
-        });
-        return newPenalizedEval;
+        if(penalizingConstraints.isEmpty()){
+            // CASE 1: no penalizing constraints -- directly apply delta
+            return objective.evaluate(move, curSolution, curEvaluation, data);
+        } else {
+            // CASE 2: penalizing constraint(s) -- extract components and apply deltas
+            PenalizedEvaluation curPenalizedEval = (PenalizedEvaluation) curEvaluation;
+            // retrieve current evaluation without penalties
+            Evaluation curEval = curPenalizedEval.getEvaluation();
+            // perform delta evaluation
+            Evaluation newEval = objective.evaluate(move, curSolution, curEval, data);
+            // initialize new penalized evaluation
+            PenalizedEvaluation newPenalizedEval = new PenalizedEvaluation(newEval, isMinimizing());
+            // perform delta validation for each penalizing constraint
+            penalizingConstraints.forEach(pc -> {
+                // retrieve current penalizing validation
+                PenalizingValidation curVal = curPenalizedEval.getPenalizingValidation(pc);
+                // delta validation
+                PenalizingValidation newVal = pc.validate(move, curSolution, curVal, data);
+                // add penalty
+                newPenalizedEval.addPenalizingValidation(pc, newVal);
+            });
+            return newPenalizedEval;
+        }
     }
 
     /**
