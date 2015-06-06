@@ -107,7 +107,7 @@ import org.slf4j.LoggerFactory;
 public class ParallelTempering<SolutionType extends Solution> extends SingleNeighbourhoodSearch<SolutionType>{
 
     // logger
-    private static final Logger logger = LoggerFactory.getLogger(ParallelTempering.class);
+    // private static final Logger logger = LoggerFactory.getLogger(ParallelTempering.class);
     
     // Metropolis replicas
     private final List<MetropolisSearch<SolutionType>> replicas;
@@ -117,7 +117,7 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
     
     // thread pool for replica execution and corresponding queue of futures of submitted tasks
     private final ExecutorService pool;
-    private final Queue<Future<?>> futures;
+    private final Queue<Future<Integer>> futures;
     
     // swap base: flipped (0/1) after every step for fair solution swaps
     private int swapBase;
@@ -361,21 +361,25 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
     @Override
     protected void searchStep() {
         // submit replicas for execution in thread pool
-        replicas.forEach(r -> futures.add(pool.submit(r)));
-        logger.debug("{}: started {} Metropolis replicas", this, futures.size());
+        // (future returns index of respective replica)
+        for(int i=0; i < replicas.size(); i++){
+            futures.add(pool.submit(replicas.get(i), i));
+        }
+        // logger.debug("{}: started {} Metropolis replicas", this, futures.size());
         // wait for completion of all replicas and remove corresponding future
-        logger.debug("{}: waiting for replicas to finish", this);
         while(!futures.isEmpty()){
             // remove next future from queue and wait until it has completed
             try{
-                futures.poll().get();
-                logger.debug("{}: {}/{} replicas finished", this, replicas.size()-futures.size(), replicas.size());
+                int i = futures.poll().get();
+                // logger.debug("{}: {}/{} replicas finished", this, replicas.size()-futures.size(), replicas.size());
+                // update total number of accepted/rejected moves
+                incNumAcceptedMoves(replicas.get(i).getNumAcceptedMoves());
+                incNumRejectedMoves(replicas.get(i).getNumRejectedMoves());
             } catch (InterruptedException | ExecutionException ex){
                 throw new SearchException("An error occured during concurrent execution of Metropolis replicas "
                                             + "in the parallel tempering algorithm.", ex);
             }
         }
-        logger.debug("{}: swapping solutions between neighbouring replicas", this);
         // consider swapping solutions of adjacent replicas
         for(int i=swapBase; i<replicas.size()-1; i+=2){
             MetropolisSearch<SolutionType> r1 = replicas.get(i);
@@ -469,23 +473,6 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
             if (numSteps >= replicaSteps){
                 replica.stop();
             }
-        }
-
-        /**
-         * Whenever a replica has finished its current run the number of accepted and rejected moves during this
-         * run are accounted for by increasing the global counters. This method is synchronized to avoid concurrent
-         * updates of the global number of accepted and rejected moves, as the replicas run in separate threads.
-         * 
-         * @param replica Metropolis replica that has finished its current run
-         */
-        @Override
-        public synchronized void searchStopped(Search<? extends SolutionType> replica) {
-            // cast to neighbourhood search (should never fail, callback is only fired by Metropolis searches)
-            NeighbourhoodSearch<?> nreplica = (NeighbourhoodSearch<?>) replica;
-            // update number of accepted moves
-            incNumAcceptedMoves(nreplica.getNumAcceptedMoves());
-            // update number of rejected moves
-            incNumRejectedMoves(nreplica.getNumRejectedMoves());
         }
         
     }
