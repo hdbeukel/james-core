@@ -31,14 +31,11 @@ import org.jamesframework.core.problems.Problem;
 import org.jamesframework.core.problems.Solution;
 import org.jamesframework.core.problems.constraints.validations.Validation;
 import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
-import org.jamesframework.core.search.NeighbourhoodSearch;
 import org.jamesframework.core.search.Search;
 import org.jamesframework.core.search.SingleNeighbourhoodSearch;
 import org.jamesframework.core.search.listeners.SearchListener;
 import org.jamesframework.core.search.neigh.Neighbourhood;
 import org.jamesframework.core.search.stopcriteria.MaxSteps;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * <p>
