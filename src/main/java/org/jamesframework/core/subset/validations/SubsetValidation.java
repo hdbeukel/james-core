@@ -20,7 +20,7 @@ import org.jamesframework.core.problems.constraints.validations.Validation;
 
 /**
  * Represents a validation of a subset solution. Separately indicates whether
- * the subset has a valid size, in addition to the general constraint validation.
+ * the subset has a valid size, in addition to the general mandatory constraint validation.
  * It can be checked whether the subset passed validation, possibly ignoring its size.
  * 
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
@@ -29,14 +29,14 @@ public class SubsetValidation implements Validation {
 
     // valid size
     private final boolean validSize;
-    // constraint validation object (may be null)
+    // mandatory constraint validation object (may be null)
     private final Validation constraintValidation;
 
     /**
      * Create a subset validation.
      * 
      * @param validSize indicates whether the subset has a valid size
-     * @param constraintValidation validation object produced when checking the general constraints
+     * @param constraintValidation validation object produced when checking the general mandatory constraints
      *                             (may be <code>null</code>)
      */
     public SubsetValidation(boolean validSize, Validation constraintValidation) {
@@ -54,9 +54,9 @@ public class SubsetValidation implements Validation {
     }
     
     /**
-     * Get the validation object produced when checking the general constraints (may be <code>null</code>).
+     * Get the validation object produced when checking the general mandatory constraints (may be <code>null</code>).
      * 
-     * @return constraint validation object
+     * @return mandatory constraint validation object
      */
     public Validation getConstraintValidation(){
         return constraintValidation;
@@ -65,7 +65,7 @@ public class SubsetValidation implements Validation {
     /**
      * Check whether the subset solution passed validation. If <code>checkSize</code>
      * is <code>false</code> the size of the subset is ignored and only the general
-     * constraints are checked (if not <code>null</code>).
+     * mandatory constraints are checked (if not <code>null</code>).
      * 
      * @param checkSize indicates whether the size should be validated
      * @return <code>true</code> if the subset solution is valid, possibly ignoring its size
@@ -76,9 +76,9 @@ public class SubsetValidation implements Validation {
     
     /**
      * Check whether the subset solution passed validation, taking into account both
-     * its size and the general constraint validations (if not <code>null</code>).
+     * its size and the general mandatory constraint validations (if not <code>null</code>).
      * 
-     * @return <code>true</code> if the subset has a valid size and satisfies all constraints (if any)
+     * @return <code>true</code> if the subset has a valid size and satisfies all mandatory constraints (if any)
      */
     @Override
     public boolean passed(){
@@ -87,7 +87,8 @@ public class SubsetValidation implements Validation {
     
     /**
      * Get a string representation of the validation object. Indicates whether the
-     * general constraints are satisfied (if any) and if the subset has a valid size.
+     * general mandatory constraints are satisfied (if any) and whether the subset
+     * has a valid size.
      * 
      * @return string representation
      */
