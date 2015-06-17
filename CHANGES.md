@@ -1,13 +1,13 @@
 JAMES Core Module Changes
 =========================
 
-Version 1.0 (under development)
--------------------------------
+Version 1.0 (17/06/2015)
+------------------------
 
- - Use dedicated customizable random generator per search.
+ - Dedicated customizable random generator per search.
  - Reduced overhead of checking stop criteria.
- - Improved test coverage.
  - Various improvements and minor bug fixes.
+ - Improved test coverage.
  - Cleaned up log messages.
  - Moved SearchFactory interface from extensions to core module. Grouped various factory interfaces in package org.jamesframework.core.factory.
  - Moved to SLF4J API 1.7.12.
