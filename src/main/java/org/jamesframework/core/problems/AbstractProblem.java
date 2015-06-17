@@ -18,6 +18,7 @@ package org.jamesframework.core.problems;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,9 +73,12 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
     private Objective<? super SolutionType, ? super DataType> objective;
     // underlying data
     private DataType data;
-    // mandatory and penalizing constraints (may be more general than solution and data types of problem)
-    private final List<Constraint<? super SolutionType, ? super DataType>> mandatoryConstraints;
-    private final List<PenalizingConstraint<? super SolutionType, ? super DataType>> penalizingConstraints;
+    // mandatory and penalizing constraints (+ unmodifiable views)
+    // note: solution and data types can be more general than those of the problem
+    private final List<Constraint<? super SolutionType, ? super DataType>>
+            mandatoryConstraints, mandatoryConstraintsView;
+    private final List<PenalizingConstraint<? super SolutionType, ? super DataType>>
+            penalizingConstraints, penalizingConstraintsView;
     
     /**
      * Creates a new abstract problem with given objective and data. Any objective designed for the solution and
@@ -93,9 +97,11 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
         // set fields
         this.objective = objective;
         this.data = data;
-        // initialize constraint lists
+        // initialize constraint lists + views
         mandatoryConstraints = new ArrayList<>();
         penalizingConstraints = new ArrayList<>();
+        mandatoryConstraintsView = Collections.unmodifiableList(mandatoryConstraints);
+        penalizingConstraintsView = Collections.unmodifiableList(penalizingConstraints);
     }
 
     /**
@@ -169,6 +175,15 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
     }
     
     /**
+     * Get mandatory constraints (unmodifiable view).
+     * 
+     * @return list of mandatory constraints
+     */
+    public List<Constraint<? super SolutionType, ? super DataType>> getMandatoryConstraints(){
+        return mandatoryConstraintsView;
+    }
+    
+    /**
      * Add a penalizing constraint to the problem. For a solution that violates a penalizing constraint, a penalty
      * will be assigned to the objective score. Only penalizing constraints designed for the solution and data type
      * of the problem (or more general) are accepted.
@@ -193,6 +208,15 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
      */
     public boolean removePenalizingConstraint(PenalizingConstraint<? super SolutionType, ? super DataType> constraint){
         return penalizingConstraints.remove(constraint);
+    }
+    
+    /**
+     * Get penalizing constraints (unmodifiable view).
+     * 
+     * @return list of penalizing constraints
+     */
+    public List<PenalizingConstraint<? super SolutionType, ? super DataType>> getPenalizingConstraints(){
+        return penalizingConstraintsView;
     }
     
     /**

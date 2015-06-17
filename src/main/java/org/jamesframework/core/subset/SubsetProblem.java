@@ -21,6 +21,7 @@ import java.util.Random;
 import java.util.Set;
 import org.jamesframework.core.exceptions.IncompatibleDeltaValidationException;
 import org.jamesframework.core.problems.AbstractProblem;
+import org.jamesframework.core.problems.constraints.validations.SimpleValidation;
 import org.jamesframework.core.problems.constraints.validations.Validation;
 import org.jamesframework.core.subset.validations.SubsetValidation;
 import org.jamesframework.core.problems.datatypes.IntegerIdentifiedData;
@@ -209,22 +210,36 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Abstr
         return new SubsetSolution(getData().getIDs(), orderOfIDs);
     }
     
+    /**********************************************************************/
+    /* CONSTANT VALIDATION OBJECTS USED FOR UNCONSTRAINED SUBSET PROBLEMS */
+    /**********************************************************************/
+
+    private static final SubsetValidation UNCONSTRAINED_VALID_SIZE = new SubsetValidation(true, SimpleValidation.PASSED);
+    private static final SubsetValidation UNCONSTRAINED_INVALID_SIZE = new SubsetValidation(false, SimpleValidation.PASSED);
+    
+    /**********************************************************************/
+    
     /**
-     * Validate a subset solution. The returned validation object indicates whether
-     * the solution passed constraint validation, possibly also requiring that it
-     * has a valid size.
+     * Validate a subset solution. The returned validation object separately indicates whether
+     * the solution passed general mandatory constraint validation and whether it has a valid size.
      * 
      * @param solution solution to validate
      * @return subset validation
      */
     @Override
     public SubsetValidation validate(SubsetSolution solution){
-        // validate constraints
-        Validation constraintVal = super.validate(solution);
-        // extend with size check
+        // check size
         boolean validSize = solution.getNumSelectedIDs() >= getMinSubsetSize()
                                 && solution.getNumSelectedIDs() <= getMaxSubsetSize();
-        return new SubsetValidation(validSize, constraintVal);
+        // combine with mandatory constraint validation
+        if(getMandatoryConstraints().isEmpty()){
+            // CASE 1: no mandatory constraints -- return constant validation object
+            return validSize ? UNCONSTRAINED_VALID_SIZE : UNCONSTRAINED_INVALID_SIZE;
+        } else {
+            // CASE 2: mandatory constraint(s) -- wrap constraints validation in subset validation
+            Validation constraintVal = super.validate(solution);
+            return new SubsetValidation(validSize, constraintVal);
+        }
     }
     
     /**
@@ -235,7 +250,7 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Abstr
      * @param move subset move to be validated
      * @param curSolution current solution
      * @param curValidation current validation
-     * @return validation of modified subset solution
+     * @return subset validation of modified subset solution
      * @throws IncompatibleDeltaValidationException if the received move is not of type {@link SubsetMove}
      *                                              or if the delta validation of any mandatory constraint
      *                                              is not compatible with the received move type
@@ -246,15 +261,26 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Abstr
                                      Validation curValidation){
         // check type and cast
         if(move instanceof SubsetMove){
+
             SubsetMove subsetMove = (SubsetMove) move;
-            SubsetValidation subsetVal = (SubsetValidation) curValidation;
-            // check new size
+            
+            // update and check size
             int newSize = curSolution.getNumSelectedIDs() + subsetMove.getNumAdded() - subsetMove.getNumDeleted();
             boolean validSize = newSize >= getMinSubsetSize() && newSize <= getMaxSubsetSize();
-            // delta validation of general constraints
-            Validation deltaVal = super.validate(subsetMove, curSolution, subsetVal.getConstraintValidation());
-            // create and return new subset validation
-            return new SubsetValidation(validSize, deltaVal);
+            
+            // combine with mandatory constraint delta validation
+            if(getMandatoryConstraints().isEmpty()){
+                // CASE 1: no mandatory constraints -- return constant validation object
+                return validSize ? UNCONSTRAINED_VALID_SIZE : UNCONSTRAINED_INVALID_SIZE;
+            } else {
+                // CASE 2: mandatory constraint(s) -- extract and update mandatory constraints validation
+                SubsetValidation subsetVal = (SubsetValidation) curValidation;
+                // delta validation of mandatory constraints
+                Validation deltaVal = super.validate(subsetMove, curSolution, subsetVal.getConstraintValidation());
+                // create and return new subset validation
+                return new SubsetValidation(validSize, deltaVal);
+            }
+            
         } else {
             throw new IncompatibleDeltaValidationException("Delta validation in subset problem expects moves "
                                                             + "of type SubsetMove. Received: "
