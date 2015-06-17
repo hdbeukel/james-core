@@ -146,6 +146,8 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
      * regardless of their evaluation.
      * <p>
      * Only constraints designed for the solution and data type of the problem (or more general) are accepted.
+     * Constraints should <b>not</b> be added while a search is solving this problem; doing so may lead to
+     * exceptions and/or undefined search behaviour.
      * 
      * @param constraint mandatory constraint to add
      */
@@ -155,6 +157,9 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
     
     /**
      * Remove a mandatory constraint. Returns <code>true</code> if the constraint has been successfully removed.
+     * <p>
+     * Constraints should <b>not</b> be removed while a search is solving this problem; doing so may lead to
+     * exceptions and/or undefined search behaviour.
      * 
      * @param constraint mandatory constraint to be removed
      * @return <code>true</code> if the constraint is successfully removed
@@ -164,9 +169,12 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
     }
     
     /**
-     * Add a penalizing constraint to the problem. For a solution that violates a penalizing constraint, a penalty will be
-     * assigned to the objective score. Only penalizing constraints designed for the solution and data type of the problem
-     * (or more general) are accepted.
+     * Add a penalizing constraint to the problem. For a solution that violates a penalizing constraint, a penalty
+     * will be assigned to the objective score. Only penalizing constraints designed for the solution and data type
+     * of the problem (or more general) are accepted.
+     * <p>
+     * Constraints should <b>not</b> be added while a search is solving this problem; doing so may lead to
+     * exceptions and/or undefined search behaviour.
      * 
      * @param constraint penalizing constraint to add
      */
@@ -175,7 +183,10 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
     }
     
     /**
-     * Remove a penalizing constraint. True is returned if the constraint has successfully been removed.
+     * Remove a penalizing constraint. Returns <code>true</code> if the constraint has been successfully removed.
+     * <p>
+     * Constraints should <b>not</b> be removed while a search is solving this problem; doing so may lead to
+     * exceptions and/or undefined search behaviour.
      * 
      * @param constraint penalizing constraint to be removed
      * @return <code>true</code> if the constraint is successfully removed
@@ -186,45 +197,55 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
     
     /**
      * <p>
-     * Validate a solution by checking all mandatory constraints. The solution
-     * will only pass validation if all mandatory constraints are satisfied.
+     * Validate a solution by checking all mandatory constraints. The solution will only pass validation if
+     * all mandatory constraints are satisfied.
      * </p>
      * <p>
-     * This is a short-circuiting operation: as soon as one violated constraint
-     * is found the remaining constraints are not checked.
+     * In case there are no mandatory constraints, this method always returns {@link SimpleValidation#PASSED}.
+     * If a single mandatory constraint has been specified, the corresponding validation is returned. In case
+     * of two or more constraints, an aggregated validation is constructed that only passes if all constraints are
+     * satisfied. Short-circuiting is applied: as soon as one violated constraint is found, the remaining constraints
+     * are not checked.
      * </p>
      * 
      * @param solution solution to validate
-     * @return validation indicating whether all mandatory constraints are satisfied
+     * @return aggregated validation
      */
     @Override
     public Validation validate(SolutionType solution){
-        // skip validation if no mandatory constraints
         if(mandatoryConstraints.isEmpty()){
+            // CASE 1: no mandatory constraints
             return SimpleValidation.PASSED;
+        } else if (mandatoryConstraints.size() == 1){
+            // CASE 2: single mandatory constraint
+            return mandatoryConstraints.get(0).validate(solution, data);
+        } else {
+            // CASE 3 (default): aggregate multiple constraint validations
+            UnanimousValidation val = new UnanimousValidation();
+            mandatoryConstraints.stream()
+                                .allMatch(c -> {
+                                    // validate solution against constraint c
+                                    Validation cval = c.validate(solution, data);
+                                    // add to unanimous validation
+                                    val.addValidation(c, cval);
+                                    // continue until one constraint is not satisfied
+                                    return cval.passed();
+                                });
+            return val;
         }
-        // validate all mandatory constraints
-        UnanimousValidation val = new UnanimousValidation();
-        mandatoryConstraints.stream()
-                            .allMatch(c -> {
-                                // validate solution against constraint c
-                                Validation cval = c.validate(solution, data);
-                                // add to unanimous validation
-                                val.addValidation(c, cval);
-                                // continue until one constraint is not satisfied
-                                return cval.passed();
-                            });
-        return val;
     }
     
     /**
      * <p>
-     * Validate a move by checking all mandatory constraints. The move will
-     * only pass validation if all mandatory constraints are satisfied.
+     * Validate a move by checking all mandatory constraints (delta validation).
+     * The move will only pass validation if all mandatory constraints are satisfied.
      * </p>
      * <p>
-     * This is a short-circuiting operation: as soon as one violated constraint
-     * is found the remaining constraints are not checked.
+     * In case there are no mandatory constraints, this method always returns {@link SimpleValidation#PASSED}.
+     * If a single mandatory constraint has been specified, the corresponding delta validation is returned. In case
+     * of two or more constraints, an aggregated validation is constructed that only passes if all constraints are
+     * satisfied. Short-circuiting is applied: as soon as one violated constraint is found, the remaining constraints
+     * are not checked.
      * </p>
      * 
      * @param move move to validate
@@ -232,36 +253,40 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
      * @param curValidation validation of current solution
      * @throws IncompatibleDeltaValidationException if the provided delta validation of any mandatory
      *                                              constraint is not compatible with the received move type
-     * @return validation indicating whether all mandatory constraints are satisfied
+     * @return aggregated delta validation
      */
     @Override
     public Validation validate(Move<? super SolutionType> move,
                                         SolutionType curSolution,
                                         Validation curValidation){
-        // skip validation if no mandatory constraints
         if(mandatoryConstraints.isEmpty()){
+            // CASE 1: no mandatory constraints
             return SimpleValidation.PASSED;
+        } else if (mandatoryConstraints.size() == 1){
+            // CASE 2: single mandatory constraint
+            return mandatoryConstraints.get(0).validate(move, curSolution, curValidation, data);
+        } else {
+            // CASE 3 (default): aggregate multiple constraint validations
+            UnanimousValidation curUnanimousVal = (UnanimousValidation) curValidation;
+            UnanimousValidation newUnanimousVal = new UnanimousValidation();
+            mandatoryConstraints.stream()
+                                .allMatch(c -> {
+                                    // retrieve original validation produced by constraint c
+                                    Validation curval = curUnanimousVal.getValidation(c);
+                                    if(curval == null){
+                                        // current validation unknown: perform full validation
+                                        // (can happen due to short-circuiting behaviour)
+                                        curval = c.validate(curSolution, data);
+                                    }
+                                    // validate move against constraint c
+                                    Validation newval = c.validate(move, curSolution, curval, data);
+                                    // add to unanimous validation
+                                    newUnanimousVal.addValidation(c, newval);
+                                    // continue until one constraint is not satisfied
+                                    return newval.passed();
+                                });
+            return newUnanimousVal;
         }
-        // perform delta validation for all mandatory constraints
-        UnanimousValidation curUnanimousVal = (UnanimousValidation) curValidation;
-        UnanimousValidation newUnanimousVal = new UnanimousValidation();
-        mandatoryConstraints.stream()
-                            .allMatch(c -> {
-                                // retrieve original validation produced by constraint c
-                                Validation curval = curUnanimousVal.getValidation(c);
-                                if(curval == null){
-                                    // current validation unknown: perform full validation
-                                    // (can happen due to short-circuiting behaviour)
-                                    curval = c.validate(curSolution, data);
-                                }
-                                // validate move against constraint c
-                                Validation newval = c.validate(move, curSolution, curval, data);
-                                // add to unanimous validation
-                                newUnanimousVal.addValidation(c, newval);
-                                // continue until one constraint is not satisfied
-                                return newval.passed();
-                            });
-        return newUnanimousVal;
     }
     
     /**
@@ -281,31 +306,40 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
      * Evaluates a solution by taking into account both the evaluation calculated by the objective function and the
      * penalizing constraints (if any). Penalties are assigned for any violated penalizing constraint, which are
      * subtracted from the evaluation in case of maximization, and added to it in case of minimization.
+     * <p>
+     * If there are no penalizing constraints, this method returns the evaluation object obtained from applying
+     * the objective function to the given solution. If one or more penalizing constraints have been specified,
+     * a penalized evaluation is constructed taking into account both the main objective function evaluation
+     * and assigned penalties.
      * 
      * @param solution solution to be evaluated
      * @return aggregated evaluation taking into account both the objective function and penalizing constraints
      */
     @Override
     public Evaluation evaluate(SolutionType solution) {
-        // evaluate objective function
-        Evaluation eval = objective.evaluate(solution, data);
-        // return plain evaluation if no penalizing constraints
         if(penalizingConstraints.isEmpty()){
-            return eval;
+            // CASE 1: no penalizing constraints
+            return objective.evaluate(solution, data);
+        } else {
+            // CASE 2 (default): aggregate evaluation and penalties
+            Evaluation eval = objective.evaluate(solution, data);
+            // initialize penalized evaluation object
+            PenalizedEvaluation penEval = new PenalizedEvaluation(eval, isMinimizing());
+            // add penalties
+            penalizingConstraints.forEach(pc -> penEval.addPenalizingValidation(pc, pc.validate(solution, data)));
+            // return aggregated evaluation
+            return penEval;
         }
-        // initialize penalized evaluation object
-        PenalizedEvaluation penEval = new PenalizedEvaluation(eval, isMinimizing());
-        // add penalties
-        penalizingConstraints.forEach(pc -> penEval.addPenalizingValidation(pc, pc.validate(solution, data)));
-        // return aggregated evaluation
-        return penEval;
     }
     
     /**
-     * Evaluate a move by taking into account both the evaluation of the modified solution and
-     * the penalizing constraints (if any). Penalties are assigned for any violated penalizing
-     * constraint, which are subtracted from the evaluation in case of maximization, and added
-     * to it in case of minimization.
+     * Evaluate a move (delta evaluation) by taking into account both the evaluation of the modified solution and
+     * the penalizing constraints (if any). Penalties are assigned for any violated penalizing constraint, which are
+     * subtracted from the evaluation in case of maximization, and added to it in case of minimization.
+     * <p>
+     * If there are no penalizing constraints, this method returns the delta evaluation obtained from the objective
+     * function. If one or more penalizing constraints have been specified, a penalized delta evaluation is constructed
+     * taking into account both the main objective function evaluation and assigned penalties.
      * 
      * @param move move to evaluate
      * @param curSolution current solution
@@ -323,7 +357,7 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
             // CASE 1: no penalizing constraints -- directly apply delta
             return objective.evaluate(move, curSolution, curEvaluation, data);
         } else {
-            // CASE 2: penalizing constraint(s) -- extract components and apply deltas
+            // CASE 2 (default): penalizing constraint(s) -- extract components and apply deltas
             PenalizedEvaluation curPenalizedEval = (PenalizedEvaluation) curEvaluation;
             // retrieve current evaluation without penalties
             Evaluation curEval = curPenalizedEval.getEvaluation();
