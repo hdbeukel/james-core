@@ -91,7 +91,7 @@ public class GenericProblem<SolutionType extends Solution, DataType> implements 
     
     /**
      * <p>
-     * Creates a new abstract problem with given objective, data and random solution generator. Any objective
+     * Creates a new generic problem with given objective, data and random solution generator. Any objective
      * designed for the solution and data types of the problem, or supertypes thereof, is accepted. The random
      * solution generator may produce subtypes of the problem's solution type.
      * </p>
