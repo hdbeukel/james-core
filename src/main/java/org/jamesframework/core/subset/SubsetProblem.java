@@ -34,8 +34,9 @@ import org.jamesframework.core.util.SetUtilities;
  * All items in the data set are identified using a unique integer ID so that any subset selection problem comes down to
  * selection of a subset of these IDs. The solution type is fixed to {@link SubsetSolution} and the data type can be set
  * to any implementation of the {@link IntegerIdentifiedData} interface. When creating the problem, the minimum and maximum
- * allowed subset size are specified. Methods are provided to create random or empty subset solutions, based on the IDs of
- * the items that are retrieved from the underlying data.
+ * allowed subset size are specified. A default random solution generator is used, which generates random subsets within
+ * the imposed size limits, based on the IDs of the items as retrieved from the underlying data. An additional method is
+ * provided to generate subset solutions with an empty selection.
  * 
  * @param <DataType> underlying data type, should implement the interface {@link IntegerIdentifiedData}
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
