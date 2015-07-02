@@ -166,6 +166,20 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Abstr
     }
     
     /**
+     * Creates a subset problem without subset size limits. Equivalent to calling<pre>
+     * SubsetProblem p = new SubsetProblem(objective, data, 0, data.getIDs().size());</pre>
+     * Generated subset solutions do not impose any order on the IDs.
+     * 
+     * @param objective objective function, can not be <code>null</code>
+     * @param data underlying data, can not be <code>null</code>
+     * @throws NullPointerException if <code>objective</code> or <code>data</code> is <code>null</code>
+     * @throws IllegalArgumentException if an invalid fixed subset size is specified 
+     */
+    public SubsetProblem(Objective<? super SubsetSolution, ? super DataType> objective, DataType data) {
+        this(objective, data, 0, data.getIDs().size());
+    }
+    
+    /**
      * Set new data.
      * 
      * @param data new data (can not be <code>null</code>)
