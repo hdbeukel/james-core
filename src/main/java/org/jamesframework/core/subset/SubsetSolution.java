@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.jamesframework.core.exceptions.SolutionModificationException;
-import org.jamesframework.core.problems.Solution;
+import org.jamesframework.core.problems.sol.Solution;
 
 /**
  * High-level subset solution modeled in terms of IDs of selected items. The subset is sampled from a

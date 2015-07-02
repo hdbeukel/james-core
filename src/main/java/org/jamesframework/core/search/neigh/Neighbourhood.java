@@ -19,7 +19,7 @@ package org.jamesframework.core.search.neigh;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-import org.jamesframework.core.problems.Solution;
+import org.jamesframework.core.problems.sol.Solution;
 
 /**
  * Interface of a neighbourhood that generates moves to transform a given solution into a neighbouring solution.

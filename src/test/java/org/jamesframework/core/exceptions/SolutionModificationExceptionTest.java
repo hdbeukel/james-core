@@ -19,7 +19,7 @@ package org.jamesframework.core.exceptions;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import org.jamesframework.core.problems.Solution;
+import org.jamesframework.core.problems.sol.Solution;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.junit.AfterClass;
 import org.junit.Test;

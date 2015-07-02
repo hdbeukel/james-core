@@ -17,7 +17,7 @@
 package org.jamesframework.test.stubs;
 
 import org.jamesframework.core.problems.constraints.PenalizingConstraint;
-import org.jamesframework.core.problems.Solution;
+import org.jamesframework.core.problems.sol.Solution;
 import org.jamesframework.core.problems.constraints.validations.PenalizingValidation;
 import org.jamesframework.core.problems.constraints.validations.SimplePenalizingValidation;
 

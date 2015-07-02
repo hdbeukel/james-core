@@ -22,8 +22,8 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.jamesframework.core.exceptions.SearchException;
 import org.jamesframework.core.problems.Problem;
-import org.jamesframework.core.problems.AbstractProblem;
-import org.jamesframework.core.problems.Solution;
+import org.jamesframework.core.problems.GenericProblem;
+import org.jamesframework.core.problems.sol.Solution;
 import org.jamesframework.core.problems.objectives.evaluations.PenalizedEvaluation;
 import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.search.Search;
@@ -128,10 +128,7 @@ public class BasicParallelSearchTest extends SearchTestTemplate {
     public void testAddSearch() {
         System.out.println(" - test addSearch");
         // try to add a search that solves a different problem
-        Problem<SubsetSolution> p = new AbstractProblem<SubsetSolution, ScoredFakeSubsetData>(obj, data) {
-            @Override
-            public SubsetSolution createRandomSolution(Random rnd) {return null;}
-        };
+        Problem<SubsetSolution> p = new GenericProblem<>(obj, data, rnd -> null);
         parallelSearch.addSearch(new RandomSearch<>(p));
     }
     

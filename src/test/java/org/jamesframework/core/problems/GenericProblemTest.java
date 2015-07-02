@@ -16,12 +16,12 @@
 
 package org.jamesframework.core.problems;
 
-import java.util.Random;
+import org.jamesframework.core.problems.sol.Solution;
 import org.jamesframework.core.problems.constraints.Constraint;
 import org.jamesframework.core.problems.constraints.PenalizingConstraint;
 import org.jamesframework.core.problems.constraints.validations.SimpleValidation;
 import org.jamesframework.core.problems.constraints.validations.Validation;
-import org.jamesframework.core.problems.objectives.Objective;
+import org.jamesframework.core.problems.sol.RandomSolutionGenerator;
 import org.jamesframework.core.search.neigh.Move;
 import org.jamesframework.test.stubs.AlwaysSatisfiedConstraintStub;
 import org.jamesframework.test.stubs.AlwaysSatisfiedPenalizingConstraintStub;
@@ -38,22 +38,22 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 
 /**
- * Test general functionalities of AbstractProblem that do not actually rely on the specific data, using
- * objectives and constraints that ignore the data.
+ * Test general functionalities of GenericProblem that do not actually rely on the specific data,
+ * using objectives and constraints that ignore the data.
  * 
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
-public class AbstractProblemTest {
+public class GenericProblemTest {
 
     // problem stub to work with
-    private AbstractProblem<Solution, Object> problem;
+    private GenericProblem<Solution, Object> problem;
     
     /**
      * Print message when starting tests.
      */
     @BeforeClass
     public static void setUpClass() {
-        System.out.println("# Testing AbstractProblem ...");
+        System.out.println("# Testing GenericProblem ...");
     }
 
     /**
@@ -61,7 +61,7 @@ public class AbstractProblemTest {
      */
     @AfterClass
     public static void tearDownClass() {
-        System.out.println("# Done testing AbstractProblem!");
+        System.out.println("# Done testing GenericProblem!");
     }
     
     /**
@@ -70,11 +70,11 @@ public class AbstractProblemTest {
     @Before
     public void setUp(){
         FixedEvaluationObjectiveStub o = new FixedEvaluationObjectiveStub(10.0);
-        problem = new ProblemStub<>(o);
+        problem = new GenericProblem<>(o, null, rnd -> null);
     }
 
     /**
-     * Test constructor, of class AbstractProblem.
+     * Test constructor, of class GenericProblem.
      */
     @Test
     public void testConstructor() {
@@ -84,7 +84,16 @@ public class AbstractProblemTest {
         // try to create problem without objective, should result in error
         boolean thrown = false;
         try {
-            AbstractProblem p = new ProblemStub<>(null);
+            GenericProblem p = new GenericProblem<>(null, null, null);
+        } catch (NullPointerException ex) {
+            thrown = true;
+        }
+        assertTrue(thrown);
+        
+        // try to create problem without random solution generator, should result in error
+        thrown = false;
+        try {
+            GenericProblem p = new GenericProblem<>(new FixedEvaluationObjectiveStub(10.0), null, null);
         } catch (NullPointerException ex) {
             thrown = true;
         }
@@ -93,7 +102,7 @@ public class AbstractProblemTest {
     }
     
     /**
-     * Test of getObjective method, of class AbstractProblem.
+     * Test of getObjective method, of class GenericProblem.
      */
     @Test
     public void testGetObjective() {
@@ -107,7 +116,7 @@ public class AbstractProblemTest {
     }
 
     /**
-     * Test of setObjective method, of class AbstractProblem.
+     * Test of setObjective method, of class GenericProblem.
      */
     @Test
     public void testSetObjective() {
@@ -126,7 +135,7 @@ public class AbstractProblemTest {
     }
 
     /**
-     * Test of getData method, of class AbstractProblem.
+     * Test of getData method, of class GenericProblem.
      */
     @Test
     public void testGetData() {
@@ -144,7 +153,41 @@ public class AbstractProblemTest {
     }
     
     /**
-     * Test of addMandatoryConstraint method, of class AbstractProblem.
+     * Test of getRandomSolutionGenerator method, of class GenericProblem.
+     */
+    @Test
+    public void testGetRandomSolutionGenerator() {
+        
+        System.out.println(" - test getRandomSolutionGenerator");
+        
+        // set, get and verify
+        RandomSolutionGenerator<Solution> rsl = rnd -> new IntegerSolution(123);
+        problem.setRandomSolutionGenerator(rsl);
+        assertEquals(rsl, problem.getRandomSolutionGenerator());
+        
+    }
+    
+    /**
+     * Test of setRandomSolutionGenerator method, of class GenericProblem.
+     */
+    @Test
+    public void testSetRandomSolutionGenerator() {
+        
+        System.out.println(" - test setRandomSolutionGenerator");
+        
+        // try to set to null, should produce error
+        boolean thrown = false;
+        try {
+            problem.setRandomSolutionGenerator(null);
+        } catch (NullPointerException ex){
+            thrown = true;
+        }
+        assertTrue(thrown);
+        
+    }
+    
+    /**
+     * Test of addMandatoryConstraint method, of class GenericProblem.
      */
     @Test
     public void testAddMandatoryConstraint() {
@@ -161,7 +204,7 @@ public class AbstractProblemTest {
     }
 
     /**
-     * Test of removeMandatoryConstraint method, of class AbstractProblem.
+     * Test of removeMandatoryConstraint method, of class GenericProblem.
      */
     @Test
     public void testRemoveMandatoryConstraint() {
@@ -189,7 +232,7 @@ public class AbstractProblemTest {
     }
 
     /**
-     * Test of addPenalizingConstraint method, of class AbstractProblem.
+     * Test of addPenalizingConstraint method, of class GenericProblem.
      */
     @Test
     public void testAddPenalizingConstraint() {
@@ -203,7 +246,7 @@ public class AbstractProblemTest {
     }
 
     /**
-     * Test of removePenalizingConstraint method, of class AbstractProblem.
+     * Test of removePenalizingConstraint method, of class GenericProblem.
      */
     @Test
     public void testRemovePenalizingConstraint() {
@@ -229,7 +272,7 @@ public class AbstractProblemTest {
     }
 
     /**
-     * Test of validate method, of class AbstractProblem.
+     * Test of validate method, of class GenericProblem.
      */
     @Test
     public void testValidate1() {
@@ -282,7 +325,7 @@ public class AbstractProblemTest {
         Constraint<IntegerSolution, Object> c = (s, data) -> new SimpleValidation(s.getI() > 0);
         
         // create problem stub with solution type IntegerSolution and fixed evaluation of 0.0
-        AbstractProblem<IntegerSolution, Object> intprob = new ProblemStub<>(new FixedEvaluationObjectiveStub(0.0));
+        GenericProblem<IntegerSolution, Object> intprob = new GenericProblem<>(new FixedEvaluationObjectiveStub(0.0), null, rnd -> null);
         // add constraint to problem
         intprob.addMandatoryConstraint(c);
         
@@ -308,7 +351,7 @@ public class AbstractProblemTest {
     }
     
     /**
-     * Test of getViolatedConstraints method, of class AbstractProblem.
+     * Test of getViolatedConstraints method, of class GenericProblem.
      */
     @Test
     public void testGetViolatedConstraints() {
@@ -345,7 +388,7 @@ public class AbstractProblemTest {
     }
 
     /**
-     * Test of evaluate method, of class AbstractProblem.
+     * Test of evaluate method, of class GenericProblem.
      */
     @Test
     public void testEvaluate() {
@@ -391,7 +434,7 @@ public class AbstractProblemTest {
     }
 
     /**
-     * Test of isMinimizing method, of class AbstractProblem.
+     * Test of isMinimizing method, of class GenericProblem.
      */
     @Test
     public void testIsMinimizing() {
@@ -407,33 +450,6 @@ public class AbstractProblemTest {
         problem.setObjective(o);
         assertTrue(problem.isMinimizing());
         
-    }
-
-    /**
-     * Problem stub used for testing. Only accepts objectives/constraints that can handle any solution type
-     * and that do not use any data.
-     */
-    private class ProblemStub<SolutionType extends Solution> extends AbstractProblem<SolutionType, Object> {
-
-        /**
-         * Create problem stub with given objective, without specifying the data.
-         * 
-         * @param obj objective
-         */
-        public ProblemStub(Objective<? super SolutionType, Object> obj) {
-            super(obj, null);
-        }
-
-        /**
-         * Not used here for testing.
-         * 
-         * @return null
-         */
-        @Override
-        public SolutionType createRandomSolution(Random rnd) {
-            return null;
-        }
-
     }
 
 }

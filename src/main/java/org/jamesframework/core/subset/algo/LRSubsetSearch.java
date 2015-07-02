@@ -17,7 +17,7 @@
 package org.jamesframework.core.subset.algo;
 
 import org.jamesframework.core.subset.SubsetProblem;
-import org.jamesframework.core.problems.Solution;
+import org.jamesframework.core.problems.sol.Solution;
 import org.jamesframework.core.subset.validations.SubsetValidation;
 import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
 import org.jamesframework.core.subset.SubsetSolution;

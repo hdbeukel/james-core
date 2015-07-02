@@ -16,7 +16,7 @@
 
 package org.jamesframework.test.fakes;
 
-import org.jamesframework.core.problems.Solution;
+import org.jamesframework.core.problems.sol.Solution;
 
 /**
  * A solution that wraps an integer value.

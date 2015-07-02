@@ -16,10 +16,12 @@
 
 package org.jamesframework.core.problems;
 
+import org.jamesframework.core.problems.sol.Solution;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jamesframework.core.exceptions.IncompatibleDeltaEvaluationException;
@@ -33,13 +35,15 @@ import org.jamesframework.core.problems.constraints.validations.UnanimousValidat
 import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
 import org.jamesframework.core.problems.objectives.Objective;
 import org.jamesframework.core.problems.objectives.evaluations.PenalizedEvaluation;
+import org.jamesframework.core.problems.sol.RandomSolutionGenerator;
 import org.jamesframework.core.search.neigh.Move;
 
 /**
  * <p>
- * Represents an abstract problem that separates data from the objective and constraints (if any). The problem contains
- * data of a specific data type (parameter <code>DataType</code>) and solutions are evaluated and validated based on a
- * combination of an objective and constraints which use the underlying data. Two types of constraints can be specified:
+ * A generic problem is fully based on delegation of its responsabilities, by separating data from the objective,
+ * constraints (if any) and random solution generation. The problem contains data of a specific type (parameter
+ * <code>DataType</code>) and solutions are evaluated and validated based on a combination of an objective and
+ * constraints, which use the underlying data. Two types of constraints can be specified:
  * </p>
  * <ul>
  *  <li>
@@ -61,13 +65,16 @@ import org.jamesframework.core.search.neigh.Move;
  *  </p>
  *  </li>
  * </ul>
+ * <p>
+ * The problem uses an external, customizable random solution generator to create random instances of the solution type.
+ * </p>
  * 
  * @param <SolutionType> type of solutions to the problem, required to extend {@link Solution}
  * @param <DataType> type of underlying data
  * 
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
-public abstract class AbstractProblem<SolutionType extends Solution, DataType> implements Problem<SolutionType> {
+public class GenericProblem<SolutionType extends Solution, DataType> implements Problem<SolutionType> {
     
     // objective function (can be more general than solution and data types of problem)
     private Objective<? super SolutionType, ? super DataType> objective;
@@ -79,24 +86,38 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
             mandatoryConstraints, mandatoryConstraintsView;
     private final List<PenalizingConstraint<? super SolutionType, ? super DataType>>
             penalizingConstraints, penalizingConstraintsView;
+    // random solution generator (allowed to generate subtypes of the problem's solution type)
+    private RandomSolutionGenerator<? extends SolutionType> randomSolutionGenerator;
     
     /**
-     * Creates a new abstract problem with given objective and data. Any objective designed for the solution and
-     * data types of the problem, or more general types, is accepted. The objective can not be <code>null</code>,
-     * as it will be called to evaluate solutions.
+     * <p>
+     * Creates a new abstract problem with given objective, data and random solution generator. Any objective
+     * designed for the solution and data types of the problem, or supertypes thereof, is accepted. The random
+     * solution generator may produce subtypes of the problem's solution type.
+     * </p>
+     * <p>
+     * The objective and random solution generator can not be <code>null</code>.
+     * </p>
      * 
      * @param objective objective function
      * @param data underlying data
-     * @throws NullPointerException if <code>objective</code> is <code>null</code>
+     * @param randomSolutionGenerator random solution generator
+     * @throws NullPointerException if <code>objective</code> or <code>randomSolutionGenerator</code> are <code>null</code>
      */
-    public AbstractProblem(Objective<? super SolutionType, ? super DataType> objective, DataType data) {
+    public GenericProblem(Objective<? super SolutionType, ? super DataType> objective, DataType data,
+                          RandomSolutionGenerator<? extends SolutionType> randomSolutionGenerator) {
         // check that objective is not null
         if(objective == null){
-            throw new NullPointerException("Error while creating problem: null not allowed for objective.");
+            throw new NullPointerException("Error while creating generic problem: null not allowed for objective.");
+        }
+        // check that random solution generator is not null
+        if(randomSolutionGenerator == null){
+            throw new NullPointerException("Error while creating generic problem: null not allowed for random solution generator.");
         }
         // set fields
         this.objective = objective;
         this.data = data;
+        this.randomSolutionGenerator = randomSolutionGenerator;
         // initialize constraint lists + views
         mandatoryConstraints = new ArrayList<>();
         penalizingConstraints = new ArrayList<>();
@@ -114,20 +135,44 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
     }
 
     /**
-     * Set a new objective function. Any objective designed for the solution and data types of the problem,
-     * or more general types, is accepted. The objective can not be null, as it will be called to evaluate solutions.
+     * Set the objective function. Any objective designed for the solution and data types of the problem,
+     * or more general types, is accepted. The objective can not be <code>null</code>.
      * 
-     * @param objective new objective function
+     * @param objective objective function
      * @throws NullPointerException if <code>objective</code> is <code>null</code>
      */
     public void setObjective(Objective<? super SolutionType, ? super DataType> objective) {
         // check not null
         if(objective == null){
-            throw new NullPointerException("Error while setting new objective in problem: null is not allowed.");
+            throw new NullPointerException("Error while setting objective: null is not allowed.");
         }
         this.objective = objective;
     }
+    
+    /**
+     * Get the random solution generator.
+     * 
+     * @return random solution generator
+     */
+    public RandomSolutionGenerator<? extends SolutionType> getRandomSolutionGenerator(){
+        return randomSolutionGenerator;
+    }
 
+    /**
+     * Set random solution generator. It is allowed for the generator to produce subtypes of the
+     * problem's solution type. The generator can not be <code>null</code>.
+     * 
+     * @param randomSolutionGenerator random solution generator
+     * @throws NullPointerException if <code>randomSolutionGenerator</code> is <code>null</code>
+     */
+    public void setRandomSolutionGenerator(RandomSolutionGenerator<? extends SolutionType> randomSolutionGenerator){
+        // check not null
+        if(randomSolutionGenerator == null){
+            throw new NullPointerException("Error while setting random solution generator: null is not allowed");
+        }
+        this.randomSolutionGenerator = randomSolutionGenerator;
+    }
+    
     /**
      * Get the underlying data.
      * 
@@ -401,6 +446,17 @@ public abstract class AbstractProblem<SolutionType extends Solution, DataType> i
             return newPenalizedEval;
         }
     }
+
+    /**
+     * Delegates to the contained random solution generator.
+     * 
+     * @param rnd source of randomness
+     * @return random solution
+     */
+    @Override
+    public SolutionType createRandomSolution(Random rnd) {
+        return randomSolutionGenerator.createRandomSolution(rnd);
+    }    
 
     /**
      * Indicates whether the underlying objective is minimizing.

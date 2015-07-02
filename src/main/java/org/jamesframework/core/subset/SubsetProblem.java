@@ -17,10 +17,9 @@
 package org.jamesframework.core.subset;
 
 import java.util.Comparator;
-import java.util.Random;
 import java.util.Set;
 import org.jamesframework.core.exceptions.IncompatibleDeltaValidationException;
-import org.jamesframework.core.problems.AbstractProblem;
+import org.jamesframework.core.problems.GenericProblem;
 import org.jamesframework.core.problems.constraints.validations.SimpleValidation;
 import org.jamesframework.core.problems.constraints.validations.Validation;
 import org.jamesframework.core.subset.validations.SubsetValidation;
@@ -31,7 +30,7 @@ import org.jamesframework.core.subset.neigh.moves.SubsetMove;
 import org.jamesframework.core.util.SetUtilities;
 
 /**
- * High-level subset problem consisting of data, an objective and possibly some constraints (see {@link AbstractProblem}).
+ * High-level subset problem consisting of data, an objective and possibly some constraints (see {@link GenericProblem}).
  * All items in the data set are identified using a unique integer ID so that any subset selection problem comes down to
  * selection of a subset of these IDs. The solution type is fixed to {@link SubsetSolution} and the data type can be set
  * to any implementation of the {@link IntegerIdentifiedData} interface. When creating the problem, the minimum and maximum
@@ -41,8 +40,8 @@ import org.jamesframework.core.util.SetUtilities;
  * @param <DataType> underlying data type, should implement the interface {@link IntegerIdentifiedData}
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
-public class SubsetProblem<DataType extends IntegerIdentifiedData> extends AbstractProblem<SubsetSolution, DataType> {
-
+public class SubsetProblem<DataType extends IntegerIdentifiedData> extends GenericProblem<SubsetSolution, DataType> {
+    
     // minimum and maximum subset size
     private int minSubsetSize, maxSubsetSize;
     
@@ -75,8 +74,18 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Abstr
      */
     public SubsetProblem(Objective<? super SubsetSolution, ? super DataType> objective,
                                 DataType data, int minSubsetSize, int maxSubsetSize, Comparator<Integer> orderOfIDs) {
-        // call constructor of abstract problem (already checks that objective is not null)
-        super(objective, data);
+        // call constructor of generic problem (already checks that objective is not null)
+        // set default random subset solution generator to create random subsets within the imposed size limits
+        super(objective, data, (rnd) -> {
+            // pick random number of selected IDs within bounds
+            int size = minSubsetSize + rnd.nextInt(maxSubsetSize-minSubsetSize+1);
+            // randomly generate selection
+            Set<Integer> selection = SetUtilities.getRandomSubset(data.getIDs(), size, rnd);
+            // create subset solution with this selection
+            SubsetSolution sol = new SubsetSolution(data.getIDs(), selection, orderOfIDs);
+            // return random solution
+            return sol;
+        });
         // check that data is not null
         if(data == null){
             throw new NullPointerException("Error while creating subset problem: data is required, can not be null.");
@@ -196,27 +205,9 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Abstr
     }
     
     /**
-     * Create a random solution within the allowed minimum and maximum subset size. The set of all IDs
-     * is retrieved from the underlying data and a random subset of these IDs is selected.
-     * 
-     * @param rnd source of randomness used to generate random subset solution
-     * @return random subset solution within minimum and maximum size
-     */
-    @Override
-    public SubsetSolution createRandomSolution(Random rnd) {
-        // pick random number of selected IDs within bounds
-        int size = minSubsetSize + rnd.nextInt(maxSubsetSize-minSubsetSize+1);
-        // randomly generate selection
-        Set<Integer> selection = SetUtilities.getRandomSubset(getData().getIDs(), size, rnd);
-        // create subset solution with this selection
-        SubsetSolution sol = new SubsetSolution(getData().getIDs(), selection, orderOfIDs);
-        // return random solution
-        return sol;
-    }
-    
-    /**
-     * Creates an empty subset solution in which no IDs are selected. The set of all IDs is obtained from
-     * the underlying data and passed to the created empty solution.
+     * Creates an empty subset solution in which no IDs are selected.
+     * The set of all IDs is obtained from the underlying data and passed
+     * to the created empty solution.
      *
      * @return empty subset solution with no selected IDs
      */

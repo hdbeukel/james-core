@@ -16,6 +16,7 @@
 
 package org.jamesframework.core.problems;
 
+import org.jamesframework.core.problems.sol.Solution;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import org.jamesframework.core.exceptions.IncompatibleDeltaEvaluationException;

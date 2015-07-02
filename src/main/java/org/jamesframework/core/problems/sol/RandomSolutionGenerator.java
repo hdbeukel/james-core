@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Ghent University, Bayer CropScience.
+ * Copyright 2015 Ghent University, Bayer CropScience.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,28 @@
  * limitations under the License.
  */
 
-package org.jamesframework.core.factory;
+package org.jamesframework.core.problems.sol;
 
-import org.jamesframework.core.problems.Problem;
-import org.jamesframework.core.problems.sol.Solution;
-import org.jamesframework.core.search.Search;
+import java.util.Random;
 
 /**
- * Factory used to create a search given the problem to be solved.
+ * A random solution generator creates random solutions of a specific type.
+ * It is required that every request generates a new solution instance which
+ * is independent of any previously generated solutions.
  * 
- * @param <SolutionType> solution type of created searches, required to extend {@link Solution}
+ * 
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
+ * @param <SolutionType> type of the generated solutions, required to extend {@link Solution}
  */
 @FunctionalInterface
-public interface SearchFactory<SolutionType extends Solution> {
-    
-    /**
-     * Create a search, given the problem to solve.
-     * 
-     * @param problem problem to solve
-     * @return created search
-     */
-    public Search<SolutionType> create(Problem<SolutionType> problem);
+public interface RandomSolutionGenerator<SolutionType extends Solution> {
 
+    /**
+     * Generate a random solution.
+     * 
+     * @param rnd source of randomness
+     * @return random solution
+     */
+    public SolutionType createRandomSolution(Random rnd);
+    
 }

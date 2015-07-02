@@ -17,7 +17,7 @@
 package org.jamesframework.core.factory;
 
 import org.jamesframework.core.problems.Problem;
-import org.jamesframework.core.problems.Solution;
+import org.jamesframework.core.problems.sol.Solution;
 import org.jamesframework.core.search.algo.MetropolisSearch;
 import org.jamesframework.core.search.neigh.Neighbourhood;
 

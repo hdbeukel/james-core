@@ -18,7 +18,7 @@ package org.jamesframework.core.subset;
 
 import java.util.Random;
 import org.jamesframework.core.exceptions.IncompatibleDeltaValidationException;
-import org.jamesframework.core.problems.Solution;
+import org.jamesframework.core.problems.sol.Solution;
 import org.jamesframework.core.problems.constraints.validations.Validation;
 import org.jamesframework.core.search.neigh.Move;
 import org.jamesframework.core.util.SetUtilities;

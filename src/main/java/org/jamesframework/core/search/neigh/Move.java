@@ -17,7 +17,7 @@
 package org.jamesframework.core.search.neigh;
 
 import org.jamesframework.core.exceptions.SolutionModificationException;
-import org.jamesframework.core.problems.Solution;
+import org.jamesframework.core.problems.sol.Solution;
 
 /**
  * Interface of a move that can be applied to a generic solution type. Contains methods

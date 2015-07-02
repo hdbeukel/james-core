@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jamesframework.core.problems;
+package org.jamesframework.core.problems.sol;
 
 import org.jamesframework.core.exceptions.SolutionCopyException;
 
