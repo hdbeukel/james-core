@@ -123,7 +123,7 @@ public class SearchTestTemplate {
     public void setUp(){
         data = new ScoredFakeSubsetData(scores);
         obj = new SumOfScoresFakeSubsetObjective();
-        problem = new SubsetProblem<>(obj, data, SUBSET_SIZE);
+        problem = new SubsetProblem<>(data, obj, SUBSET_SIZE);
         constraint = new MinDiffFakeSubsetConstraint(MIN_SCORE_DIFF);
         neigh = new SingleSwapNeighbourhood();
     }

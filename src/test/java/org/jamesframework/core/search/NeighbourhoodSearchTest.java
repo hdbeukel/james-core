@@ -83,7 +83,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
     public void setUp(){
         super.setUp();
         // for this test, a variable size subset problem is used (+/- 1 allowed)
-        problem = new SubsetProblem<>(obj, data, SUBSET_SIZE-1, SUBSET_SIZE+1);
+        problem = new SubsetProblem<>(data, obj, SUBSET_SIZE-1, SUBSET_SIZE+1);
         neighSearch = new NeighbourhoodSearchStub<>(problem);
         setRandomSeed(neighSearch);
     }

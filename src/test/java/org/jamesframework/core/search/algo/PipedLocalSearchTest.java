@@ -146,8 +146,8 @@ public class PipedLocalSearchTest extends SearchTestTemplate {
         System.out.println(" - test constructor 5");
         // try with search in pipeline that solves a different problem
         SubsetProblem<ScoredFakeSubsetData> problem2 = new SubsetProblem<>(
-                                                                    new FixedEvaluationObjectiveStub(7.0),
                                                                     data,
+                                                                    new FixedEvaluationObjectiveStub(7.0),
                                                                     DATASET_SIZE
                                                                 );
         List<LocalSearch<SubsetSolution>> pipeline = new ArrayList<>();

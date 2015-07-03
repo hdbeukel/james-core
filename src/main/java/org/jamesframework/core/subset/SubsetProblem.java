@@ -51,7 +51,7 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Gener
     
     /**
      * <p>
-     * Creates a new subset problem with given objective, data and minimum/maximum subset size. Both <code>objective</code>
+     * Creates a new subset problem with given data, objective and minimum/maximum subset size. Both <code>objective</code>
      * and <code>data</code> are not allowed to be <code>null</code>, an exception will be thrown if they are. Any objective
      * designed to evaluate subset solutions (or more general solutions) using the specified data type (or more general data)
      * is accepted. The minimum and maximum subset size should be contained in <code>[0,n]</code> where <code>n</code>
@@ -63,8 +63,8 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Gener
      * This argument may be <code>null</code> in which case no ordering is imposed.
      * </p>
      * 
-     * @param objective objective function, can not be <code>null</code>
      * @param data underlying data, can not be <code>null</code>
+     * @param objective objective function, can not be <code>null</code>
      * @param minSubsetSize minimum subset size (should be &ge; 0 and &le; maximum subset size)
      * @param maxSubsetSize maximum subset size (should be &ge; minimum subset size and &le; number of items in underlying data)
      * @param orderOfIDs the order that is imposed on the IDs in any generated subset solution, may be <code>null</code>
@@ -73,17 +73,17 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Gener
      * @throws NullPointerException if <code>objective</code> or <code>data</code> is <code>null</code>
      * @throws IllegalArgumentException if an invalid minimum or maximum subset size is specified
      */
-    public SubsetProblem(Objective<? super SubsetSolution, ? super DataType> objective,
-                                DataType data, int minSubsetSize, int maxSubsetSize, Comparator<Integer> orderOfIDs) {
+    public SubsetProblem(DataType data, Objective<? super SubsetSolution, ? super DataType> objective,
+                         int minSubsetSize, int maxSubsetSize, Comparator<Integer> orderOfIDs) {
         // call constructor of generic problem (already checks that objective is not null)
         // set default random subset solution generator to create random subsets within the imposed size limits
-        super(objective, data, (rnd) -> {
+        super(data, objective, (r, d) -> {
             // pick random number of selected IDs within bounds
-            int size = minSubsetSize + rnd.nextInt(maxSubsetSize-minSubsetSize+1);
+            int size = minSubsetSize + r.nextInt(maxSubsetSize-minSubsetSize+1);
             // randomly generate selection
-            Set<Integer> selection = SetUtilities.getRandomSubset(data.getIDs(), size, rnd);
+            Set<Integer> selection = SetUtilities.getRandomSubset(d.getIDs(), size, r);
             // create subset solution with this selection
-            SubsetSolution sol = new SubsetSolution(data.getIDs(), selection, orderOfIDs);
+            SubsetSolution sol = new SubsetSolution(d.getIDs(), selection, orderOfIDs);
             // return random solution
             return sol;
         });
@@ -111,7 +111,7 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Gener
     
     /**
      * <p>
-     * Creates a new subset problem with given objective, data and minimum/maximum subset size. Both <code>objective</code>
+     * Creates a new subset problem with given data, objective and minimum/maximum subset size. Both <code>objective</code>
      * and <code>data</code> are not allowed to be <code>null</code>, an exception will be thrown if they are. Any objective
      * designed to evaluate subset solutions (or more general solutions) using the specified data type (or more general data)
      * is accepted. The minimum and maximum subset size should be contained in <code>[0,n]</code> where <code>n</code>
@@ -123,8 +123,8 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Gener
      * in ascending order (according to the natural integer ordering).
      * </p>
      * 
-     * @param objective objective function, can not be <code>null</code>
      * @param data underlying data, can not be <code>null</code>
+     * @param objective objective function, can not be <code>null</code>
      * @param minSubsetSize minimum subset size (should be &ge; 0 and &le; maximum subset size)
      * @param maxSubsetSize maximum subset size (should be &ge; minimum subset size and &le; number of items in underlying data)
      * @param orderIDs indicates whether IDs are ordered (ascending) in generated subset solutions
@@ -132,13 +132,13 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Gener
      * @throws NullPointerException if <code>objective</code> or <code>data</code> is <code>null</code>
      * @throws IllegalArgumentException if an invalid minimum or maximum subset size is specified
      */
-    public SubsetProblem(Objective<? super SubsetSolution, ? super DataType> objective,
-                                DataType data, int minSubsetSize, int maxSubsetSize, boolean orderIDs) {
-        this(objective, data, minSubsetSize, maxSubsetSize, orderIDs ? Comparator.naturalOrder() : null);
+    public SubsetProblem(DataType data, Objective<? super SubsetSolution, ? super DataType> objective,
+                         int minSubsetSize, int maxSubsetSize, boolean orderIDs) {
+        this(data, objective, minSubsetSize, maxSubsetSize, orderIDs ? Comparator.naturalOrder() : null);
     }
     
     /**
-     * Creates a new subset problem with given objective, data and minimum/maximum subset size. Both <code>objective</code>
+     * Creates a new subset problem with given data, objective and minimum/maximum subset size. Both <code>objective</code>
      * and <code>data</code> are not allowed to be <code>null</code>, an exception will be thrown if they are. Any objective
      * designed to evaluate subset solutions (or more general solutions) using the specified data type (or more general data)
      * is accepted. The minimum and maximum subset size should be contained in <code>[0,n]</code> where <code>n</code>
@@ -146,47 +146,47 @@ public class SubsetProblem<DataType extends IntegerIdentifiedData> extends Gener
      * should be smaller than or equal to the maximum size. Generated subset solutions do not impose any
      * order on the IDs.
      * 
-     * @param objective objective function, can not be <code>null</code>
      * @param data underlying data, can not be <code>null</code>
+     * @param objective objective function, can not be <code>null</code>
      * @param minSubsetSize minimum subset size (should be &ge; 0 and &le; maximum subset size)
      * @param maxSubsetSize maximum subset size (should be &ge; minimum subset size and &le; number of items in underlying data)
      * @throws NullPointerException if <code>objective</code> or <code>data</code> is <code>null</code>
      * @throws IllegalArgumentException if an invalid minimum or maximum subset size is specified
      */
-    public SubsetProblem(Objective<? super SubsetSolution, ? super DataType> objective,
-                                DataType data, int minSubsetSize, int maxSubsetSize) {
-        this(objective, data, minSubsetSize, maxSubsetSize, false);
+    public SubsetProblem(DataType data, Objective<? super SubsetSolution, ? super DataType> objective,
+                         int minSubsetSize, int maxSubsetSize) {
+        this(data, objective, minSubsetSize, maxSubsetSize, false);
     }
     
     /**
      * Creates a subset problem with fixed subset size. Equivalent to calling<pre>
-     * SubsetProblem p = new SubsetProblem(objective, data, fixedSubsetSize, fixedSubsetSize);</pre>
+     * SubsetProblem p = new SubsetProblem(data, objective, fixedSubsetSize, fixedSubsetSize);</pre>
      * The fixed subset size should be contained in <code>[0,n]</code> where <code>n</code>
      * is the number of items in the given data from which a subset is to be selected.
      * Generated subset solutions do not impose any order on the IDs.
      * 
-     * @param objective objective function, can not be <code>null</code>
      * @param data underlying data, can not be <code>null</code>
+     * @param objective objective function, can not be <code>null</code>
      * @param fixedSubsetSize fixed subset size
      * @throws NullPointerException if <code>objective</code> or <code>data</code> is <code>null</code>
      * @throws IllegalArgumentException if an invalid fixed subset size is specified 
      */
-    public SubsetProblem(Objective<? super SubsetSolution, ? super DataType> objective, DataType data, int fixedSubsetSize) {
-        this(objective, data, fixedSubsetSize, fixedSubsetSize);
+    public SubsetProblem(DataType data, Objective<? super SubsetSolution, ? super DataType> objective, int fixedSubsetSize) {
+        this(data, objective, fixedSubsetSize, fixedSubsetSize);
     }
     
     /**
      * Creates a subset problem without subset size limits. Equivalent to calling<pre>
-     * SubsetProblem p = new SubsetProblem(objective, data, 0, data.getIDs().size());</pre>
+     * SubsetProblem p = new SubsetProblem(data, objective, 0, data.getIDs().size());</pre>
      * Generated subset solutions do not impose any order on the IDs.
      * 
-     * @param objective objective function, can not be <code>null</code>
      * @param data underlying data, can not be <code>null</code>
+     * @param objective objective function, can not be <code>null</code>
      * @throws NullPointerException if <code>objective</code> or <code>data</code> is <code>null</code>
      * @throws IllegalArgumentException if an invalid fixed subset size is specified 
      */
-    public SubsetProblem(Objective<? super SubsetSolution, ? super DataType> objective, DataType data) {
-        this(objective, data, 0, data.getIDs().size());
+    public SubsetProblem(DataType data, Objective<? super SubsetSolution, ? super DataType> objective) {
+        this(data, objective, 0, data.getIDs().size());
     }
     
     /**

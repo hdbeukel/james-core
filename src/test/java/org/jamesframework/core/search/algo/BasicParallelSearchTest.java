@@ -18,7 +18,6 @@ package org.jamesframework.core.search.algo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.jamesframework.core.exceptions.SearchException;
 import org.jamesframework.core.problems.Problem;
@@ -33,7 +32,6 @@ import org.jamesframework.core.search.algo.exh.ExhaustiveSearch;
 import org.jamesframework.core.search.listeners.SearchListener;
 import org.jamesframework.core.subset.algo.exh.SubsetSolutionIterator;
 import org.jamesframework.test.util.DoubleComparatorWithPrecision;
-import org.jamesframework.test.fakes.ScoredFakeSubsetData;
 import org.jamesframework.test.stubs.NeverSatisfiedConstraintStub;
 import org.jamesframework.test.stubs.NeverSatisfiedPenalizingConstraintStub;
 import org.jamesframework.test.util.DelayedExecution;
@@ -128,7 +126,7 @@ public class BasicParallelSearchTest extends SearchTestTemplate {
     public void testAddSearch() {
         System.out.println(" - test addSearch");
         // try to add a search that solves a different problem
-        Problem<SubsetSolution> p = new GenericProblem<>(obj, data, rnd -> null);
+        Problem<SubsetSolution> p = new GenericProblem<>(data, obj, (r,d) -> null);
         parallelSearch.addSearch(new RandomSearch<>(p));
     }
     

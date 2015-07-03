@@ -184,7 +184,7 @@ public class LRSubsetSearchTest extends SearchTestTemplate {
     public void testSingleRunAnySubsetSize() {
         System.out.println(" - test single run, any subset size (L=" + DEFAULT_L + ", R=" + DEFAULT_R + ")");
         // alter problem so that any subset size is accepted
-        problem = new SubsetProblem<>(obj, data, 0, data.getIDs().size());
+        problem = new SubsetProblem<>(data, obj, 0, data.getIDs().size());
         // create LR search with default L and R
         search = new LRSubsetSearch(problem, DEFAULT_L, DEFAULT_R);
         // single run
@@ -199,7 +199,7 @@ public class LRSubsetSearchTest extends SearchTestTemplate {
     public void testSingleRunAnySubsetSizeLargeDelta() {
         System.out.println(" - test single run, any subset size, large delta (L=20, R=5)");
         // alter problem so that any subset size is accepted
-        problem = new SubsetProblem<>(obj, data, 0, data.getIDs().size());
+        problem = new SubsetProblem<>(data, obj, 0, data.getIDs().size());
         // create LR search with L=20 and R=5 (large delta)
         search = new LRSubsetSearch(problem, 20, 5);
         // single run

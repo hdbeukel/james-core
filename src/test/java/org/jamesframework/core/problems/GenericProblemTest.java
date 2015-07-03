@@ -70,7 +70,7 @@ public class GenericProblemTest {
     @Before
     public void setUp(){
         FixedEvaluationObjectiveStub o = new FixedEvaluationObjectiveStub(10.0);
-        problem = new GenericProblem<>(o, null, rnd -> null);
+        problem = new GenericProblem<>(null, o, (r,d) -> null);
     }
 
     /**
@@ -161,7 +161,7 @@ public class GenericProblemTest {
         System.out.println(" - test getRandomSolutionGenerator");
         
         // set, get and verify
-        RandomSolutionGenerator<Solution> rsl = rnd -> new IntegerSolution(123);
+        RandomSolutionGenerator<IntegerSolution, Object> rsl = (r,d) -> new IntegerSolution(r.nextInt());
         problem.setRandomSolutionGenerator(rsl);
         assertEquals(rsl, problem.getRandomSolutionGenerator());
         
@@ -325,7 +325,7 @@ public class GenericProblemTest {
         Constraint<IntegerSolution, Object> c = (s, data) -> new SimpleValidation(s.getI() > 0);
         
         // create problem stub with solution type IntegerSolution and fixed evaluation of 0.0
-        GenericProblem<IntegerSolution, Object> intprob = new GenericProblem<>(new FixedEvaluationObjectiveStub(0.0), null, rnd -> null);
+        GenericProblem<IntegerSolution, Object> intprob = new GenericProblem<>(new FixedEvaluationObjectiveStub(0.0), null, (r,d) -> null);
         // add constraint to problem
         intprob.addMandatoryConstraint(c);
         

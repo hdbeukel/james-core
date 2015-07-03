@@ -86,26 +86,28 @@ public class GenericProblem<SolutionType extends Solution, DataType> implements 
             mandatoryConstraints, mandatoryConstraintsView;
     private final List<PenalizingConstraint<? super SolutionType, ? super DataType>>
             penalizingConstraints, penalizingConstraintsView;
-    // random solution generator (allowed to generate subtypes of the problem's solution type)
-    private RandomSolutionGenerator<? extends SolutionType> randomSolutionGenerator;
+    // random solution generator (allowed to generate subtypes of the problem's solution
+    // type, requiring any supertype of the problem's data type)
+    private RandomSolutionGenerator<? extends SolutionType, ? super DataType> randomSolutionGenerator;
     
     /**
      * <p>
-     * Creates a new generic problem with given objective, data and random solution generator. Any objective
+     * Creates a new generic problem with given data, objective and random solution generator. Any objective
      * designed for the solution and data types of the problem, or supertypes thereof, is accepted. The random
-     * solution generator may produce subtypes of the problem's solution type.
+     * solution generator may produce subtypes of the problem's solution type, requiring any supertype of the
+     * problem's data type.
      * </p>
      * <p>
      * The objective and random solution generator can not be <code>null</code>.
      * </p>
      * 
-     * @param objective objective function
      * @param data underlying data
+     * @param objective objective function
      * @param randomSolutionGenerator random solution generator
      * @throws NullPointerException if <code>objective</code> or <code>randomSolutionGenerator</code> are <code>null</code>
      */
-    public GenericProblem(Objective<? super SolutionType, ? super DataType> objective, DataType data,
-                          RandomSolutionGenerator<? extends SolutionType> randomSolutionGenerator) {
+    public GenericProblem(DataType data, Objective<? super SolutionType, ? super DataType> objective,
+                          RandomSolutionGenerator<? extends SolutionType, ? super DataType> randomSolutionGenerator) {
         // check that objective is not null
         if(objective == null){
             throw new NullPointerException("Error while creating generic problem: null not allowed for objective.");
@@ -115,8 +117,8 @@ public class GenericProblem<SolutionType extends Solution, DataType> implements 
             throw new NullPointerException("Error while creating generic problem: null not allowed for random solution generator.");
         }
         // set fields
-        this.objective = objective;
         this.data = data;
+        this.objective = objective;
         this.randomSolutionGenerator = randomSolutionGenerator;
         // initialize constraint lists + views
         mandatoryConstraints = new ArrayList<>();
@@ -154,18 +156,19 @@ public class GenericProblem<SolutionType extends Solution, DataType> implements 
      * 
      * @return random solution generator
      */
-    public RandomSolutionGenerator<? extends SolutionType> getRandomSolutionGenerator(){
+    public RandomSolutionGenerator<? extends SolutionType, ? super DataType> getRandomSolutionGenerator(){
         return randomSolutionGenerator;
     }
 
     /**
      * Set random solution generator. It is allowed for the generator to produce subtypes of the
-     * problem's solution type. The generator can not be <code>null</code>.
+     * problem's solution type, requiring any supertype of the problem's data type. The generator
+     * can not be <code>null</code>.
      * 
      * @param randomSolutionGenerator random solution generator
      * @throws NullPointerException if <code>randomSolutionGenerator</code> is <code>null</code>
      */
-    public void setRandomSolutionGenerator(RandomSolutionGenerator<? extends SolutionType> randomSolutionGenerator){
+    public void setRandomSolutionGenerator(RandomSolutionGenerator<? extends SolutionType, ? super DataType> randomSolutionGenerator){
         // check not null
         if(randomSolutionGenerator == null){
             throw new NullPointerException("Error while setting random solution generator: null is not allowed");
@@ -455,7 +458,7 @@ public class GenericProblem<SolutionType extends Solution, DataType> implements 
      */
     @Override
     public SolutionType createRandomSolution(Random rnd) {
-        return randomSolutionGenerator.createRandomSolution(rnd);
+        return randomSolutionGenerator.createRandomSolution(rnd, data);
     }    
 
     /**

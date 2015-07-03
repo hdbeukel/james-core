@@ -115,7 +115,7 @@ public class ExhaustiveSearchTest extends SearchTestTemplate {
         // create small problem components
         dataSmall = new ScoredFakeSubsetData(scoresSmall);
         objSmall = new SumOfScoresFakeSubsetObjective();
-        problemSmall = new SubsetProblem<>(objSmall, dataSmall, SUBSET_SIZE_SMALL);
+        problemSmall = new SubsetProblem<>(dataSmall, objSmall, SUBSET_SIZE_SMALL);
         // create solution iterators
         solutionIterator = new SubsetSolutionIterator(data.getIDs(), SUBSET_SIZE);
         solutionIteratorSmall = new SubsetSolutionIterator(dataSmall.getIDs(), SUBSET_SIZE_SMALL);

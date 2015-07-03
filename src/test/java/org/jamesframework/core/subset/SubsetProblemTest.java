@@ -92,8 +92,8 @@ public class SubsetProblemTest {
         // create fake constraint
         fakeConstraint = new MinDiffFakeSubsetConstraint(MIN_SCORE_DIFF);
         // create subset problems
-        problem1 = new SubsetProblem<>(fakeObjIgnoringData, fakeData, PROBLEM_1_FIXED_SIZE);
-        problem2 = new SubsetProblem<>(fakeObjUsingData, fakeData, PROBLEM_2_MIN_SIZE, PROBLEM_2_MAX_SIZE);
+        problem1 = new SubsetProblem<>(fakeData, fakeObjIgnoringData, PROBLEM_1_FIXED_SIZE);
+        problem2 = new SubsetProblem<>(fakeData, fakeObjUsingData, PROBLEM_2_MIN_SIZE, PROBLEM_2_MAX_SIZE);
     }
     
     /**
@@ -107,7 +107,7 @@ public class SubsetProblemTest {
         // try to create a subset problem without objective
         boolean thrown = false;
         try {
-            SubsetProblem<?> p = new SubsetProblem<>(null, fakeData, 5);
+            SubsetProblem<?> p = new SubsetProblem<>(fakeData, null, 5);
         } catch (NullPointerException ex) {
             thrown = true;
         }
@@ -116,7 +116,7 @@ public class SubsetProblemTest {
         // try to create a subset problem without data
         thrown = false;
         try {
-            SubsetProblem<?> p = new SubsetProblem<>(fakeObjIgnoringData, null, 5);
+            SubsetProblem<?> p = new SubsetProblem<>(null, fakeObjIgnoringData, 5);
         } catch (NullPointerException ex) {
             thrown = true;
         }
@@ -125,21 +125,21 @@ public class SubsetProblemTest {
         // try to set invalid subset sizes
         thrown = false;
         try {
-            SubsetProblem<?> p = new SubsetProblem<>(fakeObjIgnoringData, fakeData, -1);
+            SubsetProblem<?> p = new SubsetProblem<>(fakeData, fakeObjIgnoringData, -1);
         } catch (IllegalArgumentException ex) {
             thrown = true;
         }
         assertTrue(thrown);
         thrown = false;
         try {
-            SubsetProblem<?> p = new SubsetProblem<>(fakeObjIgnoringData, fakeData, fakeData.getIDs().size()+1);
+            SubsetProblem<?> p = new SubsetProblem<>(fakeData, fakeObjIgnoringData, fakeData.getIDs().size()+1);
         } catch (IllegalArgumentException ex) {
             thrown = true;
         }
         assertTrue(thrown);
         thrown = false;
         try {
-            SubsetProblem<?> p = new SubsetProblem<>(fakeObjIgnoringData, fakeData, 4, 2);
+            SubsetProblem<?> p = new SubsetProblem<>(fakeData, fakeObjIgnoringData, 4, 2);
         } catch (IllegalArgumentException ex) {
             thrown = true;
         }
@@ -147,10 +147,10 @@ public class SubsetProblemTest {
         
         // verify that no errors are thrown for valid params
         SubsetProblem<?> p;
-        p = new SubsetProblem<>(fakeObjIgnoringData, fakeData, 2, 4);
-        p = new SubsetProblem<>(fakeObjIgnoringData, fakeData, 1, fakeData.getIDs().size());
-        p = new SubsetProblem<>(fakeObjIgnoringData, fakeData, 1);
-        p = new SubsetProblem<>(fakeObjIgnoringData, fakeData, fakeData.getIDs().size());
+        p = new SubsetProblem<>(fakeData, fakeObjIgnoringData, 2, 4);
+        p = new SubsetProblem<>(fakeData, fakeObjIgnoringData, 1, fakeData.getIDs().size());
+        p = new SubsetProblem<>(fakeData, fakeObjIgnoringData, 1);
+        p = new SubsetProblem<>(fakeData, fakeObjIgnoringData, fakeData.getIDs().size());
         
     }
 
@@ -538,7 +538,7 @@ public class SubsetProblemTest {
     @Test
     public void testSortedIDs(){
         System.out.println(" - test sorted IDs");
-        problem1 = new SubsetProblem<>(fakeObjIgnoringData, fakeData, PROBLEM_1_FIXED_SIZE, PROBLEM_1_FIXED_SIZE, true);
+        problem1 = new SubsetProblem<>(fakeData, fakeObjIgnoringData, PROBLEM_1_FIXED_SIZE, PROBLEM_1_FIXED_SIZE, true);
         SubsetSolution sol = problem1.createRandomSolution();
         Integer prevID = null;
         for(int ID : sol.getAllIDs()){
