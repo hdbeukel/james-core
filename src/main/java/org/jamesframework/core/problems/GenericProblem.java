@@ -458,7 +458,7 @@ public class GenericProblem<SolutionType extends Solution, DataType> implements 
      */
     @Override
     public SolutionType createRandomSolution(Random rnd) {
-        return randomSolutionGenerator.createRandomSolution(rnd, data);
+        return randomSolutionGenerator.create(rnd, data);
     }    
 
     /**

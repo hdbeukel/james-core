@@ -38,6 +38,6 @@ public interface RandomSolutionGenerator<SolutionType extends Solution, DataType
      * @param data given data
      * @return random solution
      */
-    public SolutionType createRandomSolution(Random rnd, DataType data);
+    public SolutionType create(Random rnd, DataType data);
     
 }
