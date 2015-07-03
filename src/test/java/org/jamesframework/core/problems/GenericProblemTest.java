@@ -325,7 +325,7 @@ public class GenericProblemTest {
         Constraint<IntegerSolution, Object> c = (s, data) -> new SimpleValidation(s.getI() > 0);
         
         // create problem stub with solution type IntegerSolution and fixed evaluation of 0.0
-        GenericProblem<IntegerSolution, Object> intprob = new GenericProblem<>(new FixedEvaluationObjectiveStub(0.0), null, (r,d) -> null);
+        GenericProblem<IntegerSolution, Object> intprob = new GenericProblem<>(null, new FixedEvaluationObjectiveStub(0.0), (r,d) -> null);
         // add constraint to problem
         intprob.addMandatoryConstraint(c);
         
