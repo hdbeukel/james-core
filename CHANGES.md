@@ -11,9 +11,10 @@ Version 1.1 (under development)
    model custom problems by plugging in the data, objective, constraints (if any)
    and random solution generator in a `GenericProblem`, avoiding the need to extend
    and abstract problem class. The predefined `SubsetProblem` includes a default,
-   but now easily customizable, random solution generator.
+   but now easily customizable, random subset solution generator.
  - Added a constructor to `SubsetProblem` that allows to easily create a subset
    problem without subset size limits.
+ - Reordered arguments in `SubsetProblem` constructors.
 
 Version 1.0 (17/06/2015)
 ------------------------
