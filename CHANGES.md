@@ -15,6 +15,7 @@ Version 1.1 (under development)
  - Added a constructor to `SubsetProblem` that allows to easily create a subset
    problem without subset size limits.
  - Reordered arguments in `SubsetProblem` constructors.
+ - Various improvements.
 
 Version 1.0 (17/06/2015)
 ------------------------

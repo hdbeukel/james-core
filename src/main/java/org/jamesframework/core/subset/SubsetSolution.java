@@ -130,11 +130,29 @@ public class SubsetSolution extends Solution {
      *                              or contains any <code>null</code> elements
      */
     public SubsetSolution(Set<Integer> allIDs, Comparator<Integer> orderOfIDs){
-        if(allIDs == null){
-            throw new NullPointerException("Error when creating subset solution: set of all IDs can not be null.");
-        }
-        if(allIDs.stream().anyMatch(Objects::isNull)){
-            throw new NullPointerException("Error when creating subset solution: set of all IDs can not contain any null elements.");
+        this(allIDs, orderOfIDs, true);
+    }
+    
+    /**
+     * Private constructor used to skip input checks when copying a solution (see {@link #copy()}).
+     * 
+     * @param allIDs set of all IDs from which a subset is to be selected
+     * @param orderOfIDs comparator according to which IDs are ordered, allowed to be
+     *                   <code>null</code> in which case no order is imposed
+     * @param checkInput indicates whether input should be checked (see thrown exceptions)
+     * @throws NullPointerException if <code>checkInput</code> is <code>true</code> and
+     *                              <code>allIDs</code> is <code>null</code> or contains
+     *                              any <code>null</code> elements
+     */
+    private SubsetSolution(Set<Integer> allIDs, Comparator<Integer> orderOfIDs, boolean checkInput){
+        // check input if requested
+        if(checkInput){
+            if(allIDs == null){
+                throw new NullPointerException("Error when creating subset solution: set of all IDs can not be null.");
+            }
+            if(allIDs.stream().anyMatch(Objects::isNull)){
+                throw new NullPointerException("Error when creating subset solution: set of all IDs can not contain any null elements.");
+            }
         }
         this.orderOfIDs = orderOfIDs;
         if(orderOfIDs == null){
@@ -174,18 +192,43 @@ public class SubsetSolution extends Solution {
      * @throws IllegalArgumentException if <code>selectedIDs</code> is not a subset of <code>allIDs</code>
      */
     public SubsetSolution(Set<Integer> allIDs, Set<Integer> selectedIDs, Comparator<Integer> orderOfIDs){
+        this(allIDs, selectedIDs, orderOfIDs, true);
+    }
+    
+    /**
+     * Private constructor used to skip input checks when copying a solution (see {@link #copy()}).
+     * 
+     * @param allIDs set of all IDs from which a subset is to be selected
+     * @param selectedIDs set of currently selected IDs (subset of all IDs)
+     * @param orderOfIDs comparator according to which IDs are ordered, allowed to be
+     *                   <code>null</code> in which case no order is imposed
+     * @param checkInput indicates whether input should be checked (see thrown exceptions)
+     * @throws NullPointerException if <code>checkInput</code> is <code>true</code> and
+     *                              <code>allIDs</code> or <code>selectedIDs</code> are
+     *                              <code>null</code> or contain any <code>null</code> elements
+     * @throws IllegalArgumentException if <code>checkInput</code> is <code>true</code> and
+     *                                  <code>selectedIDs</code> is not a subset of <code>allIDs</code>
+     */
+    private SubsetSolution(Set<Integer> allIDs,
+                           Set<Integer> selectedIDs,
+                           Comparator<Integer> orderOfIDs,
+                           boolean checkInput){
+
+        this(allIDs, orderOfIDs, checkInput);
         
-        this(allIDs, orderOfIDs);
-        
-        if(selectedIDs == null){
-            throw new NullPointerException("Error when creating subset solution: set of selected IDs can not be null.");
-        }
-        if(selectedIDs.stream().anyMatch(Objects::isNull)){
-            throw new NullPointerException("Error when creating subset solution: set of selected IDs can not contain any null elements.");
+        // check input if requested
+        if(checkInput){
+            if(selectedIDs == null){
+                throw new NullPointerException("Error when creating subset solution: set of selected IDs can not be null.");
+            }
+            if(selectedIDs.stream().anyMatch(Objects::isNull)){
+                throw new NullPointerException("Error when creating subset solution: set of selected IDs can not contain any null elements.");
+            }
         }
         
         for(int ID : selectedIDs){
-            if(!allIDs.contains(ID)){
+            // check if requested
+            if(checkInput && !allIDs.contains(ID)){
                 throw new IllegalArgumentException("Error while creating subset solution: "
                                 + "set of selected IDs should be a subset of set of all IDs.");
             }
@@ -194,7 +237,7 @@ public class SubsetSolution extends Solution {
         }
         
     }
-    
+        
     /**
      * Copy constructor. Creates a new subset solution which is identical to the given solution, but does not have
      * any reference to any data structures contained within the given solution (deep copy). The obtained subset
@@ -204,7 +247,8 @@ public class SubsetSolution extends Solution {
      * @param sol solution to copy (deep copy)
      */
     public SubsetSolution(SubsetSolution sol){
-        this(sol.getAllIDs(), sol.getSelectedIDs(), sol.getOrderOfIDs());
+        // skip input checks, we know it's a valid subset solution
+        this(sol.getAllIDs(), sol.getSelectedIDs(), sol.getOrderOfIDs(), false);
     }
     
     /**
