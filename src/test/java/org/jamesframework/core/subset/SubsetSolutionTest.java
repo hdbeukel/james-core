@@ -106,6 +106,14 @@ public class SubsetSolutionTest {
         
         thrown = false;
         try {
+            new SubsetSolution(Collections.emptySet());
+        } catch (IllegalArgumentException ex) {
+            thrown = true;
+        }
+        assertTrue(thrown);
+        
+        thrown = false;
+        try {
             Set<Integer> ids = new HashSet<>(Arrays.asList(1,2,3));
             Set<Integer> sel = null;
             new SubsetSolution(ids, sel);

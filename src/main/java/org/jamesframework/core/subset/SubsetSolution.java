@@ -54,11 +54,12 @@ public class SubsetSolution extends Solution {
      * Creates a new subset solution given the set of all IDs, each corresponding to an underlying entity,
      * from which a subset is to be selected. Initially, no IDs are selected. Note: IDs are copied to the
      * internal data structures of the subset solution; no reference is stored to the set given at construction.
-     * IDs are stored in general unordered sets.
+     * IDs are stored in unordered sets.
      * 
      * @param allIDs set of all IDs from which a subset is to be selected
      * @throws NullPointerException if <code>allIDs</code> is <code>null</code>
      *                              or contains any <code>null</code> elements
+     * @throws IllegalArgumentException if <code>allIDs</code> is empty
      */
     public SubsetSolution(Set<Integer> allIDs){
         this(allIDs, false);
@@ -67,13 +68,14 @@ public class SubsetSolution extends Solution {
     /**
      * Creates a new subset solution given the set of all IDs, and the set of currently selected IDs. Note: IDs
      * are copied to the internal data structures of the subset solution; no reference is stored to the sets given
-     * at construction. IDs are stored in general unordered sets.
+     * at construction. IDs are stored in unordered sets.
      * 
      * @param allIDs set of all IDs from which a subset is to be selected
      * @param selectedIDs set of currently selected IDs (subset of all IDs)
      * @throws NullPointerException if <code>allIDs</code> or <code>selectedIDs</code> are <code>null</code>
      *                              or contain any <code>null</code> elements
-     * @throws IllegalArgumentException if <code>selectedIDs</code> is not a subset of <code>allIDs</code>
+     * @throws IllegalArgumentException if <code>allIDs</code> is empty or <code>selectedIDs</code>
+     *                                  is not a subset of <code>allIDs</code>
      */
     public SubsetSolution(Set<Integer> allIDs, Set<Integer> selectedIDs){
         this(allIDs, selectedIDs, false);
@@ -92,6 +94,7 @@ public class SubsetSolution extends Solution {
      *                     their natural ordering; else, no ordering is imposed on the IDs
      * @throws NullPointerException if <code>allIDs</code> is <code>null</code>
      *                              or contains any <code>null</code> elements
+     * @throws IllegalArgumentException if <code>allIDs</code> is empty
      */
     public SubsetSolution(Set<Integer> allIDs, boolean naturalOrder){
         this(allIDs, naturalOrder ? Comparator.naturalOrder() : null);
@@ -110,7 +113,8 @@ public class SubsetSolution extends Solution {
      *                     their natural ordering; else, no ordering is imposed on the IDs
      * @throws NullPointerException if <code>allIDs</code> or <code>selectedIDs</code> are <code>null</code>
      *                              or contain any <code>null</code> elements
-     * @throws IllegalArgumentException if <code>selectedIDs</code> is not a subset of <code>allIDs</code>
+     * @throws IllegalArgumentException if <code>allIDs</code> is empty or <code>selectedIDs</code>
+     *                                  is not a subset of <code>allIDs</code>
      */
     public SubsetSolution(Set<Integer> allIDs, Set<Integer> selectedIDs, boolean naturalOrder){
         this(allIDs, selectedIDs, naturalOrder ? Comparator.naturalOrder() : null);
@@ -128,52 +132,10 @@ public class SubsetSolution extends Solution {
      *                   <code>null</code> in which case no order is imposed
      * @throws NullPointerException if <code>allIDs</code> is <code>null</code>
      *                              or contains any <code>null</code> elements
+     * @throws IllegalArgumentException if <code>allIDs</code> is empty
      */
     public SubsetSolution(Set<Integer> allIDs, Comparator<Integer> orderOfIDs){
-        this(allIDs, orderOfIDs, true);
-    }
-    
-    /**
-     * Private constructor used to skip input checks when copying a solution (see {@link #copy()}).
-     * 
-     * @param allIDs set of all IDs from which a subset is to be selected
-     * @param orderOfIDs comparator according to which IDs are ordered, allowed to be
-     *                   <code>null</code> in which case no order is imposed
-     * @param checkInput indicates whether input should be checked (see thrown exceptions)
-     * @throws NullPointerException if <code>checkInput</code> is <code>true</code> and
-     *                              <code>allIDs</code> is <code>null</code> or contains
-     *                              any <code>null</code> elements
-     */
-    private SubsetSolution(Set<Integer> allIDs, Comparator<Integer> orderOfIDs, boolean checkInput){
-        // check input if requested
-        if(checkInput){
-            if(allIDs == null){
-                throw new NullPointerException("Error when creating subset solution: set of all IDs can not be null.");
-            }
-            if(allIDs.stream().anyMatch(Objects::isNull)){
-                throw new NullPointerException("Error when creating subset solution: set of all IDs can not contain any null elements.");
-            }
-        }
-        this.orderOfIDs = orderOfIDs;
-        if(orderOfIDs == null){
-            all = new LinkedHashSet<>(allIDs);                      // set with all IDs (copy)
-            selected = new LinkedHashSet<>();                       // set with selected IDs (empty)
-            unselected = new LinkedHashSet<>(allIDs);               // set with unselected IDs (all)
-            // create views
-            allView = Collections.unmodifiableSet(all);
-            selectedView = Collections.unmodifiableSet(selected);
-            unselectedView = Collections.unmodifiableSet(unselected);
-        } else {
-            all = new TreeSet<>(orderOfIDs);           // sorted set with all IDs (copy)
-            all.addAll(allIDs);
-            selected = new TreeSet<>(orderOfIDs);      // sorted set with selected IDs (empty)
-            unselected = new TreeSet<>(orderOfIDs);    // sorted set with unselected IDs (all)
-            unselected.addAll(allIDs);
-            // create views (navigable!)
-            allView = Collections.unmodifiableNavigableSet((TreeSet<Integer>) all);
-            selectedView = Collections.unmodifiableNavigableSet((TreeSet<Integer>) selected);
-            unselectedView = Collections.unmodifiableNavigableSet((TreeSet<Integer>) unselected);
-        }
+        this(allIDs, Collections.emptySet(), orderOfIDs);
     }
     
     /**
@@ -189,7 +151,8 @@ public class SubsetSolution extends Solution {
      *                   <code>null</code> in which case no order is imposed
      * @throws NullPointerException if <code>allIDs</code> or <code>selectedIDs</code> are <code>null</code>
      *                              or contain any <code>null</code> elements
-     * @throws IllegalArgumentException if <code>selectedIDs</code> is not a subset of <code>allIDs</code>
+     * @throws IllegalArgumentException if <code>allIDs</code> is empty or <code>selectedIDs</code>
+     *                                  is not a subset of <code>allIDs</code>
      */
     public SubsetSolution(Set<Integer> allIDs, Set<Integer> selectedIDs, Comparator<Integer> orderOfIDs){
         this(allIDs, selectedIDs, orderOfIDs, true);
@@ -206,18 +169,26 @@ public class SubsetSolution extends Solution {
      * @throws NullPointerException if <code>checkInput</code> is <code>true</code> and
      *                              <code>allIDs</code> or <code>selectedIDs</code> are
      *                              <code>null</code> or contain any <code>null</code> elements
-     * @throws IllegalArgumentException if <code>checkInput</code> is <code>true</code> and
-     *                                  <code>selectedIDs</code> is not a subset of <code>allIDs</code>
+     * @throws IllegalArgumentException if <code>checkInput</code> is <code>true</code>, and
+     *                                  <code>allIDs</code> is empty or <code>selectedIDs</code>
+     *                                  is not a subset of <code>allIDs</code>
      */
     private SubsetSolution(Set<Integer> allIDs,
                            Set<Integer> selectedIDs,
                            Comparator<Integer> orderOfIDs,
                            boolean checkInput){
 
-        this(allIDs, orderOfIDs, checkInput);
-        
         // check input if requested
         if(checkInput){
+            if(allIDs == null){
+                throw new NullPointerException("Error when creating subset solution: set of all IDs can not be null.");
+            }
+            if(allIDs.stream().anyMatch(Objects::isNull)){
+                throw new NullPointerException("Error when creating subset solution: set of all IDs can not contain any null elements.");
+            }
+            if(allIDs.isEmpty()){
+                throw new IllegalArgumentException("Error when creating subset solution: set of all IDs can not be empty.");
+            }
             if(selectedIDs == null){
                 throw new NullPointerException("Error when creating subset solution: set of selected IDs can not be null.");
             }
@@ -226,8 +197,35 @@ public class SubsetSolution extends Solution {
             }
         }
         
+        // store comparator according to which IDs are ordered
+        this.orderOfIDs = orderOfIDs;
+        
+        // create sets of selection, unselected and all IDs (+ unmodifiable views)
+        if(orderOfIDs == null){
+            // CASE 1: no order
+            all = new LinkedHashSet<>(allIDs);                      // set with all IDs (copy)
+            selected = new LinkedHashSet<>();                       // set with selected IDs (empty)
+            unselected = new LinkedHashSet<>(allIDs);               // set with unselected IDs (all)
+            // create views
+            allView = Collections.unmodifiableSet(all);
+            selectedView = Collections.unmodifiableSet(selected);
+            unselectedView = Collections.unmodifiableSet(unselected);
+        } else {
+            // CASE 2: order IDs according to given comparator
+            all = new TreeSet<>(orderOfIDs);           // sorted set with all IDs (copy)
+            all.addAll(allIDs);
+            selected = new TreeSet<>(orderOfIDs);      // sorted set with selected IDs (empty)
+            unselected = new TreeSet<>(orderOfIDs);    // sorted set with unselected IDs (all)
+            unselected.addAll(allIDs);
+            // create views (navigable!)
+            allView = Collections.unmodifiableNavigableSet((TreeSet<Integer>) all);
+            selectedView = Collections.unmodifiableNavigableSet((TreeSet<Integer>) selected);
+            unselectedView = Collections.unmodifiableNavigableSet((TreeSet<Integer>) unselected);
+        }
+        
+        // select specified IDs
         for(int ID : selectedIDs){
-            // check if requested
+            // check validtiy if requested
             if(checkInput && !allIDs.contains(ID)){
                 throw new IllegalArgumentException("Error while creating subset solution: "
                                 + "set of selected IDs should be a subset of set of all IDs.");
