@@ -17,6 +17,7 @@
 package org.jamesframework.core.exceptions;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.jamesframework.core.problems.sol.Solution;
@@ -35,7 +36,7 @@ public class SolutionModificationExceptionTest {
 
     static private final String MSG = "This is all your fault!";
     static private final Exception CAUSE = new RuntimeException("I caused it ...");
-    static private final Solution SOL = new SubsetSolution(new HashSet<>());
+    static private final Solution SOL = new SubsetSolution(Collections.singleton(0));
 
     /**
      * Print message when starting tests.
