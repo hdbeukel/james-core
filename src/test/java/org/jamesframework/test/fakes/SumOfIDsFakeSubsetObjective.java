@@ -69,5 +69,10 @@ public class SumOfIDsFakeSubsetObjective extends MinMaxObjective<SubsetSolution,
         
         return new SimpleEvaluation(e);
     }
+    
+    @Override
+    public String toString(){
+        return "Sum of IDs";
+    }
 
 }

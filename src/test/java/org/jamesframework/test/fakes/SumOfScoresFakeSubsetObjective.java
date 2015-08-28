@@ -69,5 +69,10 @@ public class SumOfScoresFakeSubsetObjective extends MinMaxObjective<SubsetSoluti
         
         return new SimpleEvaluation(e);
     }
+    
+    @Override
+    public String toString(){
+        return "Sum of scores";
+    }
 
 }

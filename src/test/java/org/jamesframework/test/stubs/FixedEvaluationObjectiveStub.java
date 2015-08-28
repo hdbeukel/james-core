@@ -53,4 +53,9 @@ public class FixedEvaluationObjectiveStub extends MinMaxObjective<Solution, Obje
         return fixedEvaluation;
     }
 
+    @Override
+    public String toString(){
+        return "Fixed evaluation";
+    }
+    
 }

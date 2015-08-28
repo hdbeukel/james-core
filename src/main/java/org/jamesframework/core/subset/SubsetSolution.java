@@ -416,7 +416,7 @@ public class SubsetSolution extends Solution {
      * @return number of selected IDs
      */
     public int getNumSelectedIDs(){
-        return selected.size();
+        return getSelectedIDs().size();
     }
     
     /**
@@ -425,7 +425,7 @@ public class SubsetSolution extends Solution {
      * @return number of unselected IDs
      */
     public int getNumUnselectedIDs(){
-        return unselected.size();
+        return getUnselectedIDs().size();
     }
     
     /**
@@ -435,7 +435,7 @@ public class SubsetSolution extends Solution {
      * @return total number of IDs
      */
     public int getTotalNumIDs(){
-        return all.size();
+        return getAllIDs().size();
     }
 
     /**
@@ -490,7 +490,7 @@ public class SubsetSolution extends Solution {
     public String toString(){
         return getSelectedIDs().stream()
                                .map(Object::toString)
-                               .collect(Collectors.joining(", ", "SubsetSolution: {", "}"));
+                               .collect(Collectors.joining(", ", "Subset solution: {", "}"));
     }
 
 }
