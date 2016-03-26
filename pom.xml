@@ -21,9 +21,9 @@
         provides implementations of specific components for subset selection.
     </description>
     <scm>
-        <connection>scm:git:git@github.com:hdbeukel/james-core.git</connection>
-        <developerConnection>scm:git:git@github.com:hdbeukel/james-core.git</developerConnection>
-        <url>https://github.com/hdbeukel/james-core</url>
+        <connection>scm:git:git@github.com:neoyukito/james-core.git</connection>
+        <developerConnection>scm:git:git@github.com:neoyukito/james-core.git</developerConnection>
+        <url>https://github.com/neoyukito/james-core</url>
     </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
