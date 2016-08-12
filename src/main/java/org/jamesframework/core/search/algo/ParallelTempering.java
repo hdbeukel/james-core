@@ -31,6 +31,7 @@ import org.jamesframework.core.problems.Problem;
 import org.jamesframework.core.problems.sol.Solution;
 import org.jamesframework.core.problems.constraints.validations.Validation;
 import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
+import org.jamesframework.core.search.LocalSearch;
 import org.jamesframework.core.search.Search;
 import org.jamesframework.core.search.SingleNeighbourhoodSearch;
 import org.jamesframework.core.search.listeners.SearchListener;
@@ -101,7 +102,7 @@ import org.jamesframework.core.search.stopcriteria.MaxSteps;
  *                       required to extend {@link Solution}
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
-public class ParallelTempering<SolutionType extends Solution> extends SingleNeighbourhoodSearch<SolutionType>{
+public class ParallelTempering<SolutionType extends Solution> extends SingleNeighbourhoodSearch<SolutionType> {
 
     // logger
     // private static final Logger logger = LoggerFactory.getLogger(ParallelTempering.class);
@@ -135,22 +136,22 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
      * threads.
      * </p>
      * 
-     * @throws NullPointerException if <code>problem</code> or <code>neighbourhood</code> are
-     *                              <code>null</code>
-     * @throws IllegalArgumentException if <code>numReplicas</code>, <code>minTemperature</code>
-     *                                  or <code>maxTemperature</code> are not strictly positive,
-     *                                  or if <code>minTemperature &ge; maxTemperature</code>
      * @param problem problem to solve
      * @param neighbourhood neighbourhood used inside Metropolis search replicas
      * @param numReplicas number of Metropolis replicas
      * @param minTemperature minimum temperature of Metropolis replicas
      * @param maxTemperature maximum temperature of Metropolis replicas
+     * @throws NullPointerException if <code>problem</code> or <code>neighbourhood</code> are
+     *                              <code>null</code>
+     * @throws IllegalArgumentException if <code>numReplicas</code>, <code>minTemperature</code>
+     *                                  or <code>maxTemperature</code> are not strictly positive,
+     *                                  or if <code>minTemperature &ge; maxTemperature</code>
      */
     public ParallelTempering(Problem<SolutionType> problem, Neighbourhood<? super SolutionType> neighbourhood,
                                 int numReplicas, double minTemperature, double maxTemperature){
         this(problem, neighbourhood, numReplicas,
-                minTemperature, maxTemperature,
-                (p, n, t) -> new MetropolisSearch<>(p, n, t));
+            minTemperature, maxTemperature,
+            (p, n, t) -> new MetropolisSearch<>(p, n, t));
     }
     
     /**
@@ -174,17 +175,17 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
      * will be accessed concurrently from several Metropolis searches running in separate threads.
      * </p>
      * 
-     * @throws NullPointerException if <code>problem</code> or <code>neighbourhood</code> are
-     *                              <code>null</code>
-     * @throws IllegalArgumentException if <code>numReplicas</code>, <code>minTemperature</code>
-     *                                  or <code>maxTemperature</code> are not strictly positive,
-     *                                  or if <code>minTemperature &ge; maxTemperature</code>
      * @param problem problem to solve
      * @param neighbourhood neighbourhood used inside Metropolis search replicas
      * @param numReplicas number of Metropolis replicas
      * @param minTemperature minimum temperature of Metropolis replicas
      * @param maxTemperature maximum temperature of Metropolis replicas
      * @param metropolisFactory custom factory used to create Metropolis searches
+     * @throws NullPointerException if <code>problem</code> or <code>neighbourhood</code> are
+     *                              <code>null</code>
+     * @throws IllegalArgumentException if <code>numReplicas</code>, <code>minTemperature</code>
+     *                                  or <code>maxTemperature</code> are not strictly positive,
+     *                                  or if <code>minTemperature &ge; maxTemperature</code>
      */
     public ParallelTempering(Problem<SolutionType> problem,
                              Neighbourhood<? super SolutionType> neighbourhood,
@@ -217,11 +218,6 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
      * will be accessed concurrently from several Metropolis searches running in separate threads.
      * </p>
      * 
-     * @throws NullPointerException if <code>problem</code> or <code>neighbourhood</code> are
-     *                              <code>null</code>
-     * @throws IllegalArgumentException if <code>numReplicas</code>, <code>minTemperature</code>
-     *                                  or <code>maxTemperature</code> are not strictly positive,
-     *                                  or if <code>minTemperature &ge; maxTemperature</code>
      * @param name custom search name
      * @param problem problem to solve
      * @param neighbourhood neighbourhood used inside Metropolis search replicas
@@ -229,6 +225,11 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
      * @param minTemperature minimum temperature of Metropolis replicas
      * @param maxTemperature maximum temperature of Metropolis replicas
      * @param metropolisFactory custom factory used to create Metropolis searches
+     * @throws NullPointerException if <code>problem</code> or <code>neighbourhood</code> are
+     *                              <code>null</code>
+     * @throws IllegalArgumentException if <code>numReplicas</code>, <code>minTemperature</code>
+     *                                  or <code>maxTemperature</code> are not strictly positive,
+     *                                  or if <code>minTemperature &ge; maxTemperature</code>
      */
     public ParallelTempering(String name,
                              Problem<SolutionType> problem,
@@ -284,8 +285,8 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
      * algorithm, before considering solution swaps. Defaults to 500. The specified number of steps should
      * be strictly positive.
      * 
-     * @throws IllegalArgumentException if <code>steps</code> is not strictly positive
      * @param steps number of steps performed by replicas in each iteration
+     * @throws IllegalArgumentException if <code>steps</code> is not strictly positive
      */
     public void setReplicaSteps(long steps){
         // check number of steps
@@ -348,6 +349,17 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
     }
     
     /**
+     * When initializing a parallel tempering search, the replicas are initialized as well (in parallel).
+     */
+    @Override
+    public void init(){
+        // init super
+        super.init();
+        // initialize replicas
+        replicas.parallelStream().forEach(Search::init);
+    }
+    
+    /**
      * In each search step, every replica performs several steps after which solutions of adjacent
      * replicas may be swapped.
      * 
@@ -404,9 +416,15 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
             }
             // swap solutions
             if(swap){
-                SolutionType temp = r1.getCurrentSolution();
-                r1.setCurrentSolution(r2.getCurrentSolution());
-                r2.setCurrentSolution(temp);
+                SolutionType r1Sol = r1.getCurrentSolution();
+                Evaluation r1Eval = r1.getCurrentSolutionEvaluation();
+                Validation r1Val = r1.getCurrentSolutionValidation();
+                r1.setCurrentSolution(
+                        r2.getCurrentSolution(),
+                        r2.getCurrentSolutionEvaluation(),
+                        r2.getCurrentSolutionValidation()
+                );
+                r2.setCurrentSolution(r1Sol, r1Eval, r1Val);
             }
         }
         // flip swap base
@@ -419,11 +437,12 @@ public class ParallelTempering<SolutionType extends Solution> extends SingleNeig
      */
     @Override
     protected void searchDisposed(){
-        super.searchDisposed();
         // dispose replicas
         replicas.forEach(r -> r.dispose());
         // shut down thread pool
         pool.shutdown();
+        // dispose super
+        super.searchDisposed();
     }
 
     /**

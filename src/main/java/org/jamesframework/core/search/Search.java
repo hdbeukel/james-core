@@ -39,21 +39,22 @@ import org.slf4j.LoggerFactory;
 /**
  * <p>
  * General abstract search used to solve a problem with the specified solution type. It provides general methods to
- * start and stop the search, and to access state information and metadata such as the best solution found so far and the
- * runtime of the current run. It also provides methods to add and remove search listeners and stop criteria.
+ * start and stop the search, and to access state information and metadata such as the best solution found so far and
+ * the runtime of the current run. It also provides methods to add and remove search listeners and stop criteria.
  * </p>
  * <p>
- * A search can have five possible statuses: IDLE, INITIALIZING, RUNNING, TERMINATING or DISPOSED (see {@link SearchStatus}).
- * When a search is created, it is IDLE. Upon calling {@link #start()} it first goes to INITIALIZING and then RUNNING, after
- * successful initialization. While the search is running, it iteratively calls {@link #searchStep()} to perform a search step
- * as defined in each specific search implementation.
+ * A search can have five possible statuses: IDLE, INITIALIZING, RUNNING, TERMINATING or DISPOSED
+ * (see {@link SearchStatus}). When a search is created, it is IDLE. Upon calling {@link #start()}
+ * it first goes to INITIALIZING and then RUNNING, after successful initialization. While the search
+ * is running, it iteratively calls {@link #searchStep()} to perform a search step as defined in each
+ * specific search implementation.
  * </p>
  * <p>
  * Whenever a search is requested to stop, by calling {@link #stop()}, it goes to status TERMINATING. A terminating
  * search will stop after it has completed its current step, and then its status goes back to status IDLE. A search
- * may also terminate itself by calling {@link #stop()} internally, when it has come to its natural end. In particular,
- * a single step algorithm can be implemented by calling {@link #stop()} immediately at the end of this first and
- * only step, which guarantees that only one single step will be executed.
+ * may also terminate itself by calling {@link #stop()} internally, when it has come to its natural end.
+ * In particular, a single step algorithm can be implemented by calling {@link #stop()} immediately at the end of
+ * the first and only step, which guarantees that only one single step will be executed.
  * </p>
  * <p>
  * An idle search may be restarted at any time. The search state is retained across subsequent runs, including the best
@@ -72,12 +73,14 @@ import org.slf4j.LoggerFactory;
  * documentation. Note that stop criteria relying on such metadata will operate on a per-run basis.
  * </p>
  * <p>
- * An idle search can also be disposed (see {@link #dispose()}), upon which it will release all of its resources. A disposed
- * search can never be restarted. Note that it is important to always dispose a search after its last run so that it does not
- * hold on to any of its resources. Not disposing a search may prevent termination of the application.
+ * An idle search can also be disposed (see {@link #dispose()}), upon which it will release all of its resources.
+ * A disposed search can never be restarted. Note that it is important to always dispose a search after its last
+ * run so that it does not hold on to any of its resources. Not disposing a search may prevent termination of the
+ * application.
  * </p>
  * 
- * @param <SolutionType> solution type of the problems that may be solved using this search, required to extend {@link Solution}
+ * @param <SolutionType> solution type of the problems that may be solved using this search,
+ *                       required to extend {@link Solution}
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
 public abstract class Search<SolutionType extends Solution> implements Runnable {
@@ -92,7 +95,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
     /* LOGGER */
     /**********/
     
-    private static final Logger logger = LoggerFactory.getLogger(Search.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Search.class);
 
     /******************/
     /* PRIVATE FIELDS */
@@ -162,8 +165,8 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
     /**
      * Creates a search to solve the given problem, with default search name "Search".
      * 
-     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      * @param problem problem to solve
+     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      */
     public Search(Problem<SolutionType> problem){
         this(null, problem);
@@ -218,7 +221,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
         // initialize utility variables
         improvementDuringCurrentStep = false;
         // log search creation
-        logger.info("Created search {}", this);
+        LOGGER.info("Created search {}", this);
     }
     
     /**
@@ -306,10 +309,35 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
     
     /**
      * <p>
-     * Starts a search run and returns when this run has finished. The search run may either complete internally,
-     * i.e. come to its natural end, or be terminated by a stop criterion (see {@link #addStopCriterion(StopCriterion)}).
+     * Initializes and/or validates the search.
+     * It is not required to manually initialize a search before it is started since {@link #init()} is called from
+     * within {@link #searchStarted()}. However, it may also be called prior to starting the search. For example, a
+     * search composed of multiple subsearches may choose to initialize these searches prior to execution.
+     * </p>
+     * <p>
+     * A {@link SearchException} may be thrown if initialization fails because the search has not been configured
+     * validly. Moreover, any {@link JamesRuntimeException} could be thrown when initialization depends on
+     * malfunctioning components.
+     * </p>
+     * <p>
+     * When overriding this method, always call <code>super.init()</code> and take into account that the
+     * method may be called multiple times prior to execution. For example, consider to perform computationally
+     * expensive initializations only once, upon the first call. The default implementation is empty.
+     * </p>
+     * 
+     * @throws SearchException if initialization fails, e.g. because the search has not been configured validly
+     * @throws JamesRuntimeException in general, any {@link JamesRuntimeException} may be thrown
+     *                               in case of a malfunctioning component used during initialization
+     */
+    public void init(){}
+    
+    /**
+     * <p>
+     * Starts a search run and returns when this run has finished. The search run may either complete internally, i.e.
+     * come to its natural end, or be terminated by a stop criterion (see {@link #addStopCriterion(StopCriterion)}).
      * This method does not return anything; the best solution found during search can be obtained by calling
-     * {@link #getBestSolution()} and its corresponding evaluation with {@link #getBestSolutionEvaluation()}.
+     * {@link #getBestSolution()} and its corresponding evaluation and validation with
+     * {@link #getBestSolutionEvaluation()} and {@link #getBestSolutionValidation()}, respectively.
      * </p>
      * <p>
      * Note that a search can only be (re)started when it is idle (see {@link #getStatus()}). When attempting to start
@@ -333,14 +361,14 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // verify that search is idle
             assertIdle("Cannot start search.");
             // log
-            logger.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.INITIALIZING);
+            LOGGER.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.INITIALIZING);
             // set status to INITIALIZING
             status = SearchStatus.INITIALIZING;
             // fire status update
             fireStatusChanged(status);
         }
         
-        logger.info("Search {} started", this);
+        LOGGER.info("Search {} started", this);
         
         // fire callback
         fireSearchStarted();
@@ -358,7 +386,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // initialization finished: update status
             synchronized(statusLock){
                 // log
-                logger.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.RUNNING);
+                LOGGER.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.RUNNING);
                 // update
                 status = SearchStatus.RUNNING;
                 // fire status update
@@ -401,12 +429,12 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
         // fire callback
         fireSearchStopped();
 
-        logger.info("Search {} stopped (runtime: {} ms, steps: {})", this, getRuntime(), getSteps());
+        LOGGER.info("Search {} stopped (runtime: {} ms, steps: {})", this, getRuntime(), getSteps());
         
         // search run is complete: update status
         synchronized(statusLock){
             // log
-            logger.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.IDLE);
+            LOGGER.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.IDLE);
             // update
             status = SearchStatus.IDLE;
             // fire status update
@@ -417,14 +445,16 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
    
     /**
      * <p>
-     * Requests the search to stop. May be called from outside the search, e.g. by a stop criterion, as well as internally,
-     * when the search comes to its natural end. In the latter case, it is absolutely guaranteed that the step from which the search
-     * was requested to stop will be the last step executed during the current run. If the current search status is not INITIALIZING
-     * or RUNNING, calling this method has no effect. Else, it changes the search status to TERMINATING.
+     * Requests the search to stop. May be called from outside the search, e.g. by a stop criterion,
+     * as well as internally, when the search comes to its natural end. In the latter case, it is
+     * absolutely guaranteed that the step from which the search was requested to stop will be the
+     * last step executed during the current run. If the current search status is not
+     * {@link SearchStatus#INITIALIZING} or {@link SearchStatus#RUNNING}, calling this method has
+     * no effect. Else, it changes the search status to {@link SearchStatus#TERMINATING}.
      * </p>
      * <p>
-     * In case the search is already requested to terminate during initialization, it will complete initialization, but is guaranteed
-     * to stop before executing any search steps.
+     * In case the search is already requested to terminate during initialization, it will complete
+     * initialization, but is guaranteed to stop before executing any search steps.
      * </p>
      */
     public void stop(){
@@ -433,7 +463,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // check current status
             if(status == SearchStatus.INITIALIZING || status == SearchStatus.RUNNING){
                 // log
-                logger.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.TERMINATING);
+                LOGGER.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.TERMINATING);
                 // update status
                 status = SearchStatus.TERMINATING;
                 // fire status update
@@ -445,8 +475,8 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
     /**
      * Dispose this search, upon which all of its resources are released. Note that only idle
      * searches may be disposed and that a disposed search can never be restarted. Sets the search
-     * status to DISPOSED. When trying to dispose an already disposed search, nothing happens, i.e.
-     * calling this method on a disposed search has no effect.
+     * status to {@link SearchStatus#DISPOSED}. When trying to dispose an already disposed search,
+     * nothing happens, i.e. calling this method on a disposed search has no effect.
      * 
      * @throws SearchException if the search is currently not idle (and not already disposed)
      */
@@ -462,7 +492,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // all good, handle disposed
             searchDisposed();
             // log
-            logger.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.DISPOSED);
+            LOGGER.debug("Search {} changed status: {} --> {}", this, status, SearchStatus.DISPOSED);
             // update status
             status = SearchStatus.DISPOSED;
             // fire status update
@@ -504,7 +534,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // pass stop criterion to checker (throws error if incompatible)
             stopCriterionChecker.add(stopCriterion);
             // log
-            logger.debug("{}: added stop criterion {}", this, stopCriterion);
+            LOGGER.debug("{}: added stop criterion {}", this, stopCriterion);
         }
     }
     
@@ -513,8 +543,8 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
      * Note that this method may only be called when the search is idle.
      * 
      * @param stopCriterion stop criterion to be removed
-     * @throws SearchException if the search is not idle
      * @return <code>true</code> if the stop criterion has been successfully removed
+     * @throws SearchException if the search is not idle
      */
     public boolean removeStopCriterion(StopCriterion stopCriterion){
         // acquire status lock
@@ -524,11 +554,29 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // remove from checker
             if (stopCriterionChecker.remove(stopCriterion)){
                 // log
-                logger.debug("{}: removed stop criterion {}", this, stopCriterion);
+                LOGGER.debug("{}: removed stop criterion {}", this, stopCriterion);
                 return true;
             } else {
                 return false;
             }
+        }
+    }
+    
+    /**
+     * Removes all stop criteria.
+     * Note that this method may only be called when the search is idle.
+     * 
+     * @throws SearchException if the search is not idle
+     */
+    public void clearStopCriteria(){
+        // acquire status lock
+        synchronized(statusLock){
+            // assert idle
+            assertIdle("Cannot clear stop criteria.");
+            // remove all stop criteria from checker
+            stopCriterionChecker.clear();
+            // log
+            LOGGER.debug("{}: cleared stop criteria", this);
         }
     }
     
@@ -553,7 +601,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // pass new settings to checker
             stopCriterionChecker.setPeriod(period, timeUnit);
             // log
-            logger.debug("{}: set stop criterion check period to {} ms", this, timeUnit.toMillis(period));
+            LOGGER.debug("{}: set stop criterion check period to {} ms", this, timeUnit.toMillis(period));
         }
     }
     
@@ -572,7 +620,7 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // add listener
             searchListeners.add(listener);
             // log
-            logger.debug("{}: added search listener {}", this, listener);
+            LOGGER.debug("{}: added search listener {}", this, listener);
         }
     }
     
@@ -581,8 +629,8 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
      * Note that this method may only be called when the search is idle.
      * 
      * @param listener search listener to be removed
-     * @throws SearchException if the search is not idle
      * @return <code>true</code> if the listener was present and has now been removed
+     * @throws SearchException if the search is not idle
      */
     public boolean removeSearchListener(SearchListener<? super SolutionType> listener){
         // acquire status lock
@@ -592,11 +640,27 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
             // remove listener
             if (searchListeners.remove(listener)){
                 // log
-                logger.debug("{}: removed search listener {}", this, listener);
+                LOGGER.debug("{}: removed search listener {}", this, listener);
                 return true;
             } else {
                 return false;
             }
+        }
+    }
+    
+    /**
+     * Remove all search listeners.
+     * Note that this method may only be called when the search is idle.
+     */
+    public void clearSearchListeners(){
+        // acquire status lock
+        synchronized(statusLock){
+            // assert idle
+            assertIdle("Cannot clear search listeners.");
+            // clear listeners
+            searchListeners.clear();
+            // log
+            LOGGER.debug("{}: cleared search listeners", this);
         }
     }
     
@@ -712,8 +776,8 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
      * If not, a {@link SearchException} is thrown, which includes the given <code>errorMessage</code> and the current
      * search status (different from IDLE).
      * 
-     * @throws SearchException if the search is not idle
      * @param errorMessage message to be included in the {@link SearchException} thrown if the search is not idle
+     * @throws SearchException if the search is not idle
      */
     protected void assertIdle(String errorMessage){
         // synchronize with status updates
@@ -879,7 +943,8 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
      *  </li>
      * </ul>
      * <p>
-     * The return value is always positive, except in those cases when {@link JamesConstants#INVALID_TIME_SPAN} is returned.
+     * The return value is always positive, except in those cases when
+     * {@link JamesConstants#INVALID_TIME_SPAN} is returned.
      * </p>
      * 
      * @return runtime of the current (or last) run, in milliseconds
@@ -1053,8 +1118,8 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
      *   made during the current run is returned.
      *  </li>
      *  <li>
-     *   If the search is IDLE or DISPOSED, but has been run before, the minimum delta observed during the last run is returned.
-     *   Before the first run, the return value is {@link JamesConstants#INVALID_DELTA}.
+     *  If the search is IDLE or DISPOSED, but has been run before, the minimum delta observed during the last
+     *  run is returned. Before the first run, the return value is {@link JamesConstants#INVALID_DELTA}.
      *  </li>
      *  <li>
      *   While INITIALIZING the current run, {@link JamesConstants#INVALID_DELTA} is returned.
@@ -1085,9 +1150,10 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
     /*********************/
     
     /**
-     * Indicates whether the search should continue, by verifying whether its status is not set to {@link SearchStatus#TERMINATING}.
-     * Once the search has been started, this method will return <code>true</code> as long as {@link #stop()} has not been called.
-     * During that time, {@link #searchStep()} will be repeatedly called from a loop that uses {@link #continueSearch()} as its
+     * Indicates whether the search should continue, by verifying whether its status is not yet set to
+     * {@link SearchStatus#TERMINATING}. Once the search has been started, this method will return
+     * <code>true</code> as long as {@link #stop()} has not been called. During that time, {@link #searchStep()}
+     * will be repeatedly called from the main search loop which uses {@link #continueSearch()} as its
      * stop condition.
      * 
      * @return <code>true</code> if the search status is not {@link SearchStatus#TERMINATING}
@@ -1123,22 +1189,32 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
         }
     }
         
-    /*********************************************************************/
-    /* PROTECTED METHODS TO INITIALIZE, FINALIZE AND DISPOSE THE SEARCH  */
-    /*********************************************************************/
+    /*****************************************************************************/
+    /* PROTECTED METHODS CALLED WHEN THE SEARCH IS STARTED, STOPPED OR DISPOSED  */
+    /*****************************************************************************/
     
     /**
-     * This method is called when a search run is started, to perform initialization and/or validation of the search
-     * configuration. It may throw a {@link SearchException} if initialization fails because the search has not been
-     * configured validly. Moreover, any {@link JamesRuntimeException} could be thrown when initialization depends on
-     * malfunctioning components. The default implementation resets all general per run metadata. Therefore, it is of
-     * <b>utmost</b> importance to call <code>super.searchStart()</code> in any overriding implementation.
+     * <p>
+     * This method is called when a search run is started.
+     * It first initializes and validates the search by calling {@link #init()}, which may throw a
+     * {@link SearchException} if initialization fails because the search has not been configured validly.
+     * Moreover, any {@link JamesRuntimeException} could be thrown in case initialization depends on
+     * malfunctioning components.
+     * After initialization, all general per run metadata is (re)set, such as the step count and execution time.
+     * </p>
+     * <p>
+     * Always call <code>super.searchStarted()</code> when overriding this method.
+     * Note however that it is preferred to override {@link #init()} instead.
+     * </p>
      * 
      * @throws SearchException if initialization fails, e.g. because the search has not been configured validly
      * @throws JamesRuntimeException in general, any {@link JamesRuntimeException} may be thrown
      *                               in case of a malfunctioning component used during initialization
      */
     protected void searchStarted() {
+        // initialize
+        init();
+        // (re)set metadata
         startTime = System.currentTimeMillis();
         stopTime = JamesConstants.INVALID_TIMESTAMP;
         currentSteps = 0;
@@ -1148,11 +1224,15 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
     }
     
     /**
-     * This method is called when a search run has completed and may be used to perform some finalization. Any
+     * <p>
+     * This method is called when a search run has completed. It may be used to perform some finalization. Any
      * {@link JamesRuntimeException} may be thrown when finalization depends on malfunctioning search components.
      * The default implementation ensures that the total runtime of the last run, if applicable, will be returned
-     * when calling {@link #getRuntime()} on an idle search. Therefore, it is of <b>utmost</b> importance to call
-     * <code>super.searchStopped()</code> in any overriding implementation. 
+     * when calling {@link #getRuntime()} on an idle search.
+     * </p>
+     * <p>
+     * Always call <code>super.searchStopped()</code> when overriding this method. 
+     * </p>
      * 
      * @throws JamesRuntimeException in general, any {@link JamesRuntimeException} may be thrown
      *                               in case of a malfunctioning component used during finalization
@@ -1162,10 +1242,15 @@ public abstract class Search<SolutionType extends Solution> implements Runnable 
     }
     
     /**
-     * This method is called when a search is disposed, immediately before the search status is updated to DISPOSED.
+     * <p>
+     * This method is called when a search is disposed, immediately before the search status is updated.
      * The default implementation is empty but should be overridden when a specific search uses resources that have to
      * be released (e.g. an active thread pool) when the search is no longer used. Any {@link JamesRuntimeException} may
      * be thrown when trying to release malfunctioning resources.
+     * </p>
+     * <p>
+     * Always call <code>super.searchDisposed()</code> when overriding this method. 
+     * </p>
      * 
      * @throws JamesRuntimeException in general, any {@link JamesRuntimeException} may be thrown
      *                               when trying to release malfunctioning resources

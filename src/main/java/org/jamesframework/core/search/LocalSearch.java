@@ -50,8 +50,8 @@ public abstract class LocalSearch<SolutionType extends Solution> extends Search<
     /**
      * Create a new local search to solve the given problem, with default name "LocalSearch".
      * 
-     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      * @param problem problem to solve
+     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      */
     public LocalSearch(Problem<SolutionType> problem){
         this(null, problem);
@@ -61,9 +61,9 @@ public abstract class LocalSearch<SolutionType extends Solution> extends Search<
      * Create a new local search to solve the given problem, with a custom name. If <code>name</code>
      * is <code>null</code>, the default name "LocalSearch" will be assigned.
      * 
-     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      * @param problem problem to solve
      * @param name custom search name
+     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      */
     public LocalSearch(String name, Problem<SolutionType> problem){
         super(name != null ? name : "LocalSearch", problem);
@@ -78,13 +78,15 @@ public abstract class LocalSearch<SolutionType extends Solution> extends Search<
     /******************/
     
     /**
-     * When the search is started, a random initial solution is generated if none has been specified.
+     * When the search is initialized, a random initial solution is generated if none has been specified
+     * or generated before. If this method is called multiple times prior to execution only the first call
+     * will have an effect.
      */
     @Override
-    protected void searchStarted(){
-        // call super
-        super.searchStarted();
-        // create random initial solution if none is set
+    public void init(){
+        // initialize super
+        super.init();
+        // set random initial solution if none has been set already
         if(curSolution == null){
             generateRandomInitialSolution();
         }
@@ -97,7 +99,9 @@ public abstract class LocalSearch<SolutionType extends Solution> extends Search<
      */
     protected void generateRandomInitialSolution(){
         if(curSolution != null){
-            throw new SearchException("Cannot set random initial solution in local search: current solution is already set.");
+            throw new SearchException(
+                    "Cannot set random initial solution in local search: current solution is already set."
+            );
         }
         updateCurrentAndBestSolution(getProblem().createRandomSolution(getRandom()));
     }
@@ -168,9 +172,9 @@ public abstract class LocalSearch<SolutionType extends Solution> extends Search<
      * used to specify a custom initial solution before starting the search. Note that it may only be called when
      * the search is idle.
      * 
+     * @param solution current solution to be adopted
      * @throws SearchException if the search is not idle
      * @throws NullPointerException if <code>solution</code> is <code>null</code>
-     * @param solution current solution to be adopted
      */
     public void setCurrentSolution(SolutionType solution){
         // synchronize with status updates
@@ -181,8 +185,35 @@ public abstract class LocalSearch<SolutionType extends Solution> extends Search<
             if(solution == null){
                 throw new NullPointerException("Cannot set current solution: received null.");
             }
-            // go ahead and adjust current solution
+            // update current solution and check for new best solution
             updateCurrentAndBestSolution(solution);
+        }
+    }
+    
+    /**
+     * Sets the current solution given that it has already been evaluated and validated.
+     * It is checked whether the new current solution is a valid first/new best solution.
+     * Note that this method may only be called when the search is idle.
+     * 
+     * @param solution current solution to be adopted
+     * @param evaluation current solution evaluation
+     * @param validation current solution validation
+     * @throws SearchException if the search is not idle
+     * @throws NullPointerException if any argument is <code>null</code>
+     */
+    public void setCurrentSolution(SolutionType solution, Evaluation evaluation, Validation validation){
+        // synchronize with status updates
+        synchronized(getStatusLock()){
+            // assert idle
+            assertIdle("Cannot set current solution.");
+            // check not null
+            if(solution == null || evaluation == null || validation == null){
+                throw new NullPointerException(
+                        "Cannot set current solution: solution, evaluation and validation can not be null."
+                );
+            }
+            // update current solution and check for new best solution
+            updateCurrentAndBestSolution(solution, evaluation, validation);
         }
     }
     

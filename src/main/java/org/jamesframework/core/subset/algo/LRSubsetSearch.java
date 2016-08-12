@@ -150,12 +150,12 @@ public class LRSubsetSearch extends LocalSearch<SubsetSolution> {
     }
     
     /**
-     * When the search is started for the first time, and no custom initial solution has been set,
-     * an empty or full subset solution is created depending on whether \(L \gt R\) or \(R \gt L\),
-     * respectively, to be repeatedly modified during search.
+     * When the search is initialized, and no custom initial solution has been set,
+     * an empty or full subset solution is created depending on whether \(L \gt R\) 
+     * or \(R \gt L\), respectively.
      */
     @Override
-    protected void searchStarted(){
+    public void init(){
         // solution not yet set?
         // NOTE: important to set solution before calling super,
         //       else super sets a random initial solution
@@ -171,8 +171,8 @@ public class LRSubsetSearch extends LocalSearch<SubsetSolution> {
                 updateCurrentAndBestSolution(initial);
             }
         }
-        // call super
-        super.searchStarted();
+        // init super
+        super.init();
     }
     
     /**

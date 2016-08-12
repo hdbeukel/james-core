@@ -110,13 +110,13 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
     /******************/
     
     /**
-     * When a neighbourhood search is started, the number of accepted and rejected moves is reset to zero.
+     * When a neighbourhood search is initialized, the number of accepted and rejected moves is (re)set to zero.
      */
     @Override
-    protected void searchStarted(){
-        // call super
-        super.searchStarted();
-        // reset neighbourhood search specific, per run metadata
+    public void init(){
+        // init super
+        super.init();
+        // (re)set neighbourhood search specific, per run metadata
         numAcceptedMoves = 0;
         numRejectedMoves = 0;
     }

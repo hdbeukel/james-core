@@ -51,10 +51,11 @@ import org.jamesframework.core.search.listeners.SearchListener;
  * (problem, objective, constraints, neighbourhood, ...) are thread-safe.
  * </p>
  *
- * @param <SolutionType> solution type of the problems that may be solved using this search, required to extend {@link Solution}
+ * @param <SolutionType> solution type of the problems that may be solved using this search,
+ *                       required to extend {@link Solution}
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
-public class BasicParallelSearch<SolutionType extends Solution> extends Search<SolutionType>{
+public class BasicParallelSearch<SolutionType extends Solution> extends Search<SolutionType> {
 
     // thread pool for concurrent search execution
     private final ExecutorService pool;
@@ -71,8 +72,8 @@ public class BasicParallelSearch<SolutionType extends Solution> extends Search<S
      * Creates a new basic parallel search, specifying the problem to solve. The problem can not be <code>null</code>.
      * The default search name "BasicParallelSearch" is assigned to this search.
      *
-     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      * @param problem problem to solve
+     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      */
     public BasicParallelSearch(Problem<SolutionType> problem) {
         this(null, problem);
@@ -83,9 +84,9 @@ public class BasicParallelSearch<SolutionType extends Solution> extends Search<S
      * not be <code>null</code>. The search name can be <code>null</code> in which case the default name
      * "BasicParallelSearch" is assigned.
      *
-     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      * @param problem problem to solve
      * @param name custom search name
+     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      */
     public BasicParallelSearch(String name, Problem<SolutionType> problem) {
         super(name != null ? name : "BasicParallelSearch", problem);
@@ -112,9 +113,9 @@ public class BasicParallelSearch<SolutionType extends Solution> extends Search<S
      * (problem, objective, constraints, neighbourhood, ...) are thread-safe.
      * </p>
      *
+     * @param search search to add for parallel execution
      * @throws SearchException if the parallel search is not idle, or if the given search does not solve
      *                         the same problem as the parallel search
-     * @param search search to add for parallel execution
      */
     public void addSearch(Search<SolutionType> search) {
         // synchronize with status updates
@@ -135,9 +136,9 @@ public class BasicParallelSearch<SolutionType extends Solution> extends Search<S
      * Remove the given search. If the search was never added, <code>false</code> is returned.
      * Note that this method may only be called when the search is idle.
      *
-     * @throws SearchException if the search is not idle
      * @param search search to be removed from parallel algorithm
      * @return <code>true</code> if search is successfully removed
+     * @throws SearchException if the search is not idle
      */
     public boolean removeSearch(Search<SolutionType> search) {
         // synchronize with status updates
@@ -160,19 +161,23 @@ public class BasicParallelSearch<SolutionType extends Solution> extends Search<S
     }
 
     /**
-     * When the search is started, it is verified whether at least one subsearch has been added.
-     * If not, an exception is thrown.
+     * When the search is initialized, it is verified whether at least one subsearch
+     * has been added and all subsearches are initialized as well (in parallel).
+     * An exception is thrown if no subsearches have been added.
      *
      * @throws SearchException if no searches have been added
      */
     @Override
-    protected void searchStarted() {
-        super.searchStarted();
+    public void init() {
+        // init super
+        super.init();
         // check: at least one search added
         if (searches.isEmpty()) {
-            throw new SearchException("Cannot start basic parallel search: "
+            throw new SearchException("Cannot initialize basic parallel search: "
                                     + "no subsearches added for concurrent execution.");
         }
+        // initialize subsearches
+        searches.parallelStream().forEach(Search::init);
     }
 
     /**
@@ -192,11 +197,12 @@ public class BasicParallelSearch<SolutionType extends Solution> extends Search<S
      */
     @Override
     protected void searchDisposed() {
-        super.searchDisposed();
         // release thread pool
         pool.shutdown();
         // dispose contained searches
         searches.forEach(s -> s.dispose());
+        // dispose super
+        super.searchDisposed();
     }
 
     /**
@@ -241,8 +247,8 @@ public class BasicParallelSearch<SolutionType extends Solution> extends Search<S
 
         /**
          * When a new best solution is found in any concurrently executed subsearch, it is picked up by the main search
-         * which updates the global best solution accordingly. This method is synchronized to avoid concurrent updates of
-         * the global best solution, as searches are running in separate threads.
+         * which updates the global best solution accordingly. This method is synchronized to avoid concurrent updates
+         * of the global best solution, as searches are running in separate threads.
          *
          * @param search subsearch that found a new best solution
          * @param newBestSolution new best solution in subsearch
