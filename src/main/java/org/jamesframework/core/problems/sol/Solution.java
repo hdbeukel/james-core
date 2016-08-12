@@ -37,12 +37,14 @@ import org.jamesframework.core.exceptions.SolutionCopyException;
 public abstract class Solution {
     
     /**
-     * Creates a checked deep copy of the given solution with specific type <code>T</code> (a subclass of {@link Solution}).
-     * Both the given solution and return type are of the same type <code>T</code>. This method calls {@link #copy()} on
-     * the given solution and casts the result to the respective type <code>T</code>. If this cast fails, an exception
-     * with a detailed error message is thrown, precisely indicating the expected cause of the type mismatch: the method
-     * {@link #copy()} does not return a solution of the correct type <code>T</code>, either because an undesired implementation
-     * is inherited from a super class or because the direct implementation violates the general contract of {@link #copy()}.
+     * Creates a checked deep copy of the given solution with specific type <code>T</code>
+     * (a subclass of {@link Solution}). Both the given solution and return type are of the
+     * same type <code>T</code>. This method calls {@link #copy()} on the given solution and
+     * casts the result to the respective type <code>T</code>. If this cast fails, an exception
+     * with a detailed error message is thrown, precisely indicating the expected cause of the
+     * type mismatch: the method {@link #copy()} does not return a solution of the correct type
+     * <code>T</code>, either because an undesired implementation is inherited from a super class
+     * or because the direct implementation violates the general contract of {@link #copy()}.
      * 
      * @param <T> solution type, required to extend {@link Solution}
      * @param solution solution to copy, of type <code>T</code>
@@ -55,6 +57,13 @@ public abstract class Solution {
     static public <T extends Solution> T checkedCopy(T solution){
         // copy solution
         Solution copy = solution.copy();
+        // check for null
+        if (copy == null) {
+            throw new SolutionCopyException(
+                    "Deep copy of solution of type " + solution.getClass().getSimpleName() + " failed. "
+                    + "Calling copy() yields null."
+            );
+        }
         // verify type of copy
         Class<?> origClass = solution.getClass();
         Class<?> copyClass = copy.getClass();
@@ -66,22 +75,27 @@ public abstract class Solution {
                 Class<?> declaringClassOfCopy = origClass.getMethod("copy").getDeclaringClass();
                 if(declaringClassOfCopy != origClass){
                     // method copy() not directly implemented in T
-                    throw new SolutionCopyException("Deep copy of solution of type " + origClass.getSimpleName() + " failed. "
-                                                            + "Calling copy() yields a solution of type " + copyClass.getSimpleName() + ", not "
-                                                            + origClass.getSimpleName() + ". Expected cause of this type mismatch: "
-                                                            + origClass.getSimpleName() + " does not directly implement method copy() but "
-                                                            + "inherits an undesired implementation from super class "
-                                                            + declaringClassOfCopy.getSimpleName() + ".");
+                    throw new SolutionCopyException(
+                            "Deep copy of solution of type " + origClass.getSimpleName() + " failed. "
+                            + "Calling copy() yields a solution of type " + copyClass.getSimpleName() + ", not "
+                            + origClass.getSimpleName() + ". Expected cause of this type mismatch: "
+                            + origClass.getSimpleName() + " does not directly implement method copy() but "
+                            + "inherits an undesired implementation from super class "
+                            + declaringClassOfCopy.getSimpleName() + "."
+                    );
                 } else {
                     // copy() implemented in T but does not return correct type
-                    throw new SolutionCopyException("Deep copy of solution of type " + origClass.getSimpleName() + " failed. "
-                                                            + "Calling copy() yields a solution of type " + copyClass.getSimpleName() + ", not "
-                                                            + origClass.getSimpleName() + ". Expected cause of this type mismatch: "
-                                                            + "faulty implementation of copy() in " + origClass.getSimpleName() + ", "
-                                                            + "does not return solution of type " + origClass.getSimpleName() + ".");
+                    throw new SolutionCopyException(
+                            "Deep copy of solution of type " + origClass.getSimpleName() + " failed. "
+                            + "Calling copy() yields a solution of type " + copyClass.getSimpleName() + ", not "
+                            + origClass.getSimpleName() + ". Expected cause of this type mismatch: "
+                            + "faulty implementation of copy() in " + origClass.getSimpleName() + ", "
+                            + "does not return solution of type " + origClass.getSimpleName() + "."
+                    );
                 }
             } catch (NoSuchMethodException noSuchMethodEx){
-                // this should never happen, all subclasses of Solution have a method copy() somewhere in the class hierarchy
+                // this should never happen, all subclasses of Solution
+                // have a method copy() somewhere in the class hierarchy
                 throw new Error("Solution without method 'copy()': this should never happen; if it does, "
                                 + "there is a serious bug in Solution.", noSuchMethodEx);
             }
@@ -103,7 +117,7 @@ public abstract class Solution {
     
     /**
      * Overrides default {@link Object#equals(Object)} to be abstract so that all extending solution types are
-     * required to provide an appropriate implemenation that compares solutions by value instead of by reference.
+     * required to provide an appropriate implementation that compares solutions by value instead of by reference.
      * A consistent implementation of {@link #hashCode()} should also be provided.
      * 
      * @param other other object to compare for equality
