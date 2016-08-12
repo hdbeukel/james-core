@@ -4,7 +4,14 @@ JAMES Core Module Changes
 Version 1.2 (under development)
 -------------------------------
 
- - ...
+ - Added public method `init()` to `Search` to perform initialization. This method is called from within `searchStarted()` but may also be called prior to execution.
+ - Updated `LocalSearch`, `LRsubsetSearch`, `NeighbourhoodSearch` and `BasicParallelSearch` to use the new `init()` method for initialization and validation.
+ - When initializing a `ParallelTempering` or `BasicParallelSearch` algorithm all subsearches are now initialized as well.
+ - Added public method `setCurrentSolution(solution, evaluation, validation` to `Search` to set a new current solution with known evaluation and validation.
+ - Avoid full re-evaluation and re-validation when swapping solutions between replicas in `ParallelTempering`. [#18]
+ - Benefit from delta evaluation and validation when shaking in `VariableNeighbourhoodSearch`. [#17]
+ - Added methods to clear all stop criteria and search listeners.
+ - Indicative error message when `copy()` yields `null` in `Solution.checkedCopy(solution)`. [#32]
 
 Version 1.1 (11/07/2015)
 ------------------------
