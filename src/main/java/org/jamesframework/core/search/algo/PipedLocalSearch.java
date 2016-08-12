@@ -86,13 +86,13 @@ public class PipedLocalSearch<SolutionType extends Solution> extends LocalSearch
      * list of local searches can not be empty and can not contain any <code>null</code> elements.
      * Moreover, only searches solving the specified problem can be included in the pipeline.
      * 
+     * @param name custom search name
+     * @param problem problem to solve
+     * @param pipeline local searches to execute in the pipeline, in the given order
      * @throws NullPointerException if <code>problem</code> or <code>pipeline</code> are <code>null</code>,
      *                              or if <code>pipeline</code> contains any <code>null</code> elements
      * @throws IllegalArgumentException if <code>pipeline</code> is empty, or if it contains searches that
      *                                  do not solve the specified problem
-     * @param name custom search name
-     * @param problem problem to solve
-     * @param pipeline local searches to execute in the pipeline, in the given order
      */
     public PipedLocalSearch(String name, Problem<SolutionType> problem, List<LocalSearch<SolutionType>> pipeline){
         super(name != null ? name : "PipedLocalSearch", problem);
@@ -105,7 +105,9 @@ public class PipedLocalSearch<SolutionType extends Solution> extends LocalSearch
         }
         for(LocalSearch<?> l : pipeline){
             if(l == null){
-                throw new NullPointerException("Error while creating piped local search: pipeline contains null elements.");
+                throw new NullPointerException(
+                        "Error while creating piped local search: pipeline contains null elements."
+                );
             }
             if(l.getProblem() != problem){
                 throw new IllegalArgumentException("Error while creating piped local search: pipeline contains searches"
@@ -134,9 +136,10 @@ public class PipedLocalSearch<SolutionType extends Solution> extends LocalSearch
      */
     @Override
     protected void searchDisposed() {
-        super.searchDisposed();
         // dispose searches in pipeline
         pipeline.forEach(s -> s.dispose());
+        // dispose super
+        super.searchDisposed();
     }
     
     /**
@@ -185,7 +188,7 @@ public class PipedLocalSearch<SolutionType extends Solution> extends LocalSearch
      * Listener attached to each search in the pipeline.
      * Aborts searches that attempt to start when the main search is already terminating.
      */
-    private class PipelineListener implements SearchListener<SolutionType>{
+    private class PipelineListener implements SearchListener<SolutionType> {
 
         /**
          * When a search from the pipeline has started, it is verified that the main search has not yet been

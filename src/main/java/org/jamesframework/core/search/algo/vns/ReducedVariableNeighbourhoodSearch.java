@@ -40,10 +40,12 @@ import org.jamesframework.core.search.neigh.Neighbourhood;
  * descent is too costly because it generates and evaluates all neighbours in every step.
  * </p>
  * 
- * @param <SolutionType> solution type of the problems that may be solved using this search, required to extend {@link Solution}
+ * @param <SolutionType> solution type of the problems that may be solved using this search,
+ *                       required to extend {@link Solution}
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
-public class ReducedVariableNeighbourhoodSearch<SolutionType extends Solution> extends MultiNeighbourhoodSearch<SolutionType> {
+public class ReducedVariableNeighbourhoodSearch<SolutionType extends Solution>
+        extends MultiNeighbourhoodSearch<SolutionType> {
 
     // index of currently used neighbourhood
     private int k;
@@ -57,13 +59,14 @@ public class ReducedVariableNeighbourhoodSearch<SolutionType extends Solution> e
      * can not be empty and can not contain any <code>null</code> elements. The search name defaults to
      * "ReducedVariableNeighbourhoodSearch".
      * 
+     * @param problem problem to solve
+     * @param neighs list of neighbourhoods used to create neighbouring solutions
      * @throws NullPointerException if <code>problem</code> or <code>neighs</code> are <code>null</code>, or if
      *                              <code>neighs</code> contains a <code>null</code> element
      * @throws IllegalArgumentException if <code>neighs</code> is empty
-     * @param problem problem to solve
-     * @param neighs list of neighbourhoods used to create neighbouring solutions
      */
-    public ReducedVariableNeighbourhoodSearch(Problem<SolutionType> problem, List<? extends Neighbourhood<? super SolutionType>> neighs){
+    public ReducedVariableNeighbourhoodSearch(Problem<SolutionType> problem,
+                                              List<? extends Neighbourhood<? super SolutionType>> neighs){
         this(null, problem, neighs);
     }
     
@@ -71,18 +74,18 @@ public class ReducedVariableNeighbourhoodSearch<SolutionType extends Solution> e
      * Creates a new reduced variable neighbourhood search, specifying the problem to solve, the neighbourhoods used
      * to modify the current solution, and a custom search name. The problem and list of neighbourhoods can not be
      * <code>null</code>, and the list of neighbourhoods can not be empty and can not contain any <code>null</code>
-     * elements. The search name can be <code>null</code> in which case the default name "ReducedVariableNeighbourhoodSearch"
-     * is assigned.
+     * elements. The search name can be <code>null</code> in which case the default name
+     * "ReducedVariableNeighbourhoodSearch" is assigned.
      * 
-     * @throws NullPointerException if <code>problem</code> or <code>neighs</code> are <code>null</code>, or if
-     *                              <code>neighs</code> contains a <code>null</code> element
-     * @throws IllegalArgumentException if <code>neighs</code> is empty
      * @param problem problem to solve
      * @param neighs list of neighbourhoods used to create neighbouring solutions
      * @param name custom search name
+     * @throws NullPointerException if <code>problem</code> or <code>neighs</code> are <code>null</code>, or if
+     *                              <code>neighs</code> contains a <code>null</code> element
+     * @throws IllegalArgumentException if <code>neighs</code> is empty
      */
     public ReducedVariableNeighbourhoodSearch(String name, Problem<SolutionType> problem,
-                                            List<? extends Neighbourhood<? super SolutionType>> neighs){
+                                              List<? extends Neighbourhood<? super SolutionType>> neighs){
         this(name, problem, neighs, true);
     }
     
@@ -91,22 +94,22 @@ public class ReducedVariableNeighbourhoodSearch<SolutionType extends Solution> e
      * to modify the current solution, and a custom search name; also, it is indicated whether neighbourhoods should
      * be applied cyclically or not (by default, they are). The problem and list of neighbourhoods can not be
      * <code>null</code>, and the list of neighbourhoods can not be empty and can not contain any <code>null</code>
-     * elements. The search name can be <code>null</code> in which case the default name "ReducedVariableNeighbourhoodSearch"
-     * is assigned.
+     * elements. The search name can be <code>null</code> in which case the default name
+     * "ReducedVariableNeighbourhoodSearch" is assigned.
      * 
-     * @throws NullPointerException if <code>problem</code> or <code>neighs</code> are <code>null</code>, or if
-     *                              <code>neighs</code> contains a <code>null</code> element
-     * @throws IllegalArgumentException if <code>neighs</code> is empty
      * @param problem problem to solve
      * @param neighs list of neighbourhoods used to create neighbouring solutions
      * @param cycleNeighbourhoods indicates whether neighbourhoods are applied cyclically; if not, the search
      *                            will terminate internally when all neighbourhoods have been successively applied
      *                            without yielding any improvement
      * @param name custom search name
+     * @throws NullPointerException if <code>problem</code> or <code>neighs</code> are <code>null</code>, or if
+     *                              <code>neighs</code> contains a <code>null</code> element
+     * @throws IllegalArgumentException if <code>neighs</code> is empty
      */
     public ReducedVariableNeighbourhoodSearch(String name, Problem<SolutionType> problem,
-                                            List<? extends Neighbourhood<? super SolutionType>> neighs,
-                                            boolean cycleNeighbourhoods){
+                                              List<? extends Neighbourhood<? super SolutionType>> neighs,
+                                              boolean cycleNeighbourhoods){
         super(name != null ? name : "ReducedVariableNeighbourhoodSearch", problem, neighs);
         // cycle or not?
         this.cycleNeighbourhoods = cycleNeighbourhoods;
@@ -127,12 +130,12 @@ public class ReducedVariableNeighbourhoodSearch<SolutionType extends Solution> e
     /**
      * Samples a random neighbour of the current solution, using the k-th neighbourhood, and accepts it as the new
      * current solution if it is an improvement. If no improvement is found, k is increased. Upon each improvement,
-     * k is reset to 0. If cycling is enabled (which is the default setting), k is also reset to 0 when all neighbourhoods
-     * have been used so that the first neighbourhood will again be applied in the next step. If cycilng is disabled,
-     * the search stops if no improvement was found using the last available neighbourhood.
+     * k is reset to 0. If cycling is enabled (which is the default setting), k is also reset to 0 when all
+     * neighbourhoods have been used so that the first neighbourhood will again be applied in the next step.
+     * If cycling is disabled, the search stops if no improvement was found using the last available neighbourhood.
      * <p>
-     * If the k-th neighbourhood is unable to generate any move, k is also increased to try the next neighbourhood (if any)
-     * in the next step.
+     * If the k-th neighbourhood is unable to generate any move, k is also increased to try the next neighbourhood
+     * (if any) in the next step.
      * 
      * @throws JamesRuntimeException if depending on malfunctioning components (problem, neighbourhood, ...)
      */
