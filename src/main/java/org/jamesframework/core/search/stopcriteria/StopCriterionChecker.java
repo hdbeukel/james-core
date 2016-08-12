@@ -48,7 +48,7 @@ public class StopCriterionChecker {
 
     // scheduled executor service, shared by all checkers
     // (single thread as stop criterion checking is not intensive)
-    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> {
+    private static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor(runnable -> {
         Thread t = new Thread(runnable, "stop-crit-checker");
         t.setDaemon(true);
         return t;
@@ -62,7 +62,7 @@ public class StopCriterionChecker {
     private final Object runningTaskLock = new Object();
     
     // logger
-    private static final Logger logger = LoggerFactory.getLogger(StopCriterionChecker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StopCriterionChecker.class);
 
     // period between consecutive checks, and corresponding time unit
     private long period;
@@ -75,8 +75,9 @@ public class StopCriterionChecker {
     private final List<StopCriterion> stopCriteria;
 
     /**
-     * Create a stop criterion checker dedicated to checking the stop criteria of the given search. By default, consecutive checks will be
-     * separated with a period of 1 second. This can be customized using {@link #setPeriod(long, TimeUnit)}.
+     * Create a stop criterion checker dedicated to checking the stop criteria of the given search.
+     * By default, consecutive checks will be separated with a period of 1 second.
+     * This can be customized using {@link #setPeriod(long, TimeUnit)}.
      *
      * @param search search for which the stop criteria should be checked while running
      */
@@ -115,10 +116,17 @@ public class StopCriterionChecker {
     public boolean remove(StopCriterion stopCriterion) {
         return stopCriteria.remove(stopCriterion);
     }
+    
+    /**
+     * Remove all stop criteria.
+     */
+    public void clear(){
+        stopCriteria.clear();
+    }
 
     /**
-     * Set the period between consecutive stop criterion checks. By default, this period is set to 1 second. The new settings will apply as
-     * from the next call of {@link #startChecking()}.
+     * Set the period between consecutive stop criterion checks. By default, this period is set to 1 second.
+     * The new settings will apply as from the next call of {@link #startChecking()}.
      *
      * @param period period between two checks
      * @param timeUnit time unit of this period
@@ -129,8 +137,8 @@ public class StopCriterionChecker {
     }
 
     /**
-     * Start checking the stop criteria, in a separate background thread. If the stop criterion checker is already active,
-     * or if no stop criteria have been added, calling this method does not have any effect.
+     * Start checking the stop criteria, in a separate background thread. If the stop criterion checker is
+     * already active, or if no stop criteria have been added, calling this method does not have any effect.
      */
     public void startChecking() {
         // synchronize with other attempts to update the running task
@@ -139,15 +147,15 @@ public class StopCriterionChecker {
             if(runningTask == null) {
                 // only activate if at least one stop criterion has been set
                 if(!stopCriteria.isEmpty()){
-                    // schedule periodical check (starting without any delay)
+                    // schedule periodical check
                     runningTask = new StopCriterionCheckTask();
-                    runningTaskFuture = scheduler.scheduleWithFixedDelay(runningTask, 0, period, periodTimeUnit);
+                    runningTaskFuture = SCHEDULER.scheduleWithFixedDelay(runningTask, period, period, periodTimeUnit);
                     // log
-                    logger.debug("Stop criterion checker for search {} activated", search);
+                    LOGGER.debug("Stop criterion checker for search {} activated", search);
                 }
             } else {
                 // issue a warning
-                logger.warn("Attempted to activate already active stop criterion checker for search {}", search);
+                LOGGER.warn("Attempted to activate already active stop criterion checker for search {}", search);
             }
         }
     }
@@ -163,7 +171,7 @@ public class StopCriterionChecker {
                 // cancel task (let it complete its current run if running)
                 runningTaskFuture.cancel(false);
                 // log
-                logger.debug("Stop criterion checker for search {} deactivated", search);
+                LOGGER.debug("Stop criterion checker for search {} deactivated", search);
                 // discard task
                 runningTask = null;
                 runningTaskFuture = null;
@@ -208,17 +216,18 @@ public class StopCriterionChecker {
                         // stop checking
                         stopChecking();
                         // log
-                        logger.debug("Requesting search {} to stop", search);
+                        LOGGER.debug("Requesting search {} to stop", search);
                         // stop the search
                         search.stop();
                     }
                 } else {
-                    if(logger.isDebugEnabled()){
+                    if(LOGGER.isDebugEnabled()){
                         // log
-                        logger.debug("Aborting cancelled stop criterion check task @{} for search {} (currently scheduled task: @{})",
-                                            Integer.toHexString(this.hashCode()),
-                                            search,
-                                            Integer.toHexString(runningTask.hashCode()));
+                        LOGGER.debug("Aborting cancelled stop criterion check task @{} for search {} "
+                                     + "(currently scheduled task: @{})",
+                                     Integer.toHexString(this.hashCode()),
+                                     search,
+                                     Integer.toHexString(runningTask.hashCode()));
                     }
                 }
             }
