@@ -1,8 +1,8 @@
 JAMES Core Module Changes
 =========================
 
-Version 1.2 (under development)
--------------------------------
+Version 1.2 (12/08/2016)
+------------------------
 
  - Added public method `init()` to `Search` to perform initialization. This method is called from within `searchStarted()` but may also be called prior to execution.
  - Updated `LocalSearch`, `LRsubsetSearch`, `NeighbourhoodSearch` and `BasicParallelSearch` to use the new `init()` method for initialization and validation.
