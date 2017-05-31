@@ -1,7 +1,9 @@
 package org.jamesframework.core.search.algo.tabu;
 
+import java.util.List;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.function.Predicate;
 
 import org.jamesframework.core.problems.Problem;
@@ -38,9 +40,11 @@ public class FirstBestAdmissibleTabuSearch<SolutionType extends Solution> extend
     @Override
     protected void searchStep() {
         // get best valid, non tabu move
-        Move<? super SolutionType> move = getBestMove(
+        List<? extends Move<? super SolutionType>> listMove = getNeighbourhood().getAllMoves(getCurrentSolution());
+        Collections.shuffle(listMove);
+    	Move<? super SolutionType> move = getBestMove(
                                             // inspect all moves
-                                            getNeighbourhood().getAllMoves(getCurrentSolution()),
+    										listMove,
                                             // not necessarily an improvement
                                             false,
                                             // return first improvement move

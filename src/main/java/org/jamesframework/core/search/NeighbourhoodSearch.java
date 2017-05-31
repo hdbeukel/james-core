@@ -399,11 +399,10 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
      * @return first improving move or the best valid move, may be <code>null</code>
      */
     @SafeVarargs
-    protected final Move<? super SolutionType> getBestMove(List<? extends Move<? super SolutionType>> moves,
+    protected final Move<? super SolutionType> getBestMove(Collection<? extends Move<? super SolutionType>> moves,
                                                            boolean requireImprovement,
                                                            boolean acceptFirstImprovement,
                                                            Predicate<? super Move<? super SolutionType>>... filters){
-    	Collections.shuffle(moves);
         // track first improvement move AND best valid move + corresponding evaluation, validation and delta
         Move<? super SolutionType> bestMove = null, firstImprovementMove = null;
         double bestMoveDelta = -Double.MAX_VALUE, curMoveDelta, firstImprovementMoveDelta = -Double.MAX_VALUE;
