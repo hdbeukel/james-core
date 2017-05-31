@@ -51,7 +51,8 @@ public class FirstBestAdmissibleTabuSearch<SolutionType extends Solution> extend
                                             true,
                                             // filter tabu moves (with aspiration criterion)
                                             m -> !getTabuMemory().isTabu(m, getCurrentSolution())
-                                                    || computeDelta(evaluate(m), getBestSolutionEvaluation()) > 0
+                                                    || (validate(m).passed() && 
+                                                    		computeDelta(evaluate(m), getBestSolutionEvaluation()) > 0)
         );                                               
         if(move != null){
             // accept move (also updates tabu memory by overriding move acceptance)

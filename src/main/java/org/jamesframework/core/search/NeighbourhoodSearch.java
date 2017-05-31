@@ -20,6 +20,7 @@ import java.util.Arrays;
 import org.jamesframework.core.search.status.SearchStatus;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 import org.jamesframework.core.exceptions.SearchException;
@@ -331,43 +332,7 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
     protected final Move<? super SolutionType> getBestMove(Collection<? extends Move<? super SolutionType>> moves,
                                                            boolean requireImprovement,
                                                            Predicate<? super Move<? super SolutionType>>... filters){
-        // track best valid move + corresponding evaluation, validation and delta
-        Move<? super SolutionType> bestMove = null;
-        double bestMoveDelta = -Double.MAX_VALUE, curMoveDelta;
-        Evaluation curMoveEvaluation, bestMoveEvaluation = null;
-        Validation curMoveValidation, bestMoveValidation = null;
-        // go through all moves
-        for (Move<? super SolutionType> move : moves) {
-            // check filters
-            if(Arrays.stream(filters).allMatch(filter -> filter.test(move))){
-                // validate move
-                curMoveValidation = validate(move);
-                if (curMoveValidation.passed()) {
-                    // evaluate move
-                    curMoveEvaluation = evaluate(move);
-                    // compute delta
-                    curMoveDelta = computeDelta(curMoveEvaluation, getCurrentSolutionEvaluation());
-                    // compare with current best move
-                    if (curMoveDelta > bestMoveDelta    // higher delta
-                            && (!requireImprovement     // ensure improvement, if required
-                                || curMoveDelta > 0
-                                || !getCurrentSolutionValidation().passed())) {
-                        bestMove = move;
-                        bestMoveDelta = curMoveDelta;
-                        bestMoveEvaluation = curMoveEvaluation;
-                        // should update the bestMoveValidation
-                        bestMoveValidation = curMoveValidation;
-                    }
-                }
-            }
-        }
-        // re-cache best move, if any
-        if(bestMove != null && cache != null){
-            cache.cacheMoveEvaluation(bestMove, bestMoveEvaluation);
-            cache.cacheMoveValidation(bestMove, bestMoveValidation);
-        }
-        // return best move
-        return bestMove;
+    	return this.getBestMove(moves, requireImprovement, false, filters);
     }
     
     /**
@@ -404,70 +369,106 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
                                                            boolean acceptFirstImprovement,
                                                            Predicate<? super Move<? super SolutionType>>... filters){
         // track first improvement move AND best valid move + corresponding evaluation, validation and delta
-        Move<? super SolutionType> bestMove = null, firstImprovementMove = null;
-        double bestMoveDelta = -Double.MAX_VALUE, curMoveDelta, firstImprovementMoveDelta = -Double.MAX_VALUE;
-        Evaluation curMoveEvaluation, bestMoveEvaluation = null, firstImprovementMoveEvaluation = null;
-        Validation curMoveValidation, bestMoveValidation = null, firstImprovementMoveValidation = null;
-        // go through all moves
-        for (Move<? super SolutionType> move : moves) {
-            // check filters
-            if(Arrays.stream(filters).allMatch(filter -> filter.test(move))){
-                // validate move
-                curMoveValidation = validate(move);
-                if (curMoveValidation.passed()) {
-                    // evaluate move
-                    curMoveEvaluation = evaluate(move);
-                    // compute delta
-                    curMoveDelta = computeDelta(curMoveEvaluation, getCurrentSolutionEvaluation());
-                    
-                    // compare with current solution
-                    if(curMoveDelta > 0 // better than curSolution
-                    		|| !getCurrentSolutionValidation().passed()){ 
-                    	firstImprovementMove = move;
-                    	firstImprovementMoveDelta = curMoveDelta;
-                    	firstImprovementMoveEvaluation = curMoveEvaluation;
-                    	firstImprovementMoveValidation = curMoveValidation;
-                    	break;
-                    }
-//                    if (curMoveDelta > bestMoveDelta    // higher delta
-//                            && (!requireImprovement     // ensure improvement, if required
-//                                || curMoveDelta > 0
-//                                || !getCurrentSolutionValidation().passed())) {
-//                        bestMove = move;
-//                        bestMoveDelta = curMoveDelta;
-//                        bestMoveEvaluation = curMoveEvaluation;
-//                        bestMoveValidation = curMoveValidation;
-//                        break;
+//        Move<? super SolutionType> bestMove = null, firstImprovementMove = null;
+//        double bestMoveDelta = -Double.MAX_VALUE, curMoveDelta, firstImprovementMoveDelta = -Double.MAX_VALUE;
+//        Evaluation curMoveEvaluation, bestMoveEvaluation = null, firstImprovementMoveEvaluation = null;
+//        Validation curMoveValidation, bestMoveValidation = null, firstImprovementMoveValidation = null;
+//
+//        
+//        // go through all moves
+//        for (Move<? super SolutionType> move : moves) {
+//            // check filters
+//            if(Arrays.stream(filters).allMatch(filter -> filter.test(move))){
+//                // validate move
+//                curMoveValidation = validate(move);
+//                if (curMoveValidation.passed()) {
+//                    // evaluate move
+//                    curMoveEvaluation = evaluate(move);
+//                    // compute delta
+//                    curMoveDelta = computeDelta(curMoveEvaluation, getCurrentSolutionEvaluation());
+//                    
+//                    // compare with current solution
+//                    if(curMoveDelta > 0 // better than curSolution
+//                    		|| !getCurrentSolutionValidation().passed()){ 
+//                    	firstImprovementMove = move;
+//                    	firstImprovementMoveDelta = curMoveDelta;
+//                    	firstImprovementMoveEvaluation = curMoveEvaluation;
+//                    	firstImprovementMoveValidation = curMoveValidation;
+//                    	break;
 //                    }
-                    // compare with best move
-                    if (curMoveDelta > bestMoveDelta){ // higher delta
-                    	bestMoveDelta = curMoveDelta;
-                    	bestMove = move;
-                    	bestMoveEvaluation = curMoveEvaluation;
-                    	bestMoveValidation = curMoveValidation;
-                    }
-                    
+////                    if (curMoveDelta > bestMoveDelta    // higher delta
+////                            && (!requireImprovement     // ensure improvement, if required
+////                                || curMoveDelta > 0
+////                                || !getCurrentSolutionValidation().passed())) {
+////                        bestMove = move;
+////                        bestMoveDelta = curMoveDelta;
+////                        bestMoveEvaluation = curMoveEvaluation;
+////                        bestMoveValidation = curMoveValidation;
+////                        break;
+////                    }
+//                    // compare with best move
+//                    if (curMoveDelta > bestMoveDelta){ // higher delta
+//                    	bestMoveDelta = curMoveDelta;
+//                    	bestMove = move;
+//                    	bestMoveEvaluation = curMoveEvaluation;
+//                    	bestMoveValidation = curMoveValidation;
+//                    }
+//                    
+//
+//                }
+//            }
+//        }
+//        // re-cache best move, if any
+//        if(bestMove != null && cache != null){
+//            cache.cacheMoveEvaluation(bestMove, bestMoveEvaluation);
+//            cache.cacheMoveValidation(bestMove, bestMoveValidation);
+//        }
+//        // re-cache best non-tabu move, if any
+//        if(firstImprovementMove != null && cache != null){
+//            cache.cacheMoveEvaluation(firstImprovementMove, firstImprovementMoveEvaluation);
+//            cache.cacheMoveValidation(firstImprovementMove, firstImprovementMoveValidation);
+//        }
+//        // If firstImprovementMove is not null, return firstImprovementMove. 
+//        // Otherwise, return bestMove (which should be no better than currentSolution but be better than any other move)
+////        if(firstImprovementMove != null)
+////        	return firstImprovementMove;
+////        else
+////        	return bestMove;
+        
+        // track the chosen move + corresponding evaluation, validation and delta
+        Move<? super SolutionType> chosenMove = null;
+        double chosenMoveDelta = -Double.MAX_VALUE, curMoveDelta = -Double.MAX_VALUE;
+        Evaluation chosenMoveEvaluation = null, curMoveEvaluation = null;
+        Validation chosenMoveValidation = null, curMoveValidation = null;
+        Iterator<? extends Move<? super SolutionType>> iteMove = moves.iterator();
+        while(iteMove.hasNext() && 
+        		!(acceptFirstImprovement && // if acceptFirstImprovement=false, should check every move
+        		 chosenMoveDelta>0) ){ // if chosenMoveDelta<=0, should check every move        		
+        	Move<? super SolutionType> curMove = iteMove.next();
+        	if(Arrays.stream(filters).allMatch(filter -> filter.test(curMove))){
+        		curMoveValidation = validate(curMove);
+        		if(curMoveValidation.passed()){
+            		curMoveEvaluation = evaluate(curMove);
+            		curMoveDelta = computeDelta(curMoveEvaluation, getCurrentSolutionEvaluation());
+            		if(curMoveDelta > chosenMoveDelta && 
+            				(!requireImprovement     // ensure improvement, if required
+                            || curMoveDelta > 0
+                            || !getCurrentSolutionValidation().passed())){
+            			chosenMove = curMove;
+            			chosenMoveDelta = curMoveDelta;
+            			chosenMoveEvaluation = curMoveEvaluation;
+            			chosenMoveValidation = curMoveValidation;
+            		}
+        		}
+        	}
+        }
+     // re-cache the choseMove, if any
+        if(chosenMove != null && cache != null){
+            cache.cacheMoveEvaluation(chosenMove, chosenMoveEvaluation);
+            cache.cacheMoveValidation(chosenMove, chosenMoveValidation);
+        }
 
-                }
-            }
-        }
-        // re-cache best move, if any
-        if(bestMove != null && cache != null){
-            cache.cacheMoveEvaluation(bestMove, bestMoveEvaluation);
-            cache.cacheMoveValidation(bestMove, bestMoveValidation);
-        }
-        // re-cache best non-tabu move, if any
-        if(firstImprovementMove != null && cache != null){
-            cache.cacheMoveEvaluation(firstImprovementMove, firstImprovementMoveEvaluation);
-            cache.cacheMoveValidation(firstImprovementMove, firstImprovementMoveValidation);
-        }
-        // If firstImprovementMove is not null, return firstImprovementMove. 
-        // Otherwise, return bestMove (which should be no better than currentSolution but be better than any other move)
-        if(firstImprovementMove != null)
-        	return firstImprovementMove;
-        else
-        	return bestMove;
-
+        return chosenMove;
     }
     
     /**
