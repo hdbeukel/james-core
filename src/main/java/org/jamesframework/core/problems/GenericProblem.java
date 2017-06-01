@@ -442,7 +442,7 @@ public class GenericProblem<SolutionType extends Solution, DataType> implements 
                 // retrieve current penalizing validation
                 PenalizingValidation curVal = curPenalizedEval.getPenalizingValidation(pc);
                 // delta validation
-                PenalizingValidation newVal = pc.validate(move, curSolution, (Validation)curVal, data);
+                PenalizingValidation newVal = pc.validate(move, curSolution, curVal, data);
                 // add penalty
                 newPenalizedEval.addPenalizingValidation(pc, newVal);
             });
