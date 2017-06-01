@@ -187,7 +187,8 @@ public class TabuSearch<SolutionType extends Solution> extends SingleNeighbourho
                                             false,
                                             // filter tabu moves (with aspiration criterion)
                                             m -> !tabuMemory.isTabu(m, getCurrentSolution())
-                                                    || computeDelta(evaluate(m), getBestSolutionEvaluation()) > 0
+                                                    || (validate(m).passed() && 
+                                                    		computeDelta(evaluate(m), getBestSolutionEvaluation()) > 0)
         );                                               
         if(move != null){
             // accept move (also updates tabu memory by overriding move acceptance)
