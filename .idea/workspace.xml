@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="79e247f9-099e-49f4-aec0-6ebaf8ad290c" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/NeighbourhoodSearchTest.java" afterPath="$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/NeighbourhoodSearchTest.java" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
@@ -41,8 +42,8 @@
       <file leaf-file-name="NeighbourhoodSearchTest.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/NeighbourhoodSearchTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="477">
-              <caret line="504" column="39" lean-forward="true" selection-start-line="504" selection-start-column="39" selection-end-line="504" selection-end-column="39" />
+            <state relative-caret-position="544">
+              <caret line="58" column="41" lean-forward="true" selection-start-line="58" selection-start-column="41" selection-end-line="58" selection-end-column="41" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#21197#21209#0" expanded="true" />
@@ -830,7 +831,7 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1172,8 +1173,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/NeighbourhoodSearchTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="477">
-          <caret line="504" column="39" lean-forward="true" selection-start-line="504" selection-start-column="39" selection-end-line="504" selection-end-column="39" />
+        <state relative-caret-position="544">
+          <caret line="58" column="41" lean-forward="true" selection-start-line="58" selection-start-column="41" selection-end-line="58" selection-end-column="41" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#21197#21209#0" expanded="true" />
