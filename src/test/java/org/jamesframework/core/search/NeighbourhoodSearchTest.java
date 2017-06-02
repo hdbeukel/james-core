@@ -16,11 +16,11 @@
 
 package org.jamesframework.core.search;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
 import org.jamesframework.core.exceptions.SearchException;
 import org.jamesframework.core.problems.Problem;
+import org.jamesframework.core.problems.solutions.SolutionTest;
 import org.jamesframework.core.subset.SubsetProblem;
 import org.jamesframework.core.problems.sol.Solution;
 import org.jamesframework.core.problems.constraints.Constraint;
@@ -32,10 +32,7 @@ import org.jamesframework.core.subset.SubsetSolution;
 import org.jamesframework.core.search.neigh.Move;
 import org.jamesframework.core.search.stopcriteria.MaxSteps;
 import org.jamesframework.core.subset.neigh.SingleDeletionNeighbourhood;
-import org.jamesframework.core.subset.neigh.moves.AdditionMove;
-import org.jamesframework.core.subset.neigh.moves.DeletionMove;
-import org.jamesframework.core.subset.neigh.moves.GeneralSubsetMove;
-import org.jamesframework.core.subset.neigh.moves.SwapMove;
+import org.jamesframework.core.subset.neigh.moves.*;
 import org.jamesframework.core.util.JamesConstants;
 import org.jamesframework.core.util.SetUtilities;
 import org.jamesframework.test.util.DoubleComparatorWithPrecision;
@@ -56,7 +53,7 @@ import org.junit.Before;
 public class NeighbourhoodSearchTest extends SearchTestTemplate {
 
     // neighbourhood search stub to work with
-    private NeighbourhoodSearch<SubsetSolution> neighSearch;    
+    private NeighbourhoodSearch<SubsetSolution> neighSearch;
     
     /**
      * Print message when starting tests.
@@ -74,7 +71,9 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
     public static void tearDownClass() {
         System.out.println("# Done testing NeighbourhoodSearch!");
     }
-    
+
+
+
     /**
      * Create search and components to work with in each test method.
      */
@@ -454,7 +453,83 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
     }
 
     /**
-     * Test of accept method, of class NeighbourhoodSearch.
+     * Test of getBestMove method with acceptFirstImprovement as true, of class NeighbourhoodSearch.
+     */
+    @Test
+    public void testGetBestMoveAcceptFirstImprovement() throws Exception {
+        System.out.println(" - test getBestMove with acceptFirstImprovement as true");
+
+        // set random initial solution
+        neighSearch.setCurrentSolution(problem.createRandomSolution());
+
+        List<? extends Move<? super SubsetSolution>> moves  = neigh.getAllMoves(neighSearch.getCurrentSolution());
+        Move<? super SubsetSolution> bestMoveFirstImprovement = neighSearch.getBestMove(moves, true, true);
+        Move<? super SubsetSolution> bestMove = neighSearch.getBestMove(moves, true, false);
+
+//        Evaluation prevSolutionEvaluation = neighSearch.getCurrentSolutionEvaluation();
+//        Solution curSolution = neighSearch.getCurrentSolution();
+        // apply best move until no more improvements found (important: only positive deltas allowed)
+        while(bestMove != null){
+            // apply move
+
+            // verify: bestMove should surpass bestMoveFirstImprovement?
+            assertTrue(neighSearch.evaluate(bestMove).getValue() >= neighSearch.
+                    evaluate(bestMoveFirstImprovement).getValue());
+            // apply
+            neighSearch.accept(bestMoveFirstImprovement);
+            // get new moves
+            moves = neigh.getAllMoves(neighSearch.getCurrentSolution());
+            // get move with largest positive delta
+            bestMove = neighSearch.getBestMove(moves, true, false);
+            bestMoveFirstImprovement = neighSearch.getBestMove(moves, true,true);
+        }
+
+        // when curSolution is best, bestMove and bestMoveFirstImprovement should be the same
+        neighSearch.setCurrentSolution(neighSearch.getBestSolution());
+        moves = neigh.getAllMoves(neighSearch.getCurrentSolution());
+        assertTrue(moves != null);
+        bestMove = neighSearch.getBestMove(moves, false, false);
+        bestMoveFirstImprovement = neighSearch.getBestMove(moves, false,true);
+        assertTrue(bestMove != null);
+        assertTrue(bestMoveFirstImprovement != null);
+        assertTrue(bestMove == bestMoveFirstImprovement);
+
+        // when curSolution is a neighbour of the best solution, bestMove and bestMoveFirstImprovement should be different
+        neighSearch.setCurrentSolution(neighSearch.getBestSolution());
+        Evaluation bestSolutionEvaluation = neighSearch.getCurrentSolutionEvaluation();
+        Move randomMove = neigh.getRandomMove(neighSearch.getCurrentSolution());
+        // obtain a randomMove that is worse than bestSolution
+        while(neighSearch.evaluate(randomMove).getValue() >= bestSolutionEvaluation.getValue())
+            randomMove = neigh.getRandomMove(neighSearch.getCurrentSolution());
+
+        neighSearch.accept(randomMove);
+
+        // should have more than 2 neighbours
+        assertTrue(neigh.getAllMoves(neighSearch.getCurrentSolution()).size() > 2);
+
+        // find a move that results to a solution whose quality is between bestSolution and curSolution
+        randomMove = neigh.getRandomMove(neighSearch.getCurrentSolution());
+        while(neighSearch.evaluate(randomMove).getValue() >= bestSolutionEvaluation.getValue())
+            randomMove = neigh.getRandomMove(neighSearch.getCurrentSolution());
+
+        // listMove: randomMove + allMoves
+        Collection<SubsetMove> listMove = new ArrayList<SubsetMove>();
+        listMove.add((SubsetMove)randomMove);
+        listMove.addAll(neigh.getAllMoves(neighSearch.getCurrentSolution()));
+
+        bestMove = neighSearch.getBestMove(listMove, false, false);
+        bestMoveFirstImprovement = neighSearch.getBestMove(listMove, false,true);
+
+        assertTrue(bestMove != null);
+        assertTrue(bestMoveFirstImprovement != null);
+
+        assertEquals(neighSearch.evaluate(bestMove).getValue(), bestSolutionEvaluation.getValue(), 1e-8);
+        assertTrue(bestMove != bestMoveFirstImprovement);
+        assertTrue(neighSearch.evaluate(bestMove).getValue() >
+                neighSearch.evaluate(bestMoveFirstImprovement).getValue());
+    }
+    /**
+     * Test of accept method, of class NeighbourhoodSearch
      */
     @Test
     public void testAccept() {
