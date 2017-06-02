@@ -9,8 +9,9 @@
 *.iml
 .classpath
 .project
-**/.settings/
-**/.idea/
+**/.settings/**
+**/.idea/**
+pom.xml
 
 
 /target/

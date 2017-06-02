@@ -497,7 +497,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         // when curSolution is a neighbour of the best solution, bestMove and bestMoveFirstImprovement should be different
         neighSearch.setCurrentSolution(neighSearch.getBestSolution());
         Evaluation bestSolutionEvaluation = neighSearch.getCurrentSolutionEvaluation();
-        Move randomMove = neigh.getRandomMove(neighSearch.getCurrentSolution());
+        Move<? super SubsetSolution> randomMove = neigh.getRandomMove(neighSearch.getCurrentSolution());
         // obtain a randomMove that is worse than bestSolution
         while(neighSearch.evaluate(randomMove).getValue() >= bestSolutionEvaluation.getValue())
             randomMove = neigh.getRandomMove(neighSearch.getCurrentSolution());

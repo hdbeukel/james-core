@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="79e247f9-099e-49f4-aec0-6ebaf8ad290c" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/algo/tabu/FirstBestAdmissibleTabuSearchTest.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/algo/tabu/FirstBestAdmissibleTabuSearchTest2.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/james-core.iml" afterPath="$PROJECT_DIR$/james-core.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/NeighbourhoodSearchTest.java" afterPath="$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/NeighbourhoodSearchTest.java" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
@@ -42,12 +38,15 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="EvaluatedMoveCache.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/org/jamesframework/core/search/cache/EvaluatedMoveCache.java">
+      <file leaf-file-name="NeighbourhoodSearchTest.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/NeighbourhoodSearchTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="134">
-              <caret line="46" column="28" lean-forward="true" selection-start-line="46" selection-start-column="28" selection-end-line="46" selection-end-column="28" />
-              <folding />
+            <state relative-caret-position="477">
+              <caret line="504" column="39" lean-forward="true" selection-start-line="504" selection-start-column="39" selection-end-line="504" selection-end-column="39" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#21197#21209#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -55,8 +54,8 @@
       <file leaf-file-name="SingleEvaluatedMoveCache.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/org/jamesframework/core/search/cache/SingleEvaluatedMoveCache.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="34" column="67" lean-forward="false" selection-start-line="34" selection-start-column="49" selection-end-line="34" selection-end-column="67" />
+            <state relative-caret-position="136">
+              <caret line="24" column="43" lean-forward="true" selection-start-line="24" selection-start-column="43" selection-end-line="24" selection-end-column="43" />
               <folding />
             </state>
           </provider>
@@ -105,14 +104,12 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FirstBestAdmissibleTabuSearchTest2.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="FirstBestAdmissibleTabuSearchTest2.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/algo/tabu/FirstBestAdmissibleTabuSearchTest2.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="476">
-              <caret line="28" column="7" lean-forward="false" selection-start-line="28" selection-start-column="7" selection-end-line="28" selection-end-column="7" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
+            <state relative-caret-position="34">
+              <caret line="2" column="57" lean-forward="true" selection-start-line="2" selection-start-column="57" selection-end-line="2" selection-end-column="57" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -140,6 +137,7 @@
     <findStrings>
       <find>tabusearch</find>
       <find>FirstBestAdmissibleTabuSearch</find>
+      <find>move</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -153,12 +151,12 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/NeighbourhoodSearchTest.java" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/org/jamesframework/core/search/NeighbourhoodSearch.java" />
         <option value="$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/algo/tabu/FirstBestFeasibleTabuSearchTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/algo/tabu/FirstBestAdmissibleTabuSearchTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/algo/tabu/FirstBestAdmissibleTabuSearchTest2.java" />
+        <option value="$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/NeighbourhoodSearchTest.java" />
       </list>
     </option>
   </component>
@@ -416,7 +414,7 @@
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="SearchEverywhereHistoryKey" value="run&#9;ACTION&#9;Run&#10;tabusearch&#9;FILE&#9;file://D:/JavaWorkspace/james-core/src/test/java/org/jamesframework/core/search/algo/tabu/TabuSearchTest.java&#10;keymap&#9;ACTION&#9;ChangeKeymap&#10;keyma&#9;ACTION&#9;ChangeKeymap&#10;cache&#9;PSI&#9;JAVA://org.jamesframework.core.search.NeighbourhoodSearch#cache&#10;neighbourhoodsear&#9;FILE&#9;file://D:/JavaWorkspace/james-core/src/main/java/org/jamesframework/core/search/NeighbourhoodSearch.java&#10;testbestmo&#9;PSI&#9;JAVA://org.jamesframework.core.search.NeighbourhoodSearchTest#testGetBestMoveAcceptFirstImprovement&#10;testgetbest&#9;PSI&#9;JAVA://org.jamesframework.core.search.NeighbourhoodSearchTest#testGetBestMove&#10;getbest&#9;PSI&#9;JAVA://org.jamesframework.core.search.NeighbourhoodSearch#getBestMove&#10;getbestmove&#9;PSI&#9;JAVA://org.jamesframework.core.search.NeighbourhoodSearchTest#testGetBestMoveAcceptFirstImprovement&#10;NeighbourhoodSearch&#9;FILE&#9;file://D:/JavaWorkspace/james-core/src/main/java/org/jamesframework/core/search/NeighbourhoodSearch.java&#10;Nei&#9;PSI&#9;JAVA://org.jamesframework.core.search.NeighbourhoodSearchTest" />
+    <property name="SearchEverywhereHistoryKey" value="neighbourhoodsearchtest&#9;FILE&#9;file://D:/JavaWorkspace/james-core/src/test/java/org/jamesframework/core/search/NeighbourhoodSearchTest.java&#10;run&#9;ACTION&#9;Run&#10;tabusearch&#9;FILE&#9;file://D:/JavaWorkspace/james-core/src/test/java/org/jamesframework/core/search/algo/tabu/TabuSearchTest.java&#10;keymap&#9;ACTION&#9;ChangeKeymap&#10;keyma&#9;ACTION&#9;ChangeKeymap&#10;cache&#9;PSI&#9;JAVA://org.jamesframework.core.search.NeighbourhoodSearch#cache&#10;neighbourhoodsear&#9;FILE&#9;file://D:/JavaWorkspace/james-core/src/main/java/org/jamesframework/core/search/NeighbourhoodSearch.java&#10;testbestmo&#9;PSI&#9;JAVA://org.jamesframework.core.search.NeighbourhoodSearchTest#testGetBestMoveAcceptFirstImprovement&#10;testgetbest&#9;PSI&#9;JAVA://org.jamesframework.core.search.NeighbourhoodSearchTest#testGetBestMove&#10;getbest&#9;PSI&#9;JAVA://org.jamesframework.core.search.NeighbourhoodSearch#getBestMove&#10;getbestmove&#9;PSI&#9;JAVA://org.jamesframework.core.search.NeighbourhoodSearchTest#testGetBestMoveAcceptFirstImprovement&#10;NeighbourhoodSearch&#9;FILE&#9;file://D:/JavaWorkspace/james-core/src/main/java/org/jamesframework/core/search/NeighbourhoodSearch.java&#10;Nei&#9;PSI&#9;JAVA://org.jamesframework.core.search.NeighbourhoodSearchTest" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RunDashboard">
@@ -833,6 +831,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -849,7 +848,7 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25572917" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25572917" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1703125" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32946146" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -939,7 +938,7 @@
           <caret line="515" column="38" lean-forward="false" selection-start-line="515" selection-start-column="38" selection-end-line="515" selection-end-column="38" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#21173#21185#0" expanded="true" />
+            <element signature="e#21197#21209#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1007,7 +1006,7 @@
           <caret line="66" column="0" lean-forward="false" selection-start-line="66" selection-start-column="0" selection-end-line="67" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#21173#21185#0" expanded="true" />
+            <element signature="e#21197#21209#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1070,17 +1069,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/NeighbourhoodSearchTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="737">
-          <caret line="482" column="48" lean-forward="false" selection-start-line="482" selection-start-column="48" selection-end-line="482" selection-end-column="48" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#21173#21185#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/org/jamesframework/core/search/algo/tabu/FirstBestAdmissibleTabuSearch.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="561">
@@ -1093,14 +1081,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
           <caret line="10" column="13" lean-forward="false" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/org/jamesframework/core/search/cache/SingleEvaluatedMoveCache.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="34" column="67" lean-forward="false" selection-start-line="34" selection-start-column="49" selection-end-line="34" selection-end-column="67" />
           <folding />
         </state>
       </provider>
@@ -1139,6 +1119,22 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/org/jamesframework/core/search/algo/tabu/TabuSearch.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="340">
+          <caret line="41" column="17" lean-forward="false" selection-start-line="41" selection-start-column="17" selection-end-line="41" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/algo/tabu/FirstBestAdmissibleTabuSearchTest2.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="57" lean-forward="true" selection-start-line="2" selection-start-column="57" selection-end-line="2" selection-end-column="57" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/algo/tabu/TabuSearchTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="136">
@@ -1147,14 +1143,6 @@
             <element signature="e#0#12684#0" expanded="true" />
             <element signature="imports" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/org/jamesframework/core/search/algo/tabu/TabuSearch.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="41" column="17" lean-forward="false" selection-start-line="41" selection-start-column="17" selection-end-line="41" selection-end-column="17" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1174,12 +1162,21 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/algo/tabu/FirstBestAdmissibleTabuSearchTest2.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/org/jamesframework/core/search/cache/SingleEvaluatedMoveCache.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="476">
-          <caret line="28" column="7" lean-forward="false" selection-start-line="28" selection-start-column="7" selection-end-line="28" selection-end-column="7" />
+        <state relative-caret-position="136">
+          <caret line="24" column="43" lean-forward="true" selection-start-line="24" selection-start-column="43" selection-end-line="24" selection-end-column="43" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/org/jamesframework/core/search/NeighbourhoodSearchTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="477">
+          <caret line="504" column="39" lean-forward="true" selection-start-line="504" selection-start-column="39" selection-end-line="504" selection-end-column="39" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#21197#21209#0" expanded="true" />
           </folding>
         </state>
       </provider>
