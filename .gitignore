@@ -11,7 +11,6 @@
 .project
 **/.settings/**
 **/.idea/**
-pom.xml
 
 
 /target/
