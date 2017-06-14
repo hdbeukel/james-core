@@ -6,4 +6,11 @@
 *.log
 *.jar
 *.zip
+*.iml
+.classpath
+.project
+**/.settings/**
+**/.idea/**
+
+
 /target/
