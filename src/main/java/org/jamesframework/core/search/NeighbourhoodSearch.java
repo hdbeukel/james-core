@@ -38,7 +38,8 @@ import org.jamesframework.core.util.JamesConstants;
  * which case the current solution is retained. The number of accepted and rejected moves during the current or last
  * run can be accessed. This additional metadata applies to the current run only.
  * 
- * @param <SolutionType> solution type of the problems that may be solved using this search, required to extend {@link Solution}
+ * @param <SolutionType> solution type of the problems that may be solved using this search,
+ *                       required to extend {@link Solution}
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
 public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends LocalSearch<SolutionType> {
@@ -47,8 +48,10 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
     /* PRIVATE FIELDS */
     /******************/
     
-    // number of accepted/rejected moves during current run
-    private long numAcceptedMoves, numRejectedMoves;
+    // number of accepted moves during current run
+    private long numAcceptedMoves;
+    // number of rejected moves during current run
+    private long numRejectedMoves;
     
     // evaluated move cache
     private EvaluatedMoveCache cache;
@@ -60,8 +63,8 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
     /**
      * Create a new neighbourhood search to solve the given problem, with default name "NeighbourhoodSearch".
      * 
-     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      * @param problem problem to solve
+     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      */
     public NeighbourhoodSearch(Problem<SolutionType> problem){
         this(null, problem);
@@ -71,9 +74,9 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
      * Create a new neighbourhood search to solve the given problem, with a custom name. If <code>name</code> is
      * <code>null</code>, the default name "NeighbourhoodSearch" will be assigned.
      * 
-     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      * @param problem problem to solve
      * @param name custom search name
+     * @throws NullPointerException if <code>problem</code> is <code>null</code>
      */
     public NeighbourhoodSearch(String name, Problem<SolutionType> problem){
         super(name != null ? name : "NeighbourhoodSearch", problem);
@@ -330,13 +333,14 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
     protected final Move<? super SolutionType> getBestMove(Collection<? extends Move<? super SolutionType>> moves,
                                                            boolean requireImprovement,
                                                            Predicate<? super Move<? super SolutionType>>... filters){
-    	return this.getBestMove(moves, requireImprovement, false, filters);
+        return this.getBestMove(moves, requireImprovement, false, filters);
     }
     
     /**
      * <p>
-     * Get the best valid move among a collection of possible moves. The best valid move is the FIRST one yielding the positive delta 
-     * or the one that is non-tabu and yield the largest delta(see {@link #computeDelta(Evaluation, Evaluation)}) when being applied to the current solution.
+     * Get the best valid move among a collection of possible moves. The best valid move is the FIRST one
+     * yielding the positive delta or the one that is non-tabu and yield the largest delta
+     * (see {@link #computeDelta(Evaluation, Evaluation)}) when being applied to the current solution.
      * </p>
      * <p>
      * If <code>requireImprovement</code> is set to <code>true</code>, only moves that improve the current solution
@@ -366,72 +370,6 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
                                                            boolean requireImprovement,
                                                            boolean acceptFirstImprovement,
                                                            Predicate<? super Move<? super SolutionType>>... filters){
-        // track first improvement move AND best valid move + corresponding evaluation, validation and delta
-//        Move<? super SolutionType> bestMove = null, firstImprovementMove = null;
-//        double bestMoveDelta = -Double.MAX_VALUE, curMoveDelta, firstImprovementMoveDelta = -Double.MAX_VALUE;
-//        Evaluation curMoveEvaluation, bestMoveEvaluation = null, firstImprovementMoveEvaluation = null;
-//        Validation curMoveValidation, bestMoveValidation = null, firstImprovementMoveValidation = null;
-//
-//        
-//        // go through all moves
-//        for (Move<? super SolutionType> move : moves) {
-//            // check filters
-//            if(Arrays.stream(filters).allMatch(filter -> filter.test(move))){
-//                // validate move
-//                curMoveValidation = validate(move);
-//                if (curMoveValidation.passed()) {
-//                    // evaluate move
-//                    curMoveEvaluation = evaluate(move);
-//                    // compute delta
-//                    curMoveDelta = computeDelta(curMoveEvaluation, getCurrentSolutionEvaluation());
-//                    
-//                    // compare with current solution
-//                    if(curMoveDelta > 0 // better than curSolution
-//                    		|| !getCurrentSolutionValidation().passed()){ 
-//                    	firstImprovementMove = move;
-//                    	firstImprovementMoveDelta = curMoveDelta;
-//                    	firstImprovementMoveEvaluation = curMoveEvaluation;
-//                    	firstImprovementMoveValidation = curMoveValidation;
-//                    	break;
-//                    }
-////                    if (curMoveDelta > bestMoveDelta    // higher delta
-////                            && (!requireImprovement     // ensure improvement, if required
-////                                || curMoveDelta > 0
-////                                || !getCurrentSolutionValidation().passed())) {
-////                        bestMove = move;
-////                        bestMoveDelta = curMoveDelta;
-////                        bestMoveEvaluation = curMoveEvaluation;
-////                        bestMoveValidation = curMoveValidation;
-////                        break;
-////                    }
-//                    // compare with best move
-//                    if (curMoveDelta > bestMoveDelta){ // higher delta
-//                    	bestMoveDelta = curMoveDelta;
-//                    	bestMove = move;
-//                    	bestMoveEvaluation = curMoveEvaluation;
-//                    	bestMoveValidation = curMoveValidation;
-//                    }
-//                    
-//
-//                }
-//            }
-//        }
-//        // re-cache best move, if any
-//        if(bestMove != null && cache != null){
-//            cache.cacheMoveEvaluation(bestMove, bestMoveEvaluation);
-//            cache.cacheMoveValidation(bestMove, bestMoveValidation);
-//        }
-//        // re-cache best non-tabu move, if any
-//        if(firstImprovementMove != null && cache != null){
-//            cache.cacheMoveEvaluation(firstImprovementMove, firstImprovementMoveEvaluation);
-//            cache.cacheMoveValidation(firstImprovementMove, firstImprovementMoveValidation);
-//        }
-//        // If firstImprovementMove is not null, return firstImprovementMove. 
-//        // Otherwise, return bestMove (which should be no better than currentSolution but be better than any other move)
-////        if(firstImprovementMove != null)
-////        	return firstImprovementMove;
-////        else
-////        	return bestMove;
         
         // track the chosen move + corresponding evaluation, validation and delta
         Move<? super SolutionType> chosenMove = null;
@@ -439,28 +377,29 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
         Evaluation chosenMoveEvaluation = null, curMoveEvaluation = null;
         Validation chosenMoveValidation = null, curMoveValidation = null;
         Iterator<? extends Move<? super SolutionType>> iteMove = moves.iterator();
-        while(iteMove.hasNext() && 
-        		!(acceptFirstImprovement && // if acceptFirstImprovement=false, should check every move
-        		 chosenMoveDelta>0) ){ // if chosenMoveDelta<=0, should check every move        		
-        	Move<? super SolutionType> curMove = iteMove.next();
-        	if(Arrays.stream(filters).allMatch(filter -> filter.test(curMove))){
-        		curMoveValidation = validate(curMove);
-        		if(curMoveValidation.passed()){
-            		curMoveEvaluation = evaluate(curMove);
-            		curMoveDelta = computeDelta(curMoveEvaluation, getCurrentSolutionEvaluation());
-            		if(curMoveDelta > chosenMoveDelta && 
-            				(!requireImprovement     // ensure improvement, if required
+        while (iteMove.hasNext()
+                && !(acceptFirstImprovement
+                && // if acceptFirstImprovement=false, should check every move
+                chosenMoveDelta > 0)) { // if chosenMoveDelta<=0, should check every move
+            Move<? super SolutionType> curMove = iteMove.next();
+            if (Arrays.stream(filters).allMatch(filter -> filter.test(curMove))) {
+                curMoveValidation = validate(curMove);
+                if (curMoveValidation.passed()) {
+                    curMoveEvaluation = evaluate(curMove);
+                    curMoveDelta = computeDelta(curMoveEvaluation, getCurrentSolutionEvaluation());
+                    if (curMoveDelta > chosenMoveDelta
+                            && (!requireImprovement // ensure improvement, if required
                             || curMoveDelta > 0
-                            || !getCurrentSolutionValidation().passed())){
-            			chosenMove = curMove;
-            			chosenMoveDelta = curMoveDelta;
-            			chosenMoveEvaluation = curMoveEvaluation;
-            			chosenMoveValidation = curMoveValidation;
-            		}
-        		}
-        	}
+                            || !getCurrentSolutionValidation().passed())) {
+                        chosenMove = curMove;
+                        chosenMoveDelta = curMoveDelta;
+                        chosenMoveEvaluation = curMoveEvaluation;
+                        chosenMoveValidation = curMoveValidation;
+                    }
+                }
+            }
         }
-     // re-cache the choseMove, if any
+        // re-cache the choseMove, if any
         if(chosenMove != null && cache != null){
             cache.cacheMoveEvaluation(chosenMove, chosenMoveEvaluation);
             cache.cacheMoveValidation(chosenMove, chosenMoveValidation);
@@ -481,7 +420,7 @@ public abstract class NeighbourhoodSearch<SolutionType extends Solution> extends
      * 
      * @param move accepted move to be applied to the current solution
      * @return <code>true</code> if the update has been successfully performed,
-     *         <code>false</code> if the update was cancelled because the obtained
+     *         <code>false</code> if the update was canceled because the obtained
      *         neighbour is invalid
      */
     protected boolean accept(Move<? super SolutionType> move){
