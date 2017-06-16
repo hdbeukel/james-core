@@ -7,7 +7,6 @@
         <groupId>org.jamesframework</groupId>
         <artifactId>james</artifactId>
         <version>1.3-SNAPSHOT</version>
-        <relativePath>../james/james</relativePath>
     </parent>
     <!-- james core specifications -->
     <artifactId>james-core</artifactId>
