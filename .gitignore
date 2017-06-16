@@ -1,4 +1,5 @@
 .DS_Store
+/target/
 **/target/*
 **/bin/*
 **/dist/*
@@ -9,8 +10,5 @@
 *.iml
 .classpath
 .project
-**/.settings/**
-**/.idea/**
-
-
-/target/
+**/.settings/
+**/.idea/
