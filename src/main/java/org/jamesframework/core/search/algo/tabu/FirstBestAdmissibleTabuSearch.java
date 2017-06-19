@@ -3,6 +3,9 @@ package org.jamesframework.core.search.algo.tabu;
 import java.util.List;
 import java.util.Collections;
 
+import org.jamesframework.core.exceptions.IncompatibleTabuMemoryException;
+import org.jamesframework.core.exceptions.JamesRuntimeException;
+
 import org.jamesframework.core.problems.Problem;
 import org.jamesframework.core.problems.sol.Solution;
 import org.jamesframework.core.search.neigh.Move;
