@@ -16,6 +16,7 @@
 
 package org.jamesframework.core.search.algo.tabu;
 
+import java.util.function.Predicate;
 import org.jamesframework.core.exceptions.IncompatibleTabuMemoryException;
 import org.jamesframework.core.exceptions.JamesRuntimeException;
 import org.jamesframework.core.exceptions.SearchException;
@@ -172,6 +173,20 @@ public class TabuSearch<SolutionType extends Solution> extends SingleNeighbourho
     }
     
     /**
+     * Returns the filter used to discard tabu moves, in the form of a predicate.
+     * As an exception, tabu moves that improve the currently known best solution
+     * are admitted anyway (aspiration criterion). The returned predicate is
+     * <code>false</code> for all tabu moves that have to be discarded, else
+     * it is <code>true</code>.
+     * 
+     * @return filter discarding tabu moves
+     */
+    protected Predicate<Move<? super SolutionType>> getTabuFilter(){
+        return m -> !tabuMemory.isTabu(m, getCurrentSolution())
+                    || (validate(m).passed() && computeDelta(evaluate(m), getBestSolutionEvaluation()) > 0);
+    }
+    
+    /**
      * In every step, all neighbours of the current solution are inspected and the best valid, non tabu neighbour is
      * adopted as the new current solution, if any. If all valid neighbours are tabu, the search stops.
      * 
@@ -188,8 +203,7 @@ public class TabuSearch<SolutionType extends Solution> extends SingleNeighbourho
             // not necessarily an improvement
             false,
             // filter tabu moves (with aspiration criterion)
-            m -> !tabuMemory.isTabu(m, getCurrentSolution())
-                 || (validate(m).passed() && computeDelta(evaluate(m), getBestSolutionEvaluation()) > 0)
+            getTabuFilter()
         );                                             
         if(move != null){
             // accept move (also updates tabu memory by overriding move acceptance)

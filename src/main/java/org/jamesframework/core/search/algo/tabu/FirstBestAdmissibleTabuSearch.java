@@ -91,7 +91,7 @@ public class FirstBestAdmissibleTabuSearch<SolutionType extends Solution> extend
         List<? extends Move<? super SolutionType>> moves = getNeighbourhood().getAllMoves(getCurrentSolution());
         // shuffle moves
         Collections.shuffle(moves);
-        // find first improvement (if any) or else best admissible move
+        // find best admissible move, or first admissible improvement (if any)
         Move<? super SolutionType> move = getBestMove(
             // inspect all moves
             moves,
@@ -100,8 +100,7 @@ public class FirstBestAdmissibleTabuSearch<SolutionType extends Solution> extend
             // return first improvement move, if any
             true,
             // filter tabu moves (with aspiration criterion)
-            m -> !getTabuMemory().isTabu(m, getCurrentSolution())
-                 || (validate(m).passed() && computeDelta(evaluate(m), getBestSolutionEvaluation()) > 0)
+            getTabuFilter()
         );
         // process chosen move
         if (move != null) {
