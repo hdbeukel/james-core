@@ -1,64 +1,114 @@
 package org.jamesframework.core.search.algo.tabu;
 
 import java.util.List;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.function.Predicate;
 
 import org.jamesframework.core.problems.Problem;
-import org.jamesframework.core.problems.constraints.validations.Validation;
-import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
 import org.jamesframework.core.problems.sol.Solution;
-import org.jamesframework.core.search.SingleNeighbourhoodSearch;
 import org.jamesframework.core.search.neigh.Move;
 import org.jamesframework.core.search.neigh.Neighbourhood;
-/**
- * Tabu search algorithm using first-best-admissible move strategy. 
- * In every search step, shuffle the list of moves and then iterate over all moves. If a valid neighbour that is better 
- * than the current solution is found, it is adopted as the new solution. Otherwise, the best valid and non-tabu neighbour 
- * is adopted, even if it is no improvement over the current solution, which is the same as the ordinary tabu search.
- * To avoid repeatedly revisiting the same solutions, moves might be declared tabu based on a tabu memory.
- * This memory dynamically tracks (a limited number of) recently visited solutions, features of these solutions and/or
- * recently applied moves (i.e. recently modified features). If a move is tabu, it is not considered, unless it yields
- * a solution which is better than the best solution found so far (aspiration criterion).
- * <p>
- * If all valid neighbours of the current solution are tabu and no valid neighbours are better than the current solution, 
- * the search stops. Note that this may never happen so that a stop criterion should preferably be set to ensure termination.
- * 
- * @param <SolutionType> solution type of the problems that may be solved using this search, required to extend {@link Solution}
- * @author <a href="mailto:chenhuanfa@gmail.com">Huanfa Chen</a>
- */
-public class FirstBestAdmissibleTabuSearch<SolutionType extends Solution> extends TabuSearch<SolutionType>{
 
-	public FirstBestAdmissibleTabuSearch(Problem<SolutionType> problem, Neighbourhood<? super SolutionType> neighbourhood,
-            TabuMemory<SolutionType> tabuMemory) {
-		super(problem, neighbourhood, tabuMemory);
-		// TODO Auto-generated constructor stub
-	}
-	
+/**
+ * <p>
+ * Tabu search algorithm using first-best-admissible move strategy.
+ * In every search step, the possible moves are evaluated in random order (shuffled).
+ * The first encountered admissible improvement is accepted, i.e. the first valid non-tabu
+ * move that yields a positive delta, if any. Else, the best admissible move, in this case
+ * the one with the least negative delta, is performed, as in ordinary tabu search
+ * (see {@link org.jamesframework.core.search.algo.tabu.TabuSearch}).
+ * </p>
+ * <p>
+ * This tabu search implementation includes an aspiration criterion that always accepts all moves
+ * that yield an improvement over the currently known best solution, even if they have been declared tabu.
+ * </p>
+ * <p>
+ * The search terminates in case all valid neighbours of the current solution are tabu and do not improve the
+ * best known solution. Note that this may never happen, which means that a stop criterion should preferably
+ * be specified to ensure termination.
+ * </p>
+ * 
+ * @param <SolutionType> solution type of the problems that may be solved using this search,
+ *                       required to extend {@link Solution}
+ * @author <a href="mailto:chenhuanfa@gmail.com">Huanfa Chen</a>,
+ *         <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
+ */
+public class FirstBestAdmissibleTabuSearch<SolutionType extends Solution> extends TabuSearch<SolutionType> {
+
+    /**
+     * Creates a new tabu search, specifying the problem to solve, the neighbourhood used to modify the current
+     * solution and the applied tabu memory. None of the arguments can be <code>null</code>. The search name defaults
+     * to "FirstBestAdmissibleTabuSearch".
+     * <p>
+     * Note that the applied neighbourhood and tabu memory should be compatible in terms of generated and accepted move
+     * types, respectively, else an {@link IncompatibleTabuMemoryException} might be thrown during search.
+     * 
+     * @param problem problem to solve
+     * @param neighbourhood neighbourhood used to create neighbouring solutions
+     * @param tabuMemory applied tabu memory
+     * @throws NullPointerException if <code>problem</code>, <code>neighbourhood</code> or <code>tabuMemory</code>
+     *                              are <code>null</code>
+     */
+    public FirstBestAdmissibleTabuSearch(Problem<SolutionType> problem,
+                                        Neighbourhood<? super SolutionType> neighbourhood,
+                                        TabuMemory<SolutionType> tabuMemory) {
+        this(null, problem, neighbourhood, tabuMemory);
+    }
+    
+    /**
+     * Creates a new tabu search, specifying the problem to solve, the neighbourhood used to modify the current
+     * solution, the applied tabu memory and a custom search name. The problem, neighbourhood and tabu memory can
+     * not be <code>null</code>. The search name can be <code>null</code> in which case the default name
+     * "FirstBestAdmissibleTabuSearch" is assigned.
+     * <p>
+     * Note that the applied neighbourhood and tabu memory should be compatible in terms of generated and accepted move
+     * types, respectively, else an {@link IncompatibleTabuMemoryException} might be thrown during search.
+     * 
+     * @param name custom search name
+     * @param problem problem to solve
+     * @param neighbourhood neighbourhood used to create neighbouring solutions
+     * @param tabuMemory applied tabu memory
+     * @throws NullPointerException if <code>problem</code>, <code>neighbourhood</code> or <code>tabyMemory</code>
+     *                              are <code>null</code>
+     */
+    public FirstBestAdmissibleTabuSearch(String name, Problem<SolutionType> problem,
+                                         Neighbourhood<? super SolutionType> neighbourhood,
+                                         TabuMemory<SolutionType> tabuMemory){
+        super(name != null ? name : "FirstBestAdmissibleTabuSearch", problem, neighbourhood, tabuMemory);
+    }
+
+    /**
+     * One step of the first-best-admissible tabu search algorithm.
+     * All possible moves are inspected in random order, and either the first admissible improvement,
+     * if any, or, else, the best admissible move, is applied to the current solution.
+     * 
+     * @throws IncompatibleTabuMemoryException if the applied tabu memory is not compatible with the type of moves
+     *                                         generated by the applied neighbourhood
+     * @throws JamesRuntimeException if depending on malfunctioning components (problem, neighbourhood, ...)
+     */
     @Override
     protected void searchStep() {
-        // get best valid, non tabu move
-        List<? extends Move<? super SolutionType>> listMove = getNeighbourhood().getAllMoves(getCurrentSolution());
-        Collections.shuffle(listMove);
-    	Move<? super SolutionType> move = getBestMove(
-                                            // inspect all moves
-    										listMove,
-                                            // not necessarily an improvement
-                                            false,
-                                            // return first improvement move
-                                            true,
-                                            // filter tabu moves (with aspiration criterion)
-                                            m -> !getTabuMemory().isTabu(m, getCurrentSolution())
-                                                    || (validate(m).passed() && 
-                                                    		computeDelta(evaluate(m), getBestSolutionEvaluation()) > 0)
-        );                                               
-        if(move != null){
-            // accept move (also updates tabu memory by overriding move acceptance)
+        // get list of possible moves
+        List<? extends Move<? super SolutionType>> moves = getNeighbourhood().getAllMoves(getCurrentSolution());
+        // shuffle moves
+        Collections.shuffle(moves);
+        // find first improvement (if any) or else best admissible move
+        Move<? super SolutionType> move = getBestMove(
+            // inspect all moves
+            moves,
+            // not necessarily an improvement
+            false,
+            // return first improvement move, if any
+            true,
+            // filter tabu moves (with aspiration criterion)
+            m -> !getTabuMemory().isTabu(m, getCurrentSolution())
+                 || (validate(m).passed() && computeDelta(evaluate(m), getBestSolutionEvaluation()) > 0)
+        );
+        // process chosen move
+        if (move != null) {
+            // accept move (automatically updates tabu memory)
             accept(move);
         } else {
-            // no valid, non tabu neighbour found: stop search
+            // no valid non-tabu neighbour found: terminate search
             stop();
         }
     }
