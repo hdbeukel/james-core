@@ -213,10 +213,12 @@ public class SearchTestTemplate {
     }
     
     // listener that verifies whether every new best solution is indeed an improvement over the previous best solution
-    private class BestSolutionListener implements SearchListener<SubsetSolution>{
+    private class BestSolutionListener implements SearchListener<SubsetSolution> {
+        
         private Evaluation prevBestEval = null;
         private double delta = 1e-12;
         private boolean ok = true;
+        
         @Override
         public void newBestSolution(Search<? extends SubsetSolution> search,
                                     SubsetSolution newBestSolution,
@@ -240,9 +242,11 @@ public class SearchTestTemplate {
             }
             prevBestEval = newBestSolutionEvaluation;
         }
+        
         public boolean isOK(){
             return ok;
         }
+        
     }
     
 }

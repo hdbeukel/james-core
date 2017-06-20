@@ -1,12 +1,3 @@
-package org.jamesframework.core.search.algo.tabu;
-
-import org.jamesframework.core.search.SearchTestTemplate;
-import org.jamesframework.core.subset.SubsetSolution;
-import org.jamesframework.core.search.algo.tabu.FirstBestAdmissibleTabuSearch;
-import org.junit.*;
-
-import java.util.concurrent.TimeUnit;
-
 /*
  * Copyright 2014 Ghent University, Bayer CropScience.
  *
@@ -23,10 +14,23 @@ import java.util.concurrent.TimeUnit;
  * limitations under the License.
  */
 
+package org.jamesframework.core.search.algo.tabu;
+
+import org.jamesframework.core.search.SearchTestTemplate;
+import org.jamesframework.core.subset.SubsetSolution;
+
+import java.util.concurrent.TimeUnit;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 /**
- * Test FirstBestAdmissibleTabuSearch when all moves are declared tabu. Should find the first improvement solution
- * because of the built-in aspiration criterion that overrides tabu for moves that yield a new best solution.
- * For the considered 1-opt test problem this means that the optimum should still be found.
+ * Test FirstBestAdmissibleTabuSearch when all moves are declared tabu. Always accepts the first found improvement
+ * (first descent strategy) because of the built-in aspiration criterion that overrides tabu for moves that yield
+ * a new best solution.
  *
  * @author <a href="mailto:chenhuanfa@gmail.com">Huanfa Chen</a>
  */
@@ -36,8 +40,8 @@ public class FirstBestAdmissibleTabuSearchTest2 extends SearchTestTemplate {
     private FirstBestAdmissibleTabuSearch<SubsetSolution> search;
 
     // maximum runtime
-    private final long SINGLE_RUN_RUNTIME = 1000;
-    private final TimeUnit MAX_RUNTIME_TIME_UNIT = TimeUnit.MILLISECONDS;
+    private static final long SINGLE_RUN_RUNTIME = 1000;
+    private static final TimeUnit MAX_RUNTIME_TIME_UNIT = TimeUnit.MILLISECONDS;
 
     /**
      * Print message when starting tests.
@@ -78,7 +82,7 @@ public class FirstBestAdmissibleTabuSearchTest2 extends SearchTestTemplate {
      */
     @Test
     public void testWithAllMovesTabu() {
-        System.out.println(" - test with all moves tabu");
+        System.out.println(" - test with all moves tabu (~ first descent)");
         // single run
         singleRunWithMaxRuntime(search, SINGLE_RUN_RUNTIME, MAX_RUNTIME_TIME_UNIT);
     }
@@ -88,7 +92,7 @@ public class FirstBestAdmissibleTabuSearchTest2 extends SearchTestTemplate {
      */
     @Test
     public void testMinimizingWithAllMovesTabu() {
-        System.out.println(" - test with all moves tabu, minimizing");
+        System.out.println(" - test with all moves tabu, minimizing (~ first descent)");
         // set minimizing
         obj.setMinimizing();
         // single run

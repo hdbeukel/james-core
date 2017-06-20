@@ -16,12 +16,13 @@
 
 package org.jamesframework.core.search.algo.tabu;
 
-import org.jamesframework.core.subset.algo.tabu.IDBasedSubsetTabuMemory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+
+import org.jamesframework.core.subset.algo.tabu.IDBasedSubsetTabuMemory;
 import org.jamesframework.core.problems.sol.Solution;
 import org.jamesframework.core.problems.objectives.Objective;
 import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
@@ -35,14 +36,16 @@ import org.jamesframework.core.search.stopcriteria.MaxRuntime;
 import org.jamesframework.test.stubs.NeverSatisfiedConstraintStub;
 import org.jamesframework.test.stubs.NeverSatisfiedPenalizingConstraintStub;
 import org.jamesframework.test.util.TestConstants;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+
+import static org.junit.Assert.*;
 
 /**
  * Test tabu search.
@@ -87,12 +90,12 @@ public class TabuSearchTest extends SearchTestTemplate {
     private TabuSearch<SubsetSolution> search;
     
     // maximum runtime
-    private final long SINGLE_RUN_RUNTIME = 1000;
-    private final long MULTI_RUN_RUNTIME = 100;
-    private final TimeUnit MAX_RUNTIME_TIME_UNIT = TimeUnit.MILLISECONDS;
+    private static final long SINGLE_RUN_RUNTIME = 1000;
+    private static final long MULTI_RUN_RUNTIME = 100;
+    private static final TimeUnit MAX_RUNTIME_TIME_UNIT = TimeUnit.MILLISECONDS;
     
     // number of runs in multi run tests
-    private final int NUM_RUNS = 5;
+    private static final int NUM_RUNS = 5;
     
     /**
      * Print message when starting tests.
@@ -154,15 +157,19 @@ public class TabuSearchTest extends SearchTestTemplate {
         // set objective so that initial solution is better than all others
         // (to eliminate the effect of the aspiration criterion)
         problem.setObjective(new Objective<SubsetSolution, Object>(){
+            
             SubsetSolution best = Solution.checkedCopy(sol);
+            
             @Override
             public Evaluation evaluate(SubsetSolution solution, Object data) {
                 return new SimpleEvaluation(solution.equals(best) ? 1.0 : 0.0);
             }
+            
             @Override
             public boolean isMinimizing() {
                 return false;
             }
+            
         });
         
         // make all moves from initial solution tabu
@@ -229,14 +236,17 @@ public class TabuSearchTest extends SearchTestTemplate {
         System.out.println(" - test with empty neighbourhood");
         // create empty neighbourhood
         Neighbourhood<SubsetSolution> emptyNeigh = new Neighbourhood<SubsetSolution>() {
+            
             @Override
             public Move<? super SubsetSolution> getRandomMove(SubsetSolution solution, Random rnd) {
                 return null;
             }
+            
             @Override
             public List<? extends Move<? super SubsetSolution>> getAllMoves(SubsetSolution solution) {
                 return Collections.emptyList();
             }
+            
         };
         // set in search
         search.setNeighbourhood(emptyNeigh);
@@ -273,7 +283,11 @@ public class TabuSearchTest extends SearchTestTemplate {
         singleRunWithMaxRuntime(search, SINGLE_RUN_RUNTIME, MAX_RUNTIME_TIME_UNIT);
         // verify
         PenalizedEvaluation penEval = (PenalizedEvaluation) search.getBestSolutionEvaluation();
-        assertEquals(penalty, penEval.getEvaluation().getValue() - penEval.getValue(), TestConstants.DOUBLE_COMPARISON_PRECISION);
+        assertEquals(
+                penalty,
+                penEval.getEvaluation().getValue() - penEval.getValue(),
+                TestConstants.DOUBLE_COMPARISON_PRECISION
+        );
     }
     
     /**
@@ -325,7 +339,11 @@ public class TabuSearchTest extends SearchTestTemplate {
         multiRunWithMaximumRuntime(search, MULTI_RUN_RUNTIME, MAX_RUNTIME_TIME_UNIT, NUM_RUNS, true, true);
         // verify
         PenalizedEvaluation penEval = (PenalizedEvaluation) search.getBestSolutionEvaluation();
-        assertEquals(penalty, penEval.getEvaluation().getValue() - penEval.getValue(), TestConstants.DOUBLE_COMPARISON_PRECISION);
+        assertEquals(
+                penalty,
+                penEval.getEvaluation().getValue() - penEval.getValue(),
+                TestConstants.DOUBLE_COMPARISON_PRECISION
+        );
     }
     
     /**

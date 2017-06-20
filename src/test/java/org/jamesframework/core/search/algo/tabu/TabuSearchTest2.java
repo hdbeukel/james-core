@@ -28,7 +28,6 @@ import org.junit.Before;
 /**
  * Test tabu search when all moves are declared tabu. Should lead to the same behaviour as a basic steepest descent
  * search because of the built-in aspiration criterion that overrides tabu for moves that yield a new best solution.
- * For the considered 1-opt test problem this means that the optimum should still be found.
  * 
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
@@ -38,8 +37,8 @@ public class TabuSearchTest2 extends SearchTestTemplate {
     private TabuSearch<SubsetSolution> search;
     
     // maximum runtime
-    private final long SINGLE_RUN_RUNTIME = 1000;
-    private final TimeUnit MAX_RUNTIME_TIME_UNIT = TimeUnit.MILLISECONDS;
+    private static final long SINGLE_RUN_RUNTIME = 1000;
+    private static final TimeUnit MAX_RUNTIME_TIME_UNIT = TimeUnit.MILLISECONDS;
     
     /**
      * Print message when starting tests.
