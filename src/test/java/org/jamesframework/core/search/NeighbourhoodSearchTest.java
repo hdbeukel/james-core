@@ -16,9 +16,11 @@
 
 package org.jamesframework.core.search;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
 import org.jamesframework.core.exceptions.SearchException;
 import org.jamesframework.core.problems.Problem;
 import org.jamesframework.core.subset.SubsetProblem;
@@ -35,18 +37,21 @@ import org.jamesframework.core.subset.neigh.SingleDeletionNeighbourhood;
 import org.jamesframework.core.subset.neigh.moves.AdditionMove;
 import org.jamesframework.core.subset.neigh.moves.DeletionMove;
 import org.jamesframework.core.subset.neigh.moves.GeneralSubsetMove;
+import org.jamesframework.core.subset.neigh.moves.SubsetMove;
 import org.jamesframework.core.subset.neigh.moves.SwapMove;
 import org.jamesframework.core.util.JamesConstants;
 import org.jamesframework.core.util.SetUtilities;
 import org.jamesframework.test.util.DoubleComparatorWithPrecision;
 import org.jamesframework.test.stubs.NeverSatisfiedConstraintStub;
 import org.jamesframework.test.util.TestConstants;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Before;
+
+import static org.junit.Assert.*;
 
 /**
  * Test abstract neighbourhood search behaviour.
@@ -56,7 +61,7 @@ import org.junit.Before;
 public class NeighbourhoodSearchTest extends SearchTestTemplate {
 
     // neighbourhood search stub to work with
-    private NeighbourhoodSearch<SubsetSolution> neighSearch;    
+    private NeighbourhoodSearch<SubsetSolution> neighSearch;
     
     /**
      * Print message when starting tests.
@@ -74,7 +79,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
     public static void tearDownClass() {
         System.out.println("# Done testing NeighbourhoodSearch!");
     }
-    
+
     /**
      * Create search and components to work with in each test method.
      */
@@ -308,7 +313,9 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
             initial.selectAll(SetUtilities.getRandomSubset(initial.getUnselectedIDs(), SUBSET_SIZE, RG));
             neighSearch.setCurrentSolution(initial);
             // pick any addition move
-            AdditionMove m = new AdditionMove(SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getUnselectedIDs(), RG));
+            AdditionMove m = new AdditionMove(
+                SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getUnselectedIDs(), RG)
+            );
             // verify: addition should increase score
             assertTrue(neighSearch.isImprovement(m));
             // apply move
@@ -325,7 +332,9 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
             initial.selectAll(SetUtilities.getRandomSubset(initial.getUnselectedIDs(), SUBSET_SIZE, RG));
             neighSearch.setCurrentSolution(initial);
             // verify: addition is no improvement
-            m = new AdditionMove(SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getUnselectedIDs(), RG));
+            m = new AdditionMove(
+                SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getUnselectedIDs(), RG)
+            );
             assertFalse(neighSearch.isImprovement(m));
             // apply addition
             neighSearch.accept(m);
@@ -340,10 +349,16 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
             problem.addMandatoryConstraint(c);
             neighSearch.setCurrentSolution(problem.createRandomSolution());
             // create random addition, deletion and swap move
-            m = new AdditionMove(SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getUnselectedIDs(), RG));
-            m2 = new DeletionMove(SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getSelectedIDs(), RG));
-            SwapMove m3 = new SwapMove(SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getUnselectedIDs(), RG),
-                                       SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getSelectedIDs(), RG));
+            m = new AdditionMove(
+                SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getUnselectedIDs(), RG)
+            );
+            m2 = new DeletionMove(
+                SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getSelectedIDs(), RG)
+            );
+            SwapMove m3 = new SwapMove(
+                SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getUnselectedIDs(), RG),
+                SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getSelectedIDs(), RG)
+            );
             // verify (no moves are considered improvements because of mandatory constraint)
             assertFalse(neighSearch.isImprovement(m));
             assertFalse(neighSearch.isImprovement(m2));
@@ -360,10 +375,16 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
             // set initial solution
             neighSearch.setCurrentSolution(initial);
             // create random addition, deletion and swap move
-            m = new AdditionMove(SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getUnselectedIDs(), RG));
-            m2 = new DeletionMove(SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getSelectedIDs(), RG));
-            m3 = new SwapMove(SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getUnselectedIDs(), RG),
-                                       SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getSelectedIDs(), RG));
+            m = new AdditionMove(SetUtilities.getRandomElement(
+                neighSearch.getCurrentSolution().getUnselectedIDs(), RG)
+            );
+            m2 = new DeletionMove(SetUtilities.getRandomElement(
+                neighSearch.getCurrentSolution().getSelectedIDs(), RG)
+            );
+            m3 = new SwapMove(
+                SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getUnselectedIDs(), RG),
+                SetUtilities.getRandomElement(neighSearch.getCurrentSolution().getSelectedIDs(), RG)
+            );
             // verify that all moves are considered improvements, regardless of their evaluation,
             // as yield valid neighbours of an invalid current solution
             assertTrue(neighSearch.isImprovement(m));
@@ -376,7 +397,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         
     }
     
-    private class InvalidateSelectedSolutionsConstraint implements Constraint<SubsetSolution, Object>{
+    private class InvalidateSelectedSolutionsConstraint implements Constraint<SubsetSolution, Object> {
 
         // invalid solutions
         private final Set<SubsetSolution> invalid;
@@ -446,7 +467,9 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
         bestMove = neighSearch.getBestMove(moves, true);
         // verify: move with negative delta selected although improvement was required
         assertNotNull(bestMove);
-        assertTrue(neighSearch.computeDelta(neighSearch.evaluate(bestMove), neighSearch.getCurrentSolutionEvaluation()) < 0);
+        assertTrue(
+            neighSearch.computeDelta(neighSearch.evaluate(bestMove), neighSearch.getCurrentSolutionEvaluation()) < 0
+        );
         assertTrue(neighSearch.validate(bestMove).passed());
         // remove constraint
         assertTrue(problem.removeMandatoryConstraint(c));
@@ -454,7 +477,103 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
     }
 
     /**
-     * Test of accept method, of class NeighbourhoodSearch.
+     * Test getBestMove method with acceptFirstImprovement enabled.
+     */
+    @Test
+    public void testGetBestMoveAcceptFirstImprovement() throws Exception {
+        
+        System.out.println(" - test getBestMove with acceptFirstImprovement enabled");
+
+        // set random initial solution
+        neighSearch.setCurrentSolution(problem.createRandomSolution());
+
+        // retrieve all moves
+        List<SubsetMove> moves  = neigh.getAllMoves(neighSearch.getCurrentSolution());
+        // find first and max improvement
+        Move<? super SubsetSolution> firstImprovement = neighSearch.getBestMove(moves, true, true);
+        Move<? super SubsetSolution> maxImprovement = neighSearch.getBestMove(moves, true, false);
+
+        // apply first improvement until no more improvements found (important: restrict to positive deltas)
+        while(firstImprovement != null){
+            // verify: best move should be at least as good as first improvement
+            assertTrue(
+                neighSearch.computeDelta(
+                    neighSearch.evaluate(maxImprovement),
+                    neighSearch.evaluate(firstImprovement)
+                )
+                >= 0
+            );
+            // apply first improvement
+            neighSearch.accept(firstImprovement);
+            // get new moves
+            moves = neigh.getAllMoves(neighSearch.getCurrentSolution());
+            // find first and max improvement
+            maxImprovement = neighSearch.getBestMove(moves, true, false);
+            firstImprovement = neighSearch.getBestMove(moves, true,true);
+        }
+
+        // we are now in a local optimum, so the best move has a negative delta (or zero) and
+        // should be the same regardless of whether the first improvement is accepted
+        // (note: allow negative deltas here!)
+        moves = neigh.getAllMoves(neighSearch.getCurrentSolution());
+        Move<? super SubsetSolution> bestMove = neighSearch.getBestMove(moves, false, false);
+        Move<? super SubsetSolution> bestMoveFirstImprovement = neighSearch.getBestMove(moves, false,true);
+        assertSame(bestMove, bestMoveFirstImprovement);
+        assertTrue(
+            neighSearch.computeDelta(neighSearch.evaluate(bestMove), neighSearch.getCurrentSolutionEvaluation()) <= 0
+        );
+        assertFalse(neighSearch.isImprovement(bestMove));
+        
+        // find an inferior neighbour of the current local optimum
+        Evaluation bestEval = neighSearch.getCurrentSolutionEvaluation();
+        Move<? super SubsetSolution> move = null;
+        // obtain a randomMove that is worse than bestSolution
+        while(move == null || neighSearch.computeDelta(neighSearch.evaluate(move), bestEval) >= 0){
+            move = neigh.getRandomMove(neighSearch.getCurrentSolution());
+        }
+
+        // accept move towards inferior neighbour
+        neighSearch.accept(move);
+
+        // find an intermediate neighbour (between current and best solution)
+        Evaluation curEval = neighSearch.getCurrentSolutionEvaluation();
+        move = null;
+        while(move == null
+                || neighSearch.computeDelta(neighSearch.evaluate(move), curEval) <= 0
+                || neighSearch.computeDelta(neighSearch.evaluate(move), bestEval) >= 0){
+            move = neigh.getRandomMove(neighSearch.getCurrentSolution());
+        }
+
+        // retrieve list with all possible moves
+        List<Move<? super SubsetSolution>> modifiedMoveList = new ArrayList<>(
+            neigh.getAllMoves(neighSearch.getCurrentSolution())
+        );
+        // prepend move that leads to intermediate neighbour
+        modifiedMoveList.add(0, move);
+
+        // find first and max improvement
+        firstImprovement = neighSearch.getBestMove(modifiedMoveList, true,true);
+        maxImprovement = neighSearch.getBestMove(modifiedMoveList, true, false);
+
+        // check both not null
+        assertNotNull(firstImprovement);
+        assertNotNull(maxImprovement);
+
+        // first and best improvement should be different!
+        assertNotSame(firstImprovement, maxImprovement);
+        // therefore, max improvement outperforms first improvement
+        assertTrue(
+            neighSearch.computeDelta(neighSearch.evaluate(maxImprovement), neighSearch.evaluate(firstImprovement)) >= 0
+        );
+        // first improvement = first move from list
+        assertSame(modifiedMoveList.get(0), firstImprovement);
+        // max improvement is as least as good as previously obtained local optimum
+        // (included in the current solution's neighbourhood due to symmetry)
+        assertTrue(neighSearch.computeDelta(neighSearch.evaluate(maxImprovement), bestEval) >= 0);
+    }
+    
+    /**
+     * Test of accept method, of class NeighbourhoodSearch
      */
     @Test
     public void testAccept() {
@@ -479,9 +598,17 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
             copyEval = problem.evaluate(copy);
             // verify
             assertEquals(copy, neighSearch.getCurrentSolution());
-            assertEquals(copyEval.getValue(), neighSearch.getCurrentSolutionEvaluation().getValue(), TestConstants.DOUBLE_COMPARISON_PRECISION);
-            assertTrue(DoubleComparatorWithPrecision.greaterThanOrEqual(
-                    neighSearch.getBestSolutionEvaluation().getValue(), copyEval.getValue(), TestConstants.DOUBLE_COMPARISON_PRECISION));
+            assertEquals(
+                copyEval.getValue(),
+                neighSearch.getCurrentSolutionEvaluation().getValue(),
+                TestConstants.DOUBLE_COMPARISON_PRECISION
+            );
+            assertTrue(
+                DoubleComparatorWithPrecision.greaterThanOrEqual(
+                    neighSearch.getBestSolutionEvaluation().getValue(),
+                    copyEval.getValue(),
+                    TestConstants.DOUBLE_COMPARISON_PRECISION)
+            );
         }
         
         // try to accept an invalid move
@@ -519,9 +646,17 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
             copyEval = problem.evaluate(copy);
             // verify
             assertEquals(copy, neighSearch.getCurrentSolution());
-            assertEquals(copyEval.getValue(), neighSearch.getCurrentSolutionEvaluation().getValue(), TestConstants.DOUBLE_COMPARISON_PRECISION);
-            assertTrue(DoubleComparatorWithPrecision.smallerThanOrEqual(
-                    neighSearch.getBestSolutionEvaluation().getValue(), copyEval.getValue(), TestConstants.DOUBLE_COMPARISON_PRECISION));
+            assertEquals(
+                copyEval.getValue(),
+                neighSearch.getCurrentSolutionEvaluation().getValue(),
+                TestConstants.DOUBLE_COMPARISON_PRECISION
+            );
+            assertTrue(
+                DoubleComparatorWithPrecision.smallerThanOrEqual(
+                    neighSearch.getBestSolutionEvaluation().getValue(),
+                    copyEval.getValue(),
+                    TestConstants.DOUBLE_COMPARISON_PRECISION)
+            );
         }
         
     }
@@ -556,7 +691,7 @@ public class NeighbourhoodSearchTest extends SearchTestTemplate {
      * 
      * @param <SolutionType> solution type
      */
-    private class SearchListenerStub<SolutionType extends Solution> implements SearchListener<SolutionType>{
+    private class SearchListenerStub<SolutionType extends Solution> implements SearchListener<SolutionType> {
         
         // number of calls of callback
         private int numCalls = 0;

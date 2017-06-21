@@ -1,4 +1,5 @@
 .DS_Store
+/target/
 **/target/*
 **/bin/*
 **/dist/*
@@ -6,4 +7,8 @@
 *.log
 *.jar
 *.zip
-/target/
+*.iml
+.classpath
+.project
+**/.settings/
+**/.idea/

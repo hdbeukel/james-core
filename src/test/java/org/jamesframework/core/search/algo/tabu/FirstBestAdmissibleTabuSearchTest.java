@@ -16,49 +16,47 @@
 
 package org.jamesframework.core.search.algo.tabu;
 
+import org.jamesframework.core.problems.objectives.Objective;
+import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
+import org.jamesframework.core.problems.objectives.evaluations.PenalizedEvaluation;
+import org.jamesframework.core.problems.objectives.evaluations.SimpleEvaluation;
+import org.jamesframework.core.problems.sol.Solution;
+import org.jamesframework.core.search.SearchTestTemplate;
+import org.jamesframework.core.search.neigh.Move;
+import org.jamesframework.core.search.neigh.Neighbourhood;
+import org.jamesframework.core.search.stopcriteria.MaxRuntime;
+import org.jamesframework.core.subset.SubsetSolution;
+import org.jamesframework.core.subset.algo.tabu.IDBasedSubsetTabuMemory;
+import org.jamesframework.test.stubs.NeverSatisfiedConstraintStub;
+import org.jamesframework.test.stubs.NeverSatisfiedPenalizingConstraintStub;
+import org.jamesframework.test.util.TestConstants;
+import org.jamesframework.core.search.algo.tabu.TabuSearchTest.TabuMemoryFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import org.jamesframework.core.subset.algo.tabu.IDBasedSubsetTabuMemory;
-import org.jamesframework.core.problems.sol.Solution;
-import org.jamesframework.core.problems.objectives.Objective;
-import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
-import org.jamesframework.core.problems.objectives.evaluations.PenalizedEvaluation;
-import org.jamesframework.core.problems.objectives.evaluations.SimpleEvaluation;
-import org.jamesframework.core.subset.SubsetSolution;
-import org.jamesframework.core.search.SearchTestTemplate;
-import org.jamesframework.core.search.neigh.Move;
-import org.jamesframework.core.search.neigh.Neighbourhood;
-import org.jamesframework.core.search.stopcriteria.MaxRuntime;
-import org.jamesframework.test.stubs.NeverSatisfiedConstraintStub;
-import org.jamesframework.test.stubs.NeverSatisfiedPenalizingConstraintStub;
-import org.jamesframework.test.util.TestConstants;
-
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import static org.junit.Assert.*;
 
 /**
- * Test tabu search.
+ * Test FirstBestAdmissibleTabuSearch.
  * 
- * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
+ * @author <a href="mailto:chenhuanfa@gmail.com">Huanfa Chen</a>,
+ *         <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
 @RunWith(Parameterized.class)
-public class TabuSearchTest extends SearchTestTemplate {
+public class FirstBestAdmissibleTabuSearchTest extends SearchTestTemplate {
 
-    public interface TabuMemoryFactory {
-        public TabuMemory<SubsetSolution> createTabuMemory();
-    }
-    
     // repeat all tests with different tabu memories
     @Parameterized.Parameters
     public static List<Object[]> data(){
@@ -76,33 +74,33 @@ public class TabuSearchTest extends SearchTestTemplate {
         // return params
         return params;
     }
-    
-    public TabuSearchTest(String tabuMemoryDesc, TabuMemoryFactory tabuMemoryFactory){
+
+    public FirstBestAdmissibleTabuSearchTest(String tabuMemoryDesc, TabuMemoryFactory tabuMemoryFactory){
         this.tabuMemoryDesc = tabuMemoryDesc;
         this.tabuMemoryFactory = tabuMemoryFactory;
     }
-    
+
     // tabu memory
     private final TabuMemoryFactory tabuMemoryFactory;
     private final String tabuMemoryDesc;
-    
+
     // tabu search
-    private TabuSearch<SubsetSolution> search;
-    
+    private FirstBestAdmissibleTabuSearch<SubsetSolution> search;
+
     // maximum runtime
     private static final long SINGLE_RUN_RUNTIME = 1000;
     private static final long MULTI_RUN_RUNTIME = 100;
     private static final TimeUnit MAX_RUNTIME_TIME_UNIT = TimeUnit.MILLISECONDS;
-    
+
     // number of runs in multi run tests
     private static final int NUM_RUNS = 5;
-    
+
     /**
      * Print message when starting tests.
      */
     @BeforeClass
     public static void setUpClass() {
-        System.out.println("# Testing TabuSearch ...");
+        System.out.println("# Testing FirstBestAdmissibleTabuSearch ...");
         SearchTestTemplate.setUpClass();
     }
 
@@ -111,22 +109,22 @@ public class TabuSearchTest extends SearchTestTemplate {
      */
     @AfterClass
     public static void tearDownClass() {
-        System.out.println("# Done testing TabuSearch!");
+        System.out.println("# Done testing FirstBestAdmissibleTabuSearch!");
     }
-    
+
     @Override
     @Before
     public void setUp(){
         // call super
         super.setUp();
         // create tabu search
-        search = new TabuSearch<>(problem, neigh, tabuMemoryFactory.createTabuMemory());
+        search = new FirstBestAdmissibleTabuSearch<>(problem, neigh, tabuMemoryFactory.createTabuMemory());
         // set and log random seed
         setRandomSeed(search);
         // print description of applied tabu memory
         System.out.println(" - TABU MEMORY: " + tabuMemoryDesc);
     }
-    
+
     @After
     public void tearDown(){
         // dispose search
@@ -136,24 +134,24 @@ public class TabuSearchTest extends SearchTestTemplate {
     @Test
     public void testConstructor(){
         System.out.println(" - test constructor");
-        
+
         boolean thrown = false;
         try {
-            new TabuSearch<>(problem, neigh, null);
+            new FirstBestAdmissibleTabuSearch<>(problem, neigh, null);
         } catch (NullPointerException ex) {
             thrown = true;
         }
         assertTrue(thrown);
     }
-    
+
     @Test
     public void testClearTabuMemory(){
         System.out.println(" - test clearTabuMemory");
-        
+
         // set initial solution
         SubsetSolution sol = problem.createRandomSolution();
         search.setCurrentSolution(sol);
-        
+
         // set objective so that initial solution is better than all others
         // (to eliminate the effect of the aspiration criterion)
         problem.setObjective(new Objective<SubsetSolution, Object>(){
@@ -171,41 +169,41 @@ public class TabuSearchTest extends SearchTestTemplate {
             }
             
         });
-        
+
         // make all moves from initial solution tabu
         neigh.getAllMoves(sol).forEach(m -> {
             m.apply(sol);
             search.getTabuMemory().registerVisitedSolution(sol, m);
             m.undo(sol);
         });
-        
+
         // run search (should immediately terminate as all neighbours are tabu, no aspiration effect)
         search.start();
-        
+
         // verify: single step
         assertEquals(1, search.getSteps());
-        
+
         // clear tabu memory through search
         search.clearTabuMemory();
-        
+
         // verify
         neigh.getAllMoves(sol).forEach(m -> {
             assertFalse(search.getTabuMemory().isTabu(m, sol));
         });
-        
+
         // run again for a second
         search.addStopCriterion(new MaxRuntime(1, TimeUnit.SECONDS));
         search.start();
-        
+
         // verify
         assertTrue(search.getSteps() > 1);
-        
+
     }
-    
+
     @Test
     public void testSetTabuMemory(){
         System.out.println(" - test setTabuMemory");
-        
+
         boolean thrown = false;
         try {
             search.setTabuMemory(null);
@@ -213,14 +211,14 @@ public class TabuSearchTest extends SearchTestTemplate {
             thrown = true;
         }
         assertTrue(thrown);
-        
+
         TabuMemory<SubsetSolution> newMem = new FullTabuMemory<>(100);
         search.setTabuMemory(newMem);
         // verify
         assertEquals(newMem, search.getTabuMemory());
-        
+
     }
-    
+
     /**
      * Test single run.
      */
@@ -230,7 +228,7 @@ public class TabuSearchTest extends SearchTestTemplate {
         // single run
         singleRunWithMaxRuntime(search, SINGLE_RUN_RUNTIME, MAX_RUNTIME_TIME_UNIT);
     }
-    
+
     @Test
     public void testEmptyNeighbourhood() {
         System.out.println(" - test with empty neighbourhood");
@@ -255,7 +253,7 @@ public class TabuSearchTest extends SearchTestTemplate {
         // verify: stopped after first step
         assertEquals(1, search.getSteps());
     }
-    
+
     /**
      * Test single run with unsatisfiable constraint.
      */
@@ -269,7 +267,7 @@ public class TabuSearchTest extends SearchTestTemplate {
         // verify
         assertNull(search.getBestSolution());
     }
-    
+
     /**
      * Test single run with unsatisfiable penalizing constraint.
      */
@@ -289,7 +287,7 @@ public class TabuSearchTest extends SearchTestTemplate {
                 TestConstants.DOUBLE_COMPARISON_PRECISION
         );
     }
-    
+
     /**
      * Test subsequent runs (maximizing).
      */
@@ -299,7 +297,7 @@ public class TabuSearchTest extends SearchTestTemplate {
         // perform multiple runs (maximizing objective)
         multiRunWithMaximumRuntime(search, MULTI_RUN_RUNTIME, MAX_RUNTIME_TIME_UNIT, NUM_RUNS, true, true);
     }
-    
+
     /**
      * Test subsequent runs (minimizing).
      */
@@ -311,7 +309,7 @@ public class TabuSearchTest extends SearchTestTemplate {
         // perform multiple runs (maximizing objective)
         multiRunWithMaximumRuntime(search, MULTI_RUN_RUNTIME, MAX_RUNTIME_TIME_UNIT, NUM_RUNS, false, true);
     }
-    
+
     /**
      * Test subsequent runs with unsatisfiable constraint.
      */
@@ -325,7 +323,7 @@ public class TabuSearchTest extends SearchTestTemplate {
         // verify
         assertNull(search.getBestSolution());
     }
-    
+
     /**
      * Test subsequent runs with unsatisfiable penalizing constraint.
      */
@@ -345,7 +343,7 @@ public class TabuSearchTest extends SearchTestTemplate {
                 TestConstants.DOUBLE_COMPARISON_PRECISION
         );
     }
-    
+
     /**
      * Test subsequent runs with penalizing constraint.
      */

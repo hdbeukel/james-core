@@ -16,6 +16,7 @@
 
 package org.jamesframework.core.search.algo.tabu;
 
+import java.util.function.Predicate;
 import org.jamesframework.core.exceptions.IncompatibleTabuMemoryException;
 import org.jamesframework.core.exceptions.JamesRuntimeException;
 import org.jamesframework.core.exceptions.SearchException;
@@ -28,15 +29,17 @@ import org.jamesframework.core.search.neigh.Neighbourhood;
 /**
  * Tabu search algorithm. In every search step, all neighbours of the current solution are validated and evaluated.
  * The best valid neighbour is then adopted as the new current solution, even if it is no improvement over the current
- * solution. To avoid repeatedly revisiting the same solutions, moves might be declared tabu based on a tabu memory.
- * This memory dynamically tracks (a limited number of) recently visited solutions, features of these solutions and/or
- * recently applied moves (i.e. recently modified features). If a move is tabu, it is not considered, unless it yields
- * a solution which is better than the best solution found so far (aspiration criterion).
+ * solution. To avoid repeatedly revisiting the same solutions, moves can be declared tabu, based on a tabu memory.
+ * This memory tracks (a limited number of) recently visited solutions, features of these solutions and/or
+ * recently applied moves (i.e. recently modified features). If a move is tabu, it is not considered, unless
+ * it yields a solution which is better than the best solution found so far (aspiration criterion).
  * <p>
- * If all valid neighbours of the current solution are tabu, the search stops. Note that this may never happen so that
- * a stop criterion should preferably be set to ensure termination.
+ * The search terminates in case all valid neighbours of the current solution are tabu and do not improve the
+ * best known solution. Note that this may never happen, which means that a stop criterion should preferably
+ * be specified to ensure termination.
  * 
- * @param <SolutionType> solution type of the problems that may be solved using this search, required to extend {@link Solution}
+ * @param <SolutionType> solution type of the problems that may be solved using this search,
+ *                       required to extend {@link Solution}
  * @author <a href="mailto:herman.debeukelaer@ugent.be">Herman De Beukelaer</a>
  */
 public class TabuSearch<SolutionType extends Solution> extends SingleNeighbourhoodSearch<SolutionType> {
@@ -52,11 +55,11 @@ public class TabuSearch<SolutionType extends Solution> extends SingleNeighbourho
      * Note that the applied neighbourhood and tabu memory should be compatible in terms of generated and accepted move
      * types, respectively, else an {@link IncompatibleTabuMemoryException} might be thrown during search.
      * 
-     * @throws NullPointerException if <code>problem</code>, <code>neighbourhood</code> or <code>tabuMemory</code>
-     *                              are <code>null</code>
      * @param problem problem to solve
      * @param neighbourhood neighbourhood used to create neighbouring solutions
      * @param tabuMemory applied tabu memory
+     * @throws NullPointerException if <code>problem</code>, <code>neighbourhood</code> or <code>tabuMemory</code>
+     *                              are <code>null</code>
      */
     public TabuSearch(Problem<SolutionType> problem, Neighbourhood<? super SolutionType> neighbourhood,
                                                                    TabuMemory<SolutionType> tabuMemory){
@@ -72,12 +75,12 @@ public class TabuSearch<SolutionType extends Solution> extends SingleNeighbourho
      * Note that the applied neighbourhood and tabu memory should be compatible in terms of generated and accepted move
      * types, respectively, else an {@link IncompatibleTabuMemoryException} might be thrown during search.
      * 
-     * @throws NullPointerException if <code>problem</code>, <code>neighbourhood</code> or <code>tabyMemory</code>
-     *                              are <code>null</code>
      * @param name custom search name
      * @param problem problem to solve
      * @param neighbourhood neighbourhood used to create neighbouring solutions
      * @param tabuMemory applied tabu memory
+     * @throws NullPointerException if <code>problem</code>, <code>neighbourhood</code> or <code>tabyMemory</code>
+     *                              are <code>null</code>
      */
     public TabuSearch(String name, Problem<SolutionType> problem, Neighbourhood<? super SolutionType> neighbourhood,
                                                                                 TabuMemory<SolutionType> tabuMemory){
@@ -170,6 +173,20 @@ public class TabuSearch<SolutionType extends Solution> extends SingleNeighbourho
     }
     
     /**
+     * Returns the filter used to discard tabu moves, in the form of a predicate.
+     * As an exception, tabu moves that improve the currently known best solution
+     * are admitted anyway (aspiration criterion). The returned predicate is
+     * <code>false</code> for all tabu moves that have to be discarded, else
+     * it is <code>true</code>.
+     * 
+     * @return filter discarding tabu moves
+     */
+    protected Predicate<Move<? super SolutionType>> getTabuFilter(){
+        return m -> !tabuMemory.isTabu(m, getCurrentSolution())
+                    || (validate(m).passed() && computeDelta(evaluate(m), getBestSolutionEvaluation()) > 0);
+    }
+    
+    /**
      * In every step, all neighbours of the current solution are inspected and the best valid, non tabu neighbour is
      * adopted as the new current solution, if any. If all valid neighbours are tabu, the search stops.
      * 
@@ -181,19 +198,18 @@ public class TabuSearch<SolutionType extends Solution> extends SingleNeighbourho
     protected void searchStep() {
         // get best valid, non tabu move
         Move<? super SolutionType> move = getBestMove(
-                                            // inspect all moves
-                                            getNeighbourhood().getAllMoves(getCurrentSolution()),
-                                            // not necessarily an improvement
-                                            false,
-                                            // filter tabu moves (with aspiration criterion)
-                                            m -> !tabuMemory.isTabu(m, getCurrentSolution())
-                                                    || computeDelta(evaluate(m), getBestSolutionEvaluation()) > 0
-        );                                               
+            // inspect all moves
+            getNeighbourhood().getAllMoves(getCurrentSolution()),
+            // not necessarily an improvement
+            false,
+            // filter tabu moves (with aspiration criterion)
+            getTabuFilter()
+        );                                             
         if(move != null){
             // accept move (also updates tabu memory by overriding move acceptance)
             accept(move);
         } else {
-            // no valid, non tabu neighbour found: stop search
+            // no valid non-tabu neighbour found: terminate search
             stop();
         }
     }
